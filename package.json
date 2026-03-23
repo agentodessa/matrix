@@ -1,22 +1,53 @@
 {
-  "name": "reminder-app",
+  "name": "the-executive",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "web:build": "npx expo export --platform web",
+    "tauri": "cargo tauri",
+    "tauri:dev": "cargo tauri dev",
+    "tauri:build": "cargo tauri build"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/manrope": "^0.4.2",
+    "@expo/metro-runtime": "~55.0.6",
+    "@neondatabase/serverless": "^1.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/native": "^7.2.0",
     "expo": "~55.0.8",
+    "expo-constants": "~55.0.9",
+    "expo-font": "~55.0.4",
+    "expo-glass-effect": "~55.0.8",
+    "expo-linking": "~55.0.8",
+    "expo-router": "~55.0.7",
     "expo-status-bar": "~55.0.4",
+    "nativewind": "^5.0.0-preview.3",
     "react": "19.2.0",
-    "react-native": "0.83.2"
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.72.0",
+    "react-native": "0.83.2",
+    "react-native-css": "^3.0.6",
+    "react-native-gesture-handler": "~2.30.0",
+    "react-native-reanimated": "4.2.1",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-svg": "15.15.3",
+    "react-native-web": "^0.21.0",
+    "react-native-worklets": "0.7.2",
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
     "@types/react": "~19.2.2",
+    "postcss": "^8.5.8",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "lightningcss": "1.30.1"
+  }
 }
