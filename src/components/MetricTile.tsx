@@ -18,27 +18,28 @@ export function MetricTile({
   children,
 }: MetricTileProps) {
   return (
-    <View className="rounded-lg bg-tile p-8">
+    <View className="flex-1 rounded-lg bg-bg-tile p-5 gap-2">
       <Text
         className={
           labelColor
-            ? `font-body text-xs font-bold uppercase tracking-widest ${labelColor}`
-            : "font-body text-xs font-bold uppercase tracking-widest text-label"
+            ? `font-body text-[10px] font-bold uppercase tracking-widest ${labelColor}`
+            : "font-body text-[10px] font-bold uppercase tracking-widest text-label"
         }
+        numberOfLines={1}
       >
         {label}
       </Text>
 
-      <Text className="mt-2 font-display text-4xl font-extrabold tracking-tighter text-heading">
+      <Text className="font-display text-2xl font-extrabold tracking-tight text-heading" numberOfLines={1}>
         {value}
       </Text>
 
       {description ? (
-        <Text className="mt-1 font-body text-base text-body">{description}</Text>
+        <Text className="font-body text-xs text-meta" numberOfLines={1}>{description}</Text>
       ) : null}
 
       {progress !== undefined ? (
-        <View className="mt-3 h-1.5 rounded-full bg-slate-track">
+        <View className="h-1.5 rounded-full bg-slate-track mt-1">
           <View
             className="h-1.5 rounded-full bg-slate"
             style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}

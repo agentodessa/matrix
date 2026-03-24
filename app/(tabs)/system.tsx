@@ -1,24 +1,98 @@
-import { View, Text, Switch, useColorScheme } from "react-native";
+import { View, Text, Switch, Pressable, ScrollView, useColorScheme } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
+import { useRouter } from "expo-router";
 import { Header } from "../../src/components/Header";
 import { saveTheme } from "../../src/lib/theme-store";
+import { useAuth } from "../../src/lib/auth-store";
+import { useSubscription } from "../../src/lib/subscription-store";
 
 export default function SystemScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const { user, isAuthenticated } = useAuth();
+  const { isPro } = useSubscription();
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <Header />
-      <View className="px-7 pt-8 gap-8">
-        {/* ── Title ── */}
-        <View className="gap-1">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[3px] uppercase">
-            Configuration
+      <ScrollView
+        contentContainerClassName="px-7 pt-8 pb-32 gap-8"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Account Section ── */}
+        <View className="gap-3">
+          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+            Account
           </Text>
-          <Text className="font-display text-3xl font-extrabold text-heading tracking-tight">
-            System
+          <Pressable
+            className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
+            onPress={() => router.push("/profile")}
+          >
+            <View className="flex-row items-center justify-between px-5 py-4">
+              <View className="flex-1 gap-1">
+                <Text className="font-body text-base font-bold text-heading">
+                  {isAuthenticated ? user?.displayName : "Guest User"}
+                </Text>
+                <Text className="font-body text-sm text-body">
+                  {isAuthenticated ? user?.email : "Tap to sign up or sign in"}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-2">
+                {isAuthenticated && (
+                  <View
+                    className={
+                      isPro
+                        ? "bg-success/15 rounded-full px-2 py-0.5"
+                        : "bg-btn-surface rounded-full px-2 py-0.5 border border-border"
+                    }
+                  >
+                    <Text
+                      className={
+                        isPro
+                          ? "font-body text-[10px] font-bold text-success"
+                          : "font-body text-[10px] font-bold text-meta"
+                      }
+                    >
+                      {isPro ? "Pro" : "Free"}
+                    </Text>
+                  </View>
+                )}
+                <Text className="text-meta text-base">→</Text>
+              </View>
+            </View>
+          </Pressable>
+        </View>
+
+        {/* ── Subscription Section ── */}
+        <View className="gap-3">
+          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+            Subscription
           </Text>
+          <Pressable
+            className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
+            onPress={() => router.push("/paywall")}
+          >
+            <View className="flex-row items-center justify-between px-5 py-4">
+              <View className="flex-1 gap-1">
+                <Text className="font-body text-base font-bold text-heading">
+                  {isPro ? "Pro Plan" : "Upgrade to Pro"}
+                </Text>
+                <Text className="font-body text-sm text-body">
+                  {isPro
+                    ? "All features unlocked"
+                    : "Calendar, cloud sync, and more — $4.99/mo"}
+                </Text>
+              </View>
+              {!isPro && (
+                <View className="bg-success/15 rounded-full px-2.5 py-1">
+                  <Text className="font-body text-[10px] font-bold text-success">
+                    PRO
+                  </Text>
+                </View>
+              )}
+            </View>
+          </Pressable>
         </View>
 
         {/* ── Appearance Section ── */}
@@ -46,20 +120,61 @@ export default function SystemScreen() {
           </View>
         </View>
 
+        {/* ── Projects Section ── */}
+        <View className="gap-3">
+          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+            Organization
+          </Text>
+          <Pressable
+            className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
+            onPress={() => router.push("/projects")}
+          >
+            <View className="flex-row items-center justify-between px-5 py-4">
+              <View className="flex-1 gap-1">
+                <Text className="font-body text-base font-bold text-heading">
+                  Projects
+                </Text>
+                <Text className="font-body text-sm text-body">
+                  Create and manage your projects
+                </Text>
+              </View>
+              <Text className="text-meta text-base">→</Text>
+            </View>
+          </Pressable>
+        </View>
+
         {/* ── Data Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
             Data
           </Text>
           <View className="bg-bg-card rounded-lg overflow-hidden">
-            <View className="px-5 py-4 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                Cloud Sync
-              </Text>
-              <Text className="font-body text-sm text-body">
-                Not connected
-              </Text>
-            </View>
+            <Pressable
+              className="active:opacity-70"
+              onPress={() => {
+                if (!isPro) router.push("/paywall");
+              }}
+            >
+              <View className="flex-row items-center justify-between px-5 py-4">
+                <View className="flex-1 gap-1">
+                  <Text className="font-body text-base font-bold text-heading">
+                    Cloud Sync
+                  </Text>
+                  <Text className="font-body text-sm text-body">
+                    {isPro && isAuthenticated
+                      ? "Connected"
+                      : isPro
+                      ? "Sign in to enable"
+                      : "Pro feature"}
+                  </Text>
+                </View>
+                {!isPro && (
+                  <View className="bg-success/15 rounded-full px-2 py-0.5">
+                    <Text className="font-body text-[10px] font-bold text-success">PRO</Text>
+                  </View>
+                )}
+              </View>
+            </Pressable>
             <View className="h-px bg-border mx-5" />
             <View className="px-5 py-4 gap-1">
               <Text className="font-body text-base font-bold text-heading">
@@ -90,7 +205,7 @@ export default function SystemScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

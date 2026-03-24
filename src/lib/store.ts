@@ -186,6 +186,14 @@ export function useTasks() {
       notify();
     },
 
+    updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance" | "project">>) => {
+      globalTasks = globalTasks.map((t) =>
+        t.id === id ? { ...t, ...updates } : t
+      );
+      saveTasks(globalTasks);
+      notify();
+    },
+
     deleteTask: (id: string) => {
       globalTasks = globalTasks.filter((t) => t.id !== id);
       saveTasks(globalTasks);

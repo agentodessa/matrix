@@ -1,0 +1,186 @@
+import { View, Text, Pressable, ScrollView } from "react-native";
+import { SafeAreaView } from "../src/lib/styled";
+import { useRouter } from "expo-router";
+import { Header } from "../src/components/Header";
+import { useTasks } from "../src/lib/store";
+import { useAuth } from "../src/lib/auth-store";
+import { useSubscription } from "../src/lib/subscription-store";
+
+export default function ProfileScreen() {
+  const router = useRouter();
+  const { tasks } = useTasks();
+  const { user, isAuthenticated, signOut } = useAuth();
+  const { plan, isPro } = useSubscription();
+
+  const totalCompleted = tasks.filter((t) => t.status === "completed").length;
+  const totalActive = tasks.filter((t) => t.status === "active").length;
+
+  return (
+    <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
+      <Header title="Profile" showBack />
+      <ScrollView
+        contentContainerClassName="px-7 pt-8 pb-40 gap-8"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Avatar + Info */}
+        <View className="items-center gap-4">
+          {isAuthenticated ? (
+            <>
+              <View className="w-24 h-24 rounded-full bg-success/15 items-center justify-center">
+                <Text style={{ fontSize: 40 }}>
+                  {user?.displayName?.charAt(0)?.toUpperCase() ?? "U"}
+                </Text>
+              </View>
+              <View className="items-center gap-1">
+                <Text className="font-display text-xl font-extrabold text-heading">
+                  {user?.displayName}
+                </Text>
+                <Text className="font-body text-sm text-meta">{user?.email}</Text>
+                <View
+                  className={
+                    isPro
+                      ? "bg-success/15 rounded-full px-3 py-1 mt-1"
+                      : "bg-btn-surface rounded-full px-3 py-1 mt-1 border border-border"
+                  }
+                >
+                  <Text
+                    className={
+                      isPro
+                        ? "font-body text-xs font-bold text-success"
+                        : "font-body text-xs font-bold text-meta"
+                    }
+                  >
+                    {isPro ? "Pro Plan" : "Free Plan"}
+                  </Text>
+                </View>
+              </View>
+            </>
+          ) : (
+            <>
+              <View className="w-24 h-24 rounded-full bg-slate/10 items-center justify-center border-2 border-dashed border-border">
+                <Text style={{ fontSize: 40 }}>👤</Text>
+              </View>
+              <View className="items-center gap-1">
+                <Text className="font-display text-xl font-extrabold text-heading">
+                  Guest User
+                </Text>
+                <Text className="font-body text-sm text-meta">
+                  Sign up to sync your data across devices
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Stats */}
+        <View className="flex-row gap-3">
+          <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
+            <Text className="font-display text-2xl font-extrabold text-heading">
+              {totalActive}
+            </Text>
+            <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
+              Active
+            </Text>
+          </View>
+          <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
+            <Text className="font-display text-2xl font-extrabold text-heading">
+              {totalCompleted}
+            </Text>
+            <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
+              Completed
+            </Text>
+          </View>
+          <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
+            <Text className="font-display text-2xl font-extrabold text-heading">
+              {tasks.length}
+            </Text>
+            <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
+              Total
+            </Text>
+          </View>
+        </View>
+
+        {/* Auth actions or subscription */}
+        {isAuthenticated ? (
+          <View className="gap-3">
+            {!isPro && (
+              <Pressable
+                className="bg-success rounded-xl py-4 items-center active:opacity-80"
+                onPress={() => router.push("/paywall")}
+              >
+                <Text className="font-body text-base font-extrabold text-bg tracking-wide">
+                  Upgrade to Pro — $4.99/mo
+                </Text>
+              </Pressable>
+            )}
+            {isPro && (
+              <View className="bg-bg-card rounded-xl p-5 gap-2">
+                <Text className="font-body text-sm font-bold text-heading">
+                  Subscription
+                </Text>
+                <Text className="font-body text-sm text-body leading-5">
+                  You're on the Pro plan. All features are unlocked.
+                </Text>
+              </View>
+            )}
+            <Pressable
+              className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border"
+              onPress={async () => {
+                await signOut();
+                router.back();
+              }}
+            >
+              <Text className="font-body text-base font-bold text-urgent">
+                Sign Out
+              </Text>
+            </Pressable>
+          </View>
+        ) : (
+          <View className="gap-3">
+            <Pressable
+              className="bg-success rounded-xl py-4 items-center active:opacity-80"
+              onPress={() => router.push("/auth/sign-up")}
+            >
+              <Text className="font-body text-base font-extrabold text-bg tracking-wide">
+                Create Account
+              </Text>
+            </Pressable>
+            <Pressable
+              className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border"
+              onPress={() => router.push("/auth/sign-in")}
+            >
+              <Text className="font-body text-base font-bold text-heading">
+                Sign In
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* Info */}
+        {!isAuthenticated && (
+          <View className="bg-bg-card rounded-xl p-5 gap-2">
+            <Text className="font-body text-sm font-bold text-heading">
+              Why create an account?
+            </Text>
+            <View className="gap-1.5">
+              <Text className="font-body text-sm text-body leading-5">
+                • Sync tasks across all your devices
+              </Text>
+              <Text className="font-body text-sm text-body leading-5">
+                • Back up your data to the cloud
+              </Text>
+              <Text className="font-body text-sm text-body leading-5">
+                • Unlock Pro features like full calendar
+              </Text>
+            </View>
+          </View>
+        )}
+
+        <Text className="font-body text-xs text-meta text-center leading-4">
+          Your tasks are stored locally on this device.
+          {isAuthenticated && isPro ? "\nPro users get cloud sync." : ""}
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

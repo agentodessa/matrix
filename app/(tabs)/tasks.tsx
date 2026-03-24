@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { Header } from "../../src/components/Header";
 import { TaskItem } from "../../src/components/TaskItem";
 import { useTasks } from "../../src/lib/store";
+import { useProjects } from "../../src/lib/projects-store";
 import { QUADRANTS, Quadrant } from "../../src/types/task";
 
 type FilterKey = "all" | "1" | "2" | "3" | "4";
@@ -20,12 +21,23 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 export default function TasksScreen() {
   const router = useRouter();
   const { tasks, getTasksByQuadrant, toggleTask } = useTasks();
+  const { projects } = useProjects();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+
+  const projectFiltered = selectedProject
+    ? tasks.filter((t) => t.project === selectedProject)
+    : tasks;
 
   const filteredTasks =
     activeFilter === "all"
-      ? tasks
-      : getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant);
+      ? projectFiltered
+      : projectFiltered.filter(
+          (t) =>
+            getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant).some(
+              (q) => q.id === t.id
+            )
+        );
 
   const activeTasks = filteredTasks.filter((t) => t.status === "active");
   const completedTasks = filteredTasks.filter((t) => t.status === "completed");
@@ -37,22 +49,72 @@ export default function TasksScreen() {
       {/* ── Title Section ── */}
       <View className="px-7 pt-8 pb-4 flex-row items-end justify-between">
         <View className="gap-1">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[3px] uppercase">
-            Eisenhower Matrix
-          </Text>
           <Text className="font-display text-3xl font-extrabold text-heading tracking-tight">
             Tasks
           </Text>
         </View>
         <Pressable
-          className="bg-slate-btn rounded-lg px-4 py-2.5 active:opacity-70"
+          className="bg-success rounded-full px-5 py-3 active:opacity-80"
           onPress={() => router.push("/(tabs)/add")}
         >
-          <Text className="font-body text-sm font-bold text-white">
+          <Text className="font-body text-sm font-extrabold text-bg tracking-wide">
             + New Task
           </Text>
         </Pressable>
       </View>
+
+      {/* ── Project Filter ── */}
+      {projects.length > 0 && (
+        <View className="px-7 pb-3">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="gap-2"
+          >
+            <Pressable
+              className={
+                selectedProject === null
+                  ? "rounded-full bg-slate px-4 py-1.5"
+                  : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
+              }
+              onPress={() => setSelectedProject(null)}
+            >
+              <Text
+                className={
+                  selectedProject === null
+                    ? "font-body text-xs font-bold text-white"
+                    : "font-body text-xs font-bold text-heading"
+                }
+              >
+                All
+              </Text>
+            </Pressable>
+            {projects.map((p) => (
+              <Pressable
+                key={p}
+                className={
+                  selectedProject === p
+                    ? "rounded-full bg-slate px-4 py-1.5"
+                    : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
+                }
+                onPress={() =>
+                  setSelectedProject(selectedProject === p ? null : p)
+                }
+              >
+                <Text
+                  className={
+                    selectedProject === p
+                      ? "font-body text-xs font-bold text-white"
+                      : "font-body text-xs font-bold text-heading"
+                  }
+                >
+                  {p}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {/* ── Filter Tabs ── */}
       <View className="px-7 pb-4">
@@ -61,10 +123,10 @@ export default function TasksScreen() {
             const isActive = activeFilter === filter.key;
             const count =
               filter.key === "all"
-                ? tasks.filter((t) => t.status === "active").length
+                ? projectFiltered.filter((t) => t.status === "active").length
                 : getTasksByQuadrant(
                     parseInt(filter.key, 10) as Quadrant
-                  ).filter((t) => t.status === "active").length;
+                  ).filter((t) => t.status === "active" && (!selectedProject || t.project === selectedProject)).length;
 
             return (
               <Pressable

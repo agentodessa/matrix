@@ -1,11 +1,12 @@
-import { useCallback } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, Keyboard } from "react-native";
+import { useCallback, useState } from "react";
+import { View, Text, ScrollView, TextInput, Pressable, Keyboard, useColorScheme, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
-import { useColorScheme } from "react-native";
 import { Header } from "../../src/components/Header";
 import { useTasks } from "../../src/lib/store";
+import { useProjects } from "../../src/lib/projects-store";
 import {
   Urgency,
   Importance,
@@ -13,16 +14,44 @@ import {
   QUADRANTS,
 } from "../../src/types/task";
 
+function getTomorrow() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(17, 0, 0, 0);
+  return d;
+}
+
+function formatDate(date: Date) {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+
+  const isToday = date.toDateString() === now.toDateString();
+  const isTomorrow = date.toDateString() === tomorrow.toDateString();
+
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  if (isToday) return `Today, ${time}`;
+  if (isTomorrow) return `Tomorrow, ${time}`;
+  return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${time}`;
+}
+
 interface FormData {
   title: string;
   description: string;
+  deadline: Date;
   urgency: Urgency;
   importance: Importance;
+  project: string;
 }
 
 export default function AddTaskScreen() {
   const router = useRouter();
   const { addTask } = useTasks();
+  const { projects } = useProjects();
+  const colorScheme = useColorScheme();
+  const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
+  const [showPicker, setShowPicker] = useState(false);
 
   const {
     control,
@@ -34,8 +63,10 @@ export default function AddTaskScreen() {
     defaultValues: {
       title: "",
       description: "",
+      deadline: getTomorrow(),
       urgency: "urgent",
       importance: "high",
+      project: "",
     },
     mode: "onChange",
   });
@@ -52,8 +83,6 @@ export default function AddTaskScreen() {
     created_at: "",
   });
   const quadrantInfo = QUADRANTS[quadrant];
-  const colorScheme = useColorScheme();
-  const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
   const cls = quadrantInfo.classes;
 
   const onSubmit = useCallback(
@@ -62,8 +91,10 @@ export default function AddTaskScreen() {
       addTask({
         title: data.title.trim(),
         description: data.description.trim() || undefined,
+        deadline: formatDate(data.deadline),
         urgency: data.urgency,
         importance: data.importance,
+        project: data.project || undefined,
       });
       reset();
       router.navigate("/(tabs)");
@@ -73,27 +104,16 @@ export default function AddTaskScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header />
+      <Header title="Create Task" />
       <ScrollView
-        contentContainerClassName="px-7 pt-8 pb-40 gap-8"
+        contentContainerClassName="px-7 pt-6 pb-40 gap-6"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ── Editorial Heading ── */}
-        <View className="gap-3">
-          <Text className="font-body text-[10px] font-bold text-slate tracking-[3px] uppercase">
-            New Objective
-          </Text>
-          <Text className="font-display text-[38px] font-extrabold text-heading tracking-tighter leading-[42px]">
-            Define the{"\n"}
-            <Text className="text-slate">Objective.</Text>
-          </Text>
-        </View>
-
-        {/* ── Title Input ── */}
+        {/* ── Title ── */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Task Designation
+            Title
           </Text>
           <Controller
             control={control}
@@ -102,8 +122,8 @@ export default function AddTaskScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 className="font-body text-lg font-bold text-heading border-b border-border pb-3"
-                placeholder="What requires your attention?"
-                placeholderTextColor={String(placeholderColor)}
+                placeholder="What needs to be done?"
+                placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
@@ -113,154 +133,229 @@ export default function AddTaskScreen() {
           />
         </View>
 
-        {/* ── Description Input ── */}
+        {/* ── Description ── */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Context & Details
+            Details
           </Text>
           <Controller
             control={control}
             name="description"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                className="font-body text-base text-body border-b border-border pb-3 min-h-[80px]"
-                placeholder="Expand on the nuances of this objective..."
-                placeholderTextColor={String(placeholderColor)}
+                className="font-body text-base text-body border-b border-border pb-3"
+                placeholder="Context, links, notes..."
+                placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 multiline
-                numberOfLines={4}
+                numberOfLines={3}
                 textAlignVertical="top"
               />
             )}
           />
         </View>
 
-        {/* ── Urgency Selector ── */}
-        <View className="gap-3">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Urgency
-          </Text>
+        {/* ── Deadline (Date Picker) ── */}
+        <Controller
+          control={control}
+          name="deadline"
+          render={({ field: { onChange, value } }) => (
+            <View className="gap-2">
+              <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
+                Deadline
+              </Text>
+              <Pressable
+                className="border-b border-border pb-3 active:opacity-70"
+                onPress={() => setShowPicker(true)}
+              >
+                <Text className="font-body text-base font-bold text-heading">
+                  {formatDate(value)}
+                </Text>
+              </Pressable>
+
+              {(showPicker || Platform.OS === "ios") && (
+                <DateTimePicker
+                  value={value}
+                  mode="datetime"
+                  display={Platform.OS === "ios" ? "compact" : "default"}
+                  minimumDate={new Date()}
+                  onChange={(_, selected) => {
+                    setShowPicker(false);
+                    if (selected) onChange(selected);
+                  }}
+                  themeVariant={colorScheme === "dark" ? "dark" : "light"}
+                />
+              )}
+            </View>
+          )}
+        />
+
+        {/* ── Project ── */}
+        <Controller
+          control={control}
+          name="project"
+          render={({ field: { onChange, value } }) => (
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
+                  Project
+                </Text>
+                <Pressable
+                  className="active:opacity-70"
+                  onPress={() => router.push("/projects")}
+                >
+                  <Text className="font-body text-xs font-bold text-slate">
+                    Manage
+                  </Text>
+                </Pressable>
+              </View>
+              {projects.length === 0 ? (
+                <Pressable
+                  className="border border-dashed border-border rounded-lg py-4 items-center active:opacity-70"
+                  onPress={() => router.push("/projects")}
+                >
+                  <Text className="font-body text-sm text-meta">
+                    No projects yet — tap to create one
+                  </Text>
+                </Pressable>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerClassName="gap-2"
+                >
+                  {projects.map((p) => (
+                    <Pressable
+                      key={p}
+                      className={
+                        value === p
+                          ? "rounded-full bg-slate px-4 py-2 active:opacity-70"
+                          : "rounded-full bg-btn-surface border border-border px-4 py-2 active:opacity-70"
+                      }
+                      onPress={() => onChange(value === p ? "" : p)}
+                    >
+                      <Text
+                        className={
+                          value === p
+                            ? "font-body text-sm font-bold text-white"
+                            : "font-body text-sm font-bold text-heading"
+                        }
+                      >
+                        {p}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+          )}
+        />
+
+        {/* ── Urgency + Importance ── */}
+        <View className="flex-row gap-4">
           <Controller
             control={control}
             name="urgency"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row gap-3">
-                <Pressable
+              <Pressable
+                className={
+                  value === "urgent"
+                    ? "flex-1 bg-urgent-soft rounded-lg py-3 items-center active:opacity-70 border border-urgent"
+                    : "flex-1 bg-btn-surface rounded-lg py-3 items-center active:opacity-70 border border-border"
+                }
+                onPress={() => onChange(value === "urgent" ? "routine" : "urgent")}
+              >
+                <Text
                   className={
                     value === "urgent"
-                      ? "flex-1 bg-urgent rounded-full py-3 items-center active:opacity-70"
-                      : "flex-1 bg-btn-surface rounded-full py-3 items-center active:opacity-70"
+                      ? "font-body text-[10px] font-bold text-urgent tracking-widest uppercase"
+                      : "font-body text-[10px] font-bold text-meta tracking-widest uppercase"
                   }
-                  onPress={() => onChange("urgent")}
                 >
-                  <Text
-                    className={
-                      value === "urgent"
-                        ? "font-body text-sm font-bold text-white"
-                        : "font-body text-sm font-bold text-heading"
-                    }
-                  >
-                    Urgent
-                  </Text>
-                </Pressable>
-                <Pressable
+                  Urgency
+                </Text>
+                <Text
                   className={
-                    value === "routine"
-                      ? "flex-1 bg-slate rounded-full py-3 items-center active:opacity-70"
-                      : "flex-1 bg-btn-surface rounded-full py-3 items-center active:opacity-70"
+                    value === "urgent"
+                      ? "font-display text-lg font-extrabold text-urgent"
+                      : "font-display text-lg font-extrabold text-heading"
                   }
-                  onPress={() => onChange("routine")}
                 >
-                  <Text
-                    className={
-                      value === "routine"
-                        ? "font-body text-sm font-bold text-white"
-                        : "font-body text-sm font-bold text-heading"
-                    }
-                  >
-                    Routine
-                  </Text>
-                </Pressable>
-              </View>
+                  {value === "urgent" ? "Urgent" : "Routine"}
+                </Text>
+                <Text
+                  className={
+                    value === "urgent"
+                      ? "font-body text-[10px] text-urgent/60 pt-1"
+                      : "font-body text-[10px] text-meta pt-1"
+                  }
+                >
+                  Tap to change
+                </Text>
+              </Pressable>
             )}
           />
-        </View>
 
-        {/* ── Importance Selector ── */}
-        <View className="gap-3">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Importance
-          </Text>
           <Controller
             control={control}
             name="importance"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row gap-3">
-                <Pressable
+              <Pressable
+                className={
+                  value === "high"
+                    ? "flex-1 bg-slate rounded-lg py-3 items-center active:opacity-70"
+                    : "flex-1 bg-btn-surface rounded-lg py-3 items-center active:opacity-70 border border-border"
+                }
+                onPress={() => onChange(value === "high" ? "casual" : "high")}
+              >
+                <Text
                   className={
                     value === "high"
-                      ? "flex-1 bg-slate rounded-full py-3 items-center active:opacity-70"
-                      : "flex-1 bg-btn-surface rounded-full py-3 items-center active:opacity-70"
+                      ? "font-body text-[10px] font-bold text-white/60 tracking-widest uppercase"
+                      : "font-body text-[10px] font-bold text-meta tracking-widest uppercase"
                   }
-                  onPress={() => onChange("high")}
                 >
-                  <Text
-                    className={
-                      value === "high"
-                        ? "font-body text-sm font-bold text-white"
-                        : "font-body text-sm font-bold text-heading"
-                    }
-                  >
-                    High
-                  </Text>
-                </Pressable>
-                <Pressable
+                  Importance
+                </Text>
+                <Text
                   className={
-                    value === "casual"
-                      ? "flex-1 bg-meta rounded-full py-3 items-center active:opacity-70"
-                      : "flex-1 bg-btn-surface rounded-full py-3 items-center active:opacity-70"
+                    value === "high"
+                      ? "font-display text-lg font-extrabold text-white"
+                      : "font-display text-lg font-extrabold text-heading"
                   }
-                  onPress={() => onChange("casual")}
                 >
-                  <Text
-                    className={
-                      value === "casual"
-                        ? "font-body text-sm font-bold text-white"
-                        : "font-body text-sm font-bold text-heading"
-                    }
-                  >
-                    Casual
-                  </Text>
-                </Pressable>
-              </View>
+                  {value === "high" ? "High" : "Casual"}
+                </Text>
+                <Text
+                  className={
+                    value === "high"
+                      ? "font-body text-[10px] text-white/40 pt-1"
+                      : "font-body text-[10px] text-meta pt-1"
+                  }
+                >
+                  Tap to change
+                </Text>
+              </Pressable>
             )}
           />
         </View>
 
-        {/* ── Live Quadrant Preview ── */}
-        <View className="bg-bg-card rounded-lg overflow-hidden">
-          <View className={`h-1.5 ${cls.badgeBg}`} />
-          <View className="px-5 py-4 flex-row items-center gap-4">
-            <View className={`w-3 h-3 rounded-full ${cls.dot}`} />
-            <View className="flex-1">
-              <Text className="font-body text-[10px] font-bold text-meta tracking-[1.5px] uppercase">
-                Maps to
-              </Text>
-              <Text className="font-display text-base font-extrabold text-heading">
-                {quadrantInfo.label} · {quadrantInfo.title}
-              </Text>
-            </View>
-          </View>
+        {/* ── Quadrant Preview ── */}
+        <View className="flex-row items-center gap-3 px-1">
+          <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
+          <Text className="font-body text-sm text-meta">
+            → {quadrantInfo.title}
+          </Text>
         </View>
 
-        {/* ── Save Button ── */}
+        {/* ── Save ── */}
         <Pressable
           className={
             isValid
-              ? "bg-slate-btn rounded-lg py-4 items-center mt-4 active:opacity-70"
-              : "bg-btn-surface rounded-lg py-4 items-center mt-4 opacity-50"
+              ? "bg-success rounded-full py-4 items-center active:opacity-80"
+              : "bg-btn-surface rounded-full py-4 items-center opacity-50"
           }
           onPress={handleSubmit(onSubmit)}
           disabled={!isValid}
@@ -268,11 +363,11 @@ export default function AddTaskScreen() {
           <Text
             className={
               isValid
-                ? "font-body text-base font-bold text-white"
+                ? "font-body text-base font-extrabold text-bg tracking-wide"
                 : "font-body text-base font-bold text-meta"
             }
           >
-            Save Objective →
+            + New Task
           </Text>
         </Pressable>
       </ScrollView>
