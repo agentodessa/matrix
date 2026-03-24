@@ -1,0 +1,13 @@
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3000",
+  "tauri://localhost",
+  "eisenhower-reminder://",
+  "eisenhower-reminder:///",
+  "eisenhower-reminder:///auth/callback",
+  "eisenhower-reminder://**",
+  "exp://",
+  "exp://**",
+  "https://zfhahtqrvzudnnqfwxlx.supabase.co/auth/v1/callback"
+]

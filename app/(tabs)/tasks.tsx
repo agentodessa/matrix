@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
 import { Header } from "../../src/components/Header";
 import { TaskItem } from "../../src/components/TaskItem";
 import { useTasks } from "../../src/lib/store";
 import { useProjects } from "../../src/lib/projects-store";
+import { usePullRefresh } from "../../src/lib/use-pull-refresh";
 import { QUADRANTS, Quadrant } from "../../src/types/task";
 
 type FilterKey = "all" | "1" | "2" | "3" | "4";
@@ -24,6 +25,7 @@ export default function TasksScreen() {
   const { projects } = useProjects();
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const { refreshing, onRefresh } = usePullRefresh();
 
   const projectFiltered = selectedProject
     ? tasks.filter((t) => t.project === selectedProject)
@@ -157,6 +159,7 @@ export default function TasksScreen() {
       <ScrollView
         contentContainerClassName="px-7 pt-2 pb-32 gap-3"
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />}
       >
         {activeTasks.length === 0 && completedTasks.length === 0 && (
           <View className="items-center py-16 gap-3">

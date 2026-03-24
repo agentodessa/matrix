@@ -1,7 +1,8 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "../src/lib/styled";
 import { useRouter } from "expo-router";
 import { Header } from "../src/components/Header";
+import { GoogleSignInButton } from "../src/components/GoogleSignInButton";
 import { useTasks } from "../src/lib/store";
 import { useAuth } from "../src/lib/auth-store";
 import { useSubscription } from "../src/lib/subscription-store";
@@ -26,11 +27,18 @@ export default function ProfileScreen() {
         <View className="items-center gap-4">
           {isAuthenticated ? (
             <>
-              <View className="w-24 h-24 rounded-full bg-success/15 items-center justify-center">
-                <Text style={{ fontSize: 40 }}>
-                  {user?.displayName?.charAt(0)?.toUpperCase() ?? "U"}
-                </Text>
-              </View>
+              {user?.avatarUrl ? (
+                <Image
+                  source={{ uri: user.avatarUrl }}
+                  className="w-24 h-24 rounded-full"
+                />
+              ) : (
+                <View className="w-24 h-24 rounded-full bg-success/15 items-center justify-center">
+                  <Text style={{ fontSize: 40 }}>
+                    {user?.displayName?.charAt(0)?.toUpperCase() ?? "U"}
+                  </Text>
+                </View>
+              )}
               <View className="items-center gap-1">
                 <Text className="font-display text-xl font-extrabold text-heading">
                   {user?.displayName}
@@ -137,6 +145,7 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <View className="gap-3">
+            <GoogleSignInButton />
             <Pressable
               className="bg-success rounded-xl py-4 items-center active:opacity-80"
               onPress={() => router.push("/auth/sign-up")}

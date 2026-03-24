@@ -1,11 +1,17 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { Platform } from "react-native";
 import { useTasks } from "../../src/lib/store";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { WebSidebar } from "../../src/components/WebSidebar";
 
 export default function TabLayout() {
   const { getTasksByQuadrant } = useTasks();
   const urgentCount = getTasksByQuadrant(1).filter(
     (t) => t.status === "active"
   ).length;
+
+  if (Platform.OS === "web") {
+    return <WebSidebar urgentCount={urgentCount} />;
+  }
 
   return (
     <NativeTabs>

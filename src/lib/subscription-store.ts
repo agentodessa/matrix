@@ -1,122 +1,139 @@
-import { useState, useEffect, useRef } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "./supabase";
 import { Plan, BillingCycle, Subscription, PRICING } from "../types/user";
 import { processPayment, PaymentMethod } from "./mock-payment";
+import { useAuth } from "./auth-store";
 
-const STORAGE_KEY = "@executive_subscription";
-
-let globalSubscription: Subscription | null = null;
-let initialized = false;
-const listeners = new Set<() => void>();
-
-function notify() {
-  listeners.forEach((l) => l());
-}
-
-async function loadSubscription(): Promise<Subscription | null> {
-  try {
-    const json = await AsyncStorage.getItem(STORAGE_KEY);
-    if (!json) return null;
-    const sub: Subscription = JSON.parse(json);
-    // Check expiry
-    if (new Date(sub.expiresAt) < new Date()) {
-      sub.status = "expired";
-    }
-    return sub;
-  } catch {
-    return null;
-  }
-}
-
-async function saveSubscription(sub: Subscription | null) {
-  try {
-    if (sub) {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sub));
-    } else {
-      await AsyncStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {}
-}
+/* ── Helpers ── */
 
 function getPlan(sub: Subscription | null): Plan {
-  if (sub && sub.status === "active" && new Date(sub.expiresAt) > new Date()) {
+  if (sub && sub.plan === "pro" && sub.status === "active") {
+    if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) return "free";
     return "pro";
   }
   return "free";
 }
 
+function mapRow(row: Record<string, unknown>): Subscription {
+  return {
+    plan: (row.plan as string) === "pro" ? "pro" : "free",
+    billingCycle: (row.billing_cycle as BillingCycle) ?? "monthly",
+    startDate: (row.start_date as string) ?? "",
+    expiresAt: (row.expires_at as string) ?? "",
+    status: (row.status as Subscription["status"]) ?? "active",
+  };
+}
+
+async function fetchSubscription(userId: string): Promise<Subscription | null> {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+  if (error || !data) return null;
+  return mapRow(data);
+}
+
+/* ── Hook ── */
+
 export function useSubscription() {
-  const [, forceUpdate] = useState(0);
-  const listenerRef = useRef<(() => void) | null>(null);
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
 
-  useEffect(() => {
-    const listener = () => forceUpdate((n) => n + 1);
-    listenerRef.current = listener;
-    listeners.add(listener);
+  const { data: sub = null } = useQuery<Subscription | null>({
+    queryKey: ["subscription", userId],
+    queryFn: () => fetchSubscription(userId!),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 minutes — subscriptions rarely change
+    gcTime: 1000 * 60 * 30,
+  });
 
-    if (!initialized) {
-      initialized = true;
-      loadSubscription().then((loaded) => {
-        globalSubscription = loaded;
-        notify();
-      });
-    }
+  const plan = getPlan(sub);
 
-    return () => {
-      if (listenerRef.current) listeners.delete(listenerRef.current);
-    };
-  }, []);
+  const subscribeMutation = useMutation({
+    mutationFn: async ({ billingCycle, paymentMethod }: { billingCycle: BillingCycle; paymentMethod: PaymentMethod }) => {
+      if (!userId) throw new Error("Not authenticated");
 
-  const plan = getPlan(globalSubscription);
+      const amount = billingCycle === "monthly" ? PRICING.monthly : PRICING.annual;
+      const result = await processPayment(amount, paymentMethod);
+      if (!result.success) throw new Error(result.error ?? "Payment failed");
+
+      const now = new Date();
+      const expiresAt = new Date(now);
+      if (billingCycle === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
+      else expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+      const { error } = await supabase
+        .from("subscriptions")
+        .upsert({
+          user_id: userId,
+          plan: "pro",
+          billing_cycle: billingCycle,
+          status: "active",
+          start_date: now.toISOString(),
+          expires_at: expiresAt.toISOString(),
+          stripe_subscription_id: result.transactionId,
+        }, { onConflict: "user_id" });
+
+      if (error) throw new Error(error.message);
+
+      return {
+        plan: "pro" as const,
+        billingCycle,
+        startDate: now.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+        status: "active" as const,
+      };
+    },
+    onSuccess: (newSub) => {
+      qc.setQueryData(["subscription", userId], newSub);
+      // Invalidate tasks/projects so they switch to cloud mode
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "cancelled" })
+        .eq("user_id", userId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      qc.setQueryData<Subscription | null>(["subscription", userId], (old) =>
+        old ? { ...old, status: "cancelled" } : null
+      );
+    },
+  });
 
   return {
-    subscription: globalSubscription,
+    subscription: sub,
     plan,
     isPro: plan === "pro",
 
     subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod) => {
-      const amount = billingCycle === "monthly" ? PRICING.monthly : PRICING.annual;
-      const result = await processPayment(amount, paymentMethod);
-
-      if (!result.success) {
-        return { success: false, error: result.error ?? "Payment failed" };
+      try {
+        await subscribeMutation.mutateAsync({ billingCycle, paymentMethod });
+        return { success: true, error: null };
+      } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : "Failed" };
       }
-
-      const now = new Date();
-      const expiresAt = new Date(now);
-      if (billingCycle === "monthly") {
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-      } else {
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-      }
-
-      const sub: Subscription = {
-        plan: "pro",
-        billingCycle,
-        startDate: now.toISOString(),
-        expiresAt: expiresAt.toISOString(),
-        status: "active",
-      };
-
-      globalSubscription = sub;
-      await saveSubscription(sub);
-      notify();
-      return { success: true, error: null };
     },
 
     cancelSubscription: async () => {
-      if (globalSubscription) {
-        globalSubscription = { ...globalSubscription, status: "cancelled" };
-        await saveSubscription(globalSubscription);
-        notify();
-      }
+      try { await cancelMutation.mutateAsync(); } catch {}
     },
 
     restorePurchase: async () => {
-      const sub = await loadSubscription();
-      if (sub && sub.status === "active" && new Date(sub.expiresAt) > new Date()) {
-        globalSubscription = sub;
-        notify();
+      await qc.invalidateQueries({ queryKey: ["subscription"] });
+      if (!userId) return { success: false };
+      const fresh = await fetchSubscription(userId);
+      if (fresh && fresh.plan === "pro" && fresh.status === "active") {
+        qc.setQueryData(["subscription", userId], fresh);
         return { success: true };
       }
       return { success: false };

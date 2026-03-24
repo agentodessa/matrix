@@ -1,81 +1,62 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  FlatList,
-  Dimensions,
-} from "react-native";
+import { useMemo, useState } from "react";
+import { View, Text, ScrollView, Pressable, Platform, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { Header } from "../../src/components/Header";
 import { TaskItem } from "../../src/components/TaskItem";
 import { ProGate } from "../../src/components/ProGate";
 import { useTasks } from "../../src/lib/store";
 import { useProjects } from "../../src/lib/projects-store";
-import { Task } from "../../src/types/task";
+import { usePullRefresh } from "../../src/lib/use-pull-refresh";
+import { Task, getQuadrant } from "../../src/types/task";
 
 type CalendarView = "month" | "year";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-const MONTH_NAMES_SHORT = [
+const MONTH_SHORT = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
-const WEEKDAY_HEADERS = ["M", "T", "W", "T", "F", "S", "S"];
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS_SHORT = ["M", "T", "W", "T", "F", "S", "S"];
 
-/* ── Date helpers ── */
+const QUADRANT_COLORS: Record<number, string> = {
+  1: "#ac0b18",
+  2: "#0051d5",
+  3: "#874200",
+  4: "#737686",
+};
+
+/* ── Helpers ── */
 
 function getToday() {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth(), date: d.getDate() };
 }
-
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
+function getDaysInMonth(y: number, m: number) {
+  return new Date(y, m + 1, 0).getDate();
 }
-
-function getFirstDayOfWeek(year: number, month: number) {
-  const day = new Date(year, month, 1).getDay();
-  return day === 0 ? 6 : day - 1; // Monday = 0
+function getFirstDayOfWeek(y: number, m: number) {
+  const d = new Date(y, m, 1).getDay();
+  return d === 0 ? 6 : d - 1;
 }
-
 function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-
-function parseTaskDate(task: Task): Date | null {
-  // Try created_at (ISO string)
-  if (task.created_at) {
-    const d = new Date(task.created_at);
-    if (!isNaN(d.getTime())) return d;
-  }
+function parseTaskDate(t: Task): Date | null {
+  if (t.created_at) { const d = new Date(t.created_at); if (!isNaN(d.getTime())) return d; }
   return null;
 }
-
-function getTasksForDate(tasks: Task[], date: Date): Task[] {
-  return tasks.filter((t) => {
-    const taskDate = parseTaskDate(t);
-    return taskDate && isSameDay(taskDate, date);
-  });
+function getTasksForDate(tasks: Task[], date: Date) {
+  return tasks.filter((t) => { const d = parseTaskDate(t); return d && isSameDay(d, date); });
+}
+function hasTasksOnDate(tasks: Task[], date: Date) {
+  return tasks.some((t) => { const d = parseTaskDate(t); return d && isSameDay(d, date); });
 }
 
-function hasTasksOnDate(tasks: Task[], date: Date): boolean {
-  return tasks.some((t) => {
-    const taskDate = parseTaskDate(t);
-    return taskDate && isSameDay(taskDate, date);
-  });
-}
-
-/* ── Main Component ── */
+/* ── Main ── */
 
 export default function CalendarScreen() {
   const { tasks, toggleTask } = useTasks();
@@ -91,205 +72,106 @@ export default function CalendarScreen() {
     () => selectedProject ? tasks.filter((t) => t.project === selectedProject) : tasks,
     [tasks, selectedProject]
   );
-
   const selectedTasks = useMemo(
     () => getTasksForDate(filteredTasks, selectedDate),
     [filteredTasks, selectedDate]
   );
 
-  const goToPrevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
+  const prev = () => {
+    if (view === "year") { setCurrentYear(currentYear - 1); return; }
+    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
+    else setCurrentMonth(currentMonth - 1);
+  };
+  const next = () => {
+    if (view === "year") { setCurrentYear(currentYear + 1); return; }
+    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
+    else setCurrentMonth(currentMonth + 1);
+  };
+  const goToday = () => {
+    setCurrentYear(today.year); setCurrentMonth(today.month);
+    setSelectedDate(new Date()); setView("month");
   };
 
-  const goToNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
-
-  const goToToday = () => {
-    setCurrentYear(today.year);
-    setCurrentMonth(today.month);
-    setSelectedDate(new Date());
-    setView("month");
-  };
-
-  const selectMonthFromYear = (month: number) => {
-    setCurrentMonth(month);
-    setView("month");
-  };
+  const isWeb = Platform.OS === "web";
+  const { refreshing, onRefresh } = usePullRefresh();
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header />
+      {!isWeb && <Header />}
       <ProGate feature="calendarFullView" featureLabel="Full Calendar View">
 
-      {/* ── Project Filter ── */}
-      {projects.length > 0 && (
-        <View className="px-5 pt-3">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2"
-          >
+      {/* ── Toolbar ── */}
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Pressable onPress={prev} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
+            <Text className="text-heading text-xs">‹</Text>
+          </Pressable>
+          <Pressable onPress={() => setView(view === "month" ? "year" : "month")} className="active:opacity-70">
+            <Text className="font-display text-base font-bold text-heading" style={{ minWidth: 150, textAlign: "center" }}>
+              {view === "month" ? `${MONTH_NAMES[currentMonth]} ${currentYear}` : `${currentYear}`}
+            </Text>
+          </Pressable>
+          <Pressable onPress={next} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
+            <Text className="text-heading text-xs">›</Text>
+          </Pressable>
+          <Pressable onPress={goToday} style={{ borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }} className="bg-btn-surface border border-border active:opacity-70">
+            <Text className="font-body text-[11px] font-bold text-heading">Today</Text>
+          </Pressable>
+        </View>
+
+        {projects.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-1.5">
             <Pressable
-              className={
-                selectedProject === null
-                  ? "rounded-full bg-slate px-4 py-1.5"
-                  : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
-              }
+              className={selectedProject === null ? "rounded-full bg-slate px-2.5 py-0.5" : "rounded-full bg-btn-surface border border-border px-2.5 py-0.5 active:opacity-70"}
               onPress={() => setSelectedProject(null)}
             >
-              <Text
-                className={
-                  selectedProject === null
-                    ? "font-body text-xs font-bold text-white"
-                    : "font-body text-xs font-bold text-heading"
-                }
-              >
-                All
-              </Text>
+              <Text className={selectedProject === null ? "font-body text-[10px] font-bold text-white" : "font-body text-[10px] font-bold text-heading"}>All</Text>
             </Pressable>
             {projects.map((p) => (
-              <Pressable
-                key={p}
-                className={
-                  selectedProject === p
-                    ? "rounded-full bg-slate px-4 py-1.5"
-                    : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
-                }
-                onPress={() =>
-                  setSelectedProject(selectedProject === p ? null : p)
-                }
+              <Pressable key={p}
+                className={selectedProject === p ? "rounded-full bg-slate px-2.5 py-0.5" : "rounded-full bg-btn-surface border border-border px-2.5 py-0.5 active:opacity-70"}
+                onPress={() => setSelectedProject(selectedProject === p ? null : p)}
               >
-                <Text
-                  className={
-                    selectedProject === p
-                      ? "font-body text-xs font-bold text-white"
-                      : "font-body text-xs font-bold text-heading"
-                  }
-                >
-                  {p}
-                </Text>
+                <Text className={selectedProject === p ? "font-body text-[10px] font-bold text-white" : "font-body text-[10px] font-bold text-heading"}>{p}</Text>
               </Pressable>
             ))}
           </ScrollView>
-        </View>
-      )}
-
-      {/* ── Navigation bar ── */}
-      <View className="px-5 pt-4 pb-2">
-        <View className="flex-row items-center justify-between">
-          {/* Title — tappable to toggle view */}
-          <Pressable onPress={() => setView(view === "month" ? "year" : "month")} className="active:opacity-70">
-            <Text className="font-display text-xl font-bold text-heading">
-              {view === "month"
-                ? `${MONTH_NAMES[currentMonth]} ${currentYear}`
-                : `${currentYear}`}
-            </Text>
-          </Pressable>
-
-          <View className="flex-row items-center gap-2">
-            {/* Today button */}
-            <Pressable
-              className="rounded-full bg-btn-surface border border-border px-3 py-1.5 active:opacity-70"
-              onPress={goToToday}
-            >
-              <Text className="font-body text-xs font-bold text-heading">Today</Text>
-            </Pressable>
-
-            {/* Nav arrows */}
-            {view === "month" ? (
-              <View className="flex-row gap-1">
-                <Pressable
-                  className="w-8 h-8 items-center justify-center rounded-full bg-btn-surface active:opacity-70"
-                  onPress={goToPrevMonth}
-                >
-                  <Text className="font-body text-sm text-heading">‹</Text>
-                </Pressable>
-                <Pressable
-                  className="w-8 h-8 items-center justify-center rounded-full bg-btn-surface active:opacity-70"
-                  onPress={goToNextMonth}
-                >
-                  <Text className="font-body text-sm text-heading">›</Text>
-                </Pressable>
-              </View>
-            ) : (
-              <View className="flex-row gap-1">
-                <Pressable
-                  className="w-8 h-8 items-center justify-center rounded-full bg-btn-surface active:opacity-70"
-                  onPress={() => setCurrentYear(currentYear - 1)}
-                >
-                  <Text className="font-body text-sm text-heading">‹</Text>
-                </Pressable>
-                <Pressable
-                  className="w-8 h-8 items-center justify-center rounded-full bg-btn-surface active:opacity-70"
-                  onPress={() => setCurrentYear(currentYear + 1)}
-                >
-                  <Text className="font-body text-sm text-heading">›</Text>
-                </Pressable>
-              </View>
-            )}
-          </View>
-        </View>
+        )}
       </View>
 
       {view === "month" ? (
         <MonthView
-          year={currentYear}
-          month={currentMonth}
-          today={today}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          tasks={filteredTasks}
-          selectedTasks={selectedTasks}
-          toggleTask={toggleTask}
+          year={currentYear} month={currentMonth} today={today}
+          selectedDate={selectedDate} onSelectDate={setSelectedDate}
+          tasks={filteredTasks} selectedTasks={selectedTasks} toggleTask={toggleTask}
+          refreshing={refreshing} onRefresh={onRefresh}
         />
       ) : (
-        <YearView
-          year={currentYear}
-          today={today}
-          tasks={filteredTasks}
-          onSelectMonth={selectMonthFromYear}
+        <YearView year={currentYear} today={today} tasks={filteredTasks}
+          onSelectMonth={(m) => { setCurrentMonth(m); setView("month"); }}
         />
       )}
+
       </ProGate>
     </SafeAreaView>
   );
 }
 
-/* ── Month View ── */
+/* ── Month View with event bars ── */
 
 function MonthView({
-  year,
-  month,
-  today,
-  selectedDate,
-  onSelectDate,
-  tasks,
-  selectedTasks,
-  toggleTask,
+  year, month, today, selectedDate, onSelectDate, tasks, selectedTasks, toggleTask, refreshing, onRefresh,
 }: {
-  year: number;
-  month: number;
+  year: number; month: number;
   today: { year: number; month: number; date: number };
-  selectedDate: Date;
-  onSelectDate: (d: Date) => void;
-  tasks: Task[];
-  selectedTasks: Task[];
-  toggleTask: (id: string) => void;
+  selectedDate: Date; onSelectDate: (d: Date) => void;
+  tasks: Task[]; selectedTasks: Task[]; toggleTask: (id: string) => void;
+  refreshing: boolean; onRefresh: () => void;
 }) {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
-  const cellSize = (SCREEN_WIDTH - 40) / 7;
+  const isWeb = Platform.OS === "web";
+  const MAX_EVENTS = isWeb ? 3 : 2;
 
   const days = useMemo(() => {
     const result: (number | null)[] = [];
@@ -298,254 +180,284 @@ function MonthView({
     return result;
   }, [firstDay, daysInMonth]);
 
-  const isToday = (day: number) =>
-    year === today.year && month === today.month && day === today.date;
+  // Precompute tasks per day
+  const tasksByDay = useMemo(() => {
+    const map: Record<number, Task[]> = {};
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const dayTasks = getTasksForDate(tasks, date);
+      if (dayTasks.length > 0) map[d] = dayTasks;
+    }
+    return map;
+  }, [tasks, year, month, daysInMonth]);
 
-  const isSelected = (day: number) =>
-    selectedDate.getFullYear() === year &&
-    selectedDate.getMonth() === month &&
-    selectedDate.getDate() === day;
+  const isToday = (d: number) => year === today.year && month === today.month && d === today.date;
+  const isSelected = (d: number) =>
+    selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === d;
 
   const activeTasks = selectedTasks.filter((t) => t.status === "active");
   const completedTasks = selectedTasks.filter((t) => t.status === "completed");
-
   const isSelectedToday =
-    selectedDate.getFullYear() === today.year &&
-    selectedDate.getMonth() === today.month &&
-    selectedDate.getDate() === today.date;
-
-  const selectedLabel = isSelectedToday
-    ? "Today"
-    : selectedDate.toLocaleDateString(undefined, {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-      });
+    selectedDate.getFullYear() === today.year && selectedDate.getMonth() === today.month && selectedDate.getDate() === today.date;
+  const selectedLabel = isSelectedToday ? "Today" :
+    selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
 
   return (
-    <ScrollView
-      contentContainerClassName="pb-32"
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Weekday headers */}
-      <View className="flex-row px-5">
-        {WEEKDAY_HEADERS.map((d, i) => (
-          <View key={i} style={{ width: cellSize }} className="items-center py-2">
-            <Text className="font-body text-[11px] font-bold text-meta">
-              {d}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Day grid */}
-      <View className="flex-row flex-wrap px-5">
-        {days.map((day, i) => {
-          if (day === null) {
-            return <View key={`empty-${i}`} style={{ width: cellSize, height: cellSize }} />;
-          }
-
-          const date = new Date(year, month, day);
-          const hasTasks = hasTasksOnDate(tasks, date);
-          const todayFlag = isToday(day);
-          const selectedFlag = isSelected(day);
-
-          return (
-            <Pressable
-              key={day}
-              style={{ width: cellSize, height: cellSize }}
-              className="items-center justify-center active:opacity-70"
-              onPress={() => onSelectDate(new Date(year, month, day))}
-            >
-              <View
-                className={
-                  selectedFlag
-                    ? "w-10 h-10 rounded-full bg-heading items-center justify-center"
-                    : todayFlag
-                    ? "w-10 h-10 rounded-full border-2 border-heading items-center justify-center"
-                    : "w-10 h-10 rounded-full items-center justify-center"
-                }
-              >
-                <Text
-                  className={
-                    selectedFlag
-                      ? "font-display text-base font-bold text-bg"
-                      : todayFlag
-                      ? "font-display text-base font-bold text-heading"
-                      : "font-display text-base text-heading"
-                  }
-                >
-                  {day}
-                </Text>
-              </View>
-              {hasTasks && !selectedFlag && (
-                <View className="w-1 h-1 rounded-full bg-urgent mt-0.5 absolute bottom-1" />
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {/* Selected day tasks */}
-      <View className="px-5 pt-5">
-        <View className="border-t border-border pt-4">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase pb-3">
-            {selectedLabel} · {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
-          </Text>
-
-          {activeTasks.length === 0 && completedTasks.length === 0 ? (
-            <View className="items-center py-10 gap-2">
-              <Text className="font-display text-base font-bold text-heading">
-                No tasks
-              </Text>
-              <Text className="font-body text-sm text-meta">
-                Nothing scheduled for this day.
-              </Text>
+    <View className="flex-1">
+      <ScrollView
+        contentContainerClassName="pb-32"
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />}
+      >
+        {/* Weekday headers */}
+        <View style={{ flexDirection: "row", paddingHorizontal: 4 }}>
+          {(isWeb ? WEEKDAYS : WEEKDAYS_SHORT).map((d, i) => (
+            <View key={i} style={{ flex: 1, alignItems: "center", paddingVertical: 4 }}>
+              <Text className={i >= 5 ? "font-body text-[11px] font-bold text-meta/40" : "font-body text-[11px] font-bold text-meta"}>{d}</Text>
             </View>
-          ) : (
-            <View className="gap-3">
-              {activeTasks.map((task) => (
-                <TaskItem key={task.id} task={task} onToggle={toggleTask} />
-              ))}
-              {completedTasks.length > 0 && (
-                <View className="gap-3 pt-3">
-                  <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-                    Completed ({completedTasks.length})
-                  </Text>
-                  {completedTasks.map((task) => (
-                    <TaskItem key={task.id} task={task} onToggle={toggleTask} />
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
+          ))}
         </View>
+
+        {/* Grid */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 4 }}>
+          {days.map((day, i) => {
+            if (day === null) {
+              return <View key={`e-${i}`} style={{ width: "14.285%", minHeight: isWeb ? 80 : 52, borderTopWidth: 1, borderColor: "rgba(150,150,150,0.08)" }} />;
+            }
+
+            const todayFlag = isToday(day);
+            const selectedFlag = isSelected(day);
+            const dayTasks = tasksByDay[day] ?? [];
+            const activeDayTasks = dayTasks.filter((t) => t.status === "active");
+            const overflow = activeDayTasks.length > MAX_EVENTS ? activeDayTasks.length - MAX_EVENTS : 0;
+
+            return (
+              <Pressable
+                key={day}
+                style={{
+                  width: "14.285%",
+                  minHeight: isWeb ? 80 : 52,
+                  borderTopWidth: 1,
+                  borderColor: selectedFlag ? "rgba(100,160,255,0.4)" : "rgba(150,150,150,0.08)",
+                  backgroundColor: selectedFlag ? "rgba(100,160,255,0.06)" : "transparent",
+                  padding: 3,
+                }}
+                className="active:opacity-70"
+                onPress={() => onSelectDate(new Date(year, month, day))}
+              >
+                {/* Day number */}
+                <View style={{ alignItems: "flex-end", marginBottom: 2 }}>
+                  <View
+                    style={{
+                      width: 22, height: 22, borderRadius: 11,
+                      alignItems: "center", justifyContent: "center",
+                      backgroundColor: todayFlag ? "#ac0b18" : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 11, fontWeight: todayFlag || selectedFlag ? "700" : "400",
+                        color: todayFlag ? "#fff" : selectedFlag ? "#6fa8ff" : "#999",
+                      }}
+                    >
+                      {day}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Event bars */}
+                {activeDayTasks.slice(0, MAX_EVENTS).map((task) => {
+                  const q = getQuadrant(task);
+                  const color = QUADRANT_COLORS[q];
+                  return (
+                    <View
+                      key={task.id}
+                      style={{
+                        backgroundColor: color + "25",
+                        borderLeftWidth: 2,
+                        borderLeftColor: color,
+                        borderRadius: 2,
+                        paddingHorizontal: 3,
+                        paddingVertical: 1,
+                        marginBottom: 1,
+                      }}
+                    >
+                      <Text
+                        style={{ fontSize: 9, color, fontWeight: "600" }}
+                        numberOfLines={1}
+                      >
+                        {task.title}
+                      </Text>
+                    </View>
+                  );
+                })}
+                {overflow > 0 && (
+                  <Text style={{ fontSize: 8, color: "#888", paddingLeft: 3 }}>
+                    +{overflow} more
+                  </Text>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* ── Selected day detail ── */}
+        <View className="px-5 pt-4">
+          <View className="border-t border-border pt-4">
+            <View className="flex-row items-center justify-between pb-3">
+              <Text className="font-body text-xs font-bold text-heading">
+                {selectedLabel}
+              </Text>
+              <Text className="font-body text-[10px] text-meta">
+                {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
+              </Text>
+            </View>
+
+            {activeTasks.length === 0 && completedTasks.length === 0 ? (
+              <View className="items-center py-6 gap-1">
+                <Text className="font-body text-sm text-meta">No tasks for this day</Text>
+              </View>
+            ) : (
+              <View className="gap-2">
+                {activeTasks.map((task) => (
+                  <CalendarTaskRow key={task.id} task={task} onToggle={toggleTask} />
+                ))}
+                {completedTasks.length > 0 && (
+                  <View className="gap-2 pt-2">
+                    <Text className="font-body text-[10px] font-bold text-meta tracking-[1px] uppercase">
+                      Done ({completedTasks.length})
+                    </Text>
+                    {completedTasks.map((task) => (
+                      <CalendarTaskRow key={task.id} task={task} onToggle={toggleTask} />
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+/* ── Compact task row for calendar detail ── */
+
+function CalendarTaskRow({ task, onToggle }: { task: Task; onToggle: (id: string) => void }) {
+  const q = getQuadrant(task);
+  const color = QUADRANT_COLORS[q];
+  const done = task.status === "completed";
+
+  return (
+    <Pressable
+      style={{
+        flexDirection: "row", alignItems: "center", gap: 10,
+        backgroundColor: color + "0a",
+        borderLeftWidth: 3, borderLeftColor: color,
+        borderRadius: 8, padding: 10,
+        opacity: done ? 0.5 : 1,
+      }}
+      className="active:opacity-70"
+      onPress={() => onToggle(task.id)}
+    >
+      {/* Checkbox */}
+      <View style={{
+        width: 18, height: 18, borderRadius: 9,
+        borderWidth: 2, borderColor: color,
+        alignItems: "center", justifyContent: "center",
+        backgroundColor: done ? color : "transparent",
+      }}>
+        {done && <Text style={{ color: "#fff", fontSize: 10, fontWeight: "700" }}>✓</Text>}
       </View>
-    </ScrollView>
+
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{ fontSize: 13, fontWeight: "600", color: done ? "#888" : "#e5e2e1", textDecorationLine: done ? "line-through" : "none" }}
+          numberOfLines={1}
+        >
+          {task.title}
+        </Text>
+        {task.deadline && (
+          <Text style={{ fontSize: 10, color: "#888", marginTop: 1 }}>{task.deadline}</Text>
+        )}
+      </View>
+
+      {task.project && (
+        <View style={{ backgroundColor: "rgba(150,150,150,0.15)", borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
+          <Text style={{ fontSize: 9, fontWeight: "600", color: "#888" }}>{task.project}</Text>
+        </View>
+      )}
+    </Pressable>
   );
 }
 
 /* ── Year View ── */
 
 function YearView({
-  year,
-  today,
-  tasks,
-  onSelectMonth,
+  year, today, tasks, onSelectMonth,
 }: {
-  year: number;
-  today: { year: number; month: number; date: number };
-  tasks: Task[];
-  onSelectMonth: (month: number) => void;
+  year: number; today: { year: number; month: number; date: number };
+  tasks: Task[]; onSelectMonth: (m: number) => void;
 }) {
   return (
-    <ScrollView
-      contentContainerClassName="px-3 pb-32 pt-2"
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView contentContainerClassName="px-4 pb-32 pt-2" showsVerticalScrollIndicator={false}>
       <View className="flex-row flex-wrap">
-        {Array.from({ length: 12 }, (_, month) => (
-          <MiniMonth
-            key={month}
-            year={year}
-            month={month}
-            today={today}
-            tasks={tasks}
-            onPress={() => onSelectMonth(month)}
-          />
+        {Array.from({ length: 12 }, (_, m) => (
+          <MiniMonth key={m} year={year} month={m} today={today} tasks={tasks} onPress={() => onSelectMonth(m)} />
         ))}
       </View>
     </ScrollView>
   );
 }
 
-/* ── Mini Month (for Year View) ── */
-
 function MiniMonth({
-  year,
-  month,
-  today,
-  tasks,
-  onPress,
+  year, month, today, tasks, onPress,
 }: {
-  year: number;
-  month: number;
+  year: number; month: number;
   today: { year: number; month: number; date: number };
-  tasks: Task[];
-  onPress: () => void;
+  tasks: Task[]; onPress: () => void;
 }) {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
-  const isCurrentMonth = year === today.year && month === today.month;
-  const cellSize = ((SCREEN_WIDTH - 24) / 3 - 16) / 7;
+  const isCurrent = year === today.year && month === today.month;
 
   const days = useMemo(() => {
-    const result: (number | null)[] = [];
-    for (let i = 0; i < firstDay; i++) result.push(null);
-    for (let d = 1; d <= daysInMonth; d++) result.push(d);
-    return result;
+    const r: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) r.push(null);
+    for (let d = 1; d <= daysInMonth; d++) r.push(d);
+    return r;
   }, [firstDay, daysInMonth]);
 
   return (
-    <Pressable
-      style={{ width: (SCREEN_WIDTH - 24) / 3 }}
-      className="p-2 active:opacity-70"
-      onPress={onPress}
-    >
+    <Pressable style={{ width: "33.33%" }} className="p-2 active:opacity-70" onPress={onPress}>
       <View className="bg-bg-card rounded-xl p-3">
-        {/* Month name */}
-        <Text
-          className={
-            isCurrentMonth
-              ? "font-display text-sm font-bold text-heading pb-2"
-              : "font-display text-sm font-bold text-meta pb-2"
-          }
-        >
-          {MONTH_NAMES_SHORT[month]}
+        <Text className={isCurrent ? "font-display text-sm font-bold text-heading pb-2" : "font-display text-sm font-bold text-meta pb-2"}>
+          {MONTH_SHORT[month]}
         </Text>
-
-        {/* Weekday headers */}
         <View className="flex-row">
-          {WEEKDAY_HEADERS.map((d, i) => (
-            <View key={i} style={{ width: cellSize }} className="items-center">
-              <Text className="font-body text-[6px] text-meta">{d}</Text>
+          {WEEKDAYS_SHORT.map((d, i) => (
+            <View key={i} style={{ flex: 1, alignItems: "center" }}>
+              <Text className="font-body text-[7px] text-meta">{d}</Text>
             </View>
           ))}
         </View>
-
-        {/* Days grid */}
         <View className="flex-row flex-wrap">
           {days.map((day, i) => {
-            if (day === null) {
-              return <View key={`e-${i}`} style={{ width: cellSize, height: cellSize }} />;
-            }
-
-            const isToday =
-              year === today.year && month === today.month && day === today.date;
-            const date = new Date(year, month, day);
-            const hasTasks = hasTasksOnDate(tasks, date);
-
+            if (!day) return <View key={`e-${i}`} style={{ width: "14.285%", aspectRatio: 1 }} />;
+            const isToday = year === today.year && month === today.month && day === today.date;
+            const hasTasks = hasTasksOnDate(tasks, new Date(year, month, day));
             return (
-              <View
-                key={day}
-                style={{ width: cellSize, height: cellSize }}
-                className="items-center justify-center"
-              >
-                <Text
-                  className={
-                    isToday
-                      ? "font-body text-[7px] font-bold text-heading"
-                      : "font-body text-[7px] text-meta"
-                  }
-                >
-                  {day}
-                </Text>
-                {hasTasks && (
-                  <View
-                    className="bg-urgent rounded-full absolute"
-                    style={{ width: 2, height: 2, bottom: 0 }}
-                  />
-                )}
+              <View key={day} style={{ width: "14.285%", aspectRatio: 1, alignItems: "center", justifyContent: "center" }}>
+                <View style={{
+                  width: 14, height: 14, borderRadius: 7,
+                  alignItems: "center", justifyContent: "center",
+                  backgroundColor: isToday ? "#ac0b18" : "transparent",
+                }}>
+                  <Text style={{ fontSize: 7, fontWeight: isToday ? "700" : "400", color: isToday ? "#fff" : "#888" }}>
+                    {day}
+                  </Text>
+                </View>
+                {hasTasks && <View style={{ width: 2, height: 2, borderRadius: 1, backgroundColor: "#ac0b18", position: "absolute", bottom: 0 }} />}
               </View>
             );
           })}

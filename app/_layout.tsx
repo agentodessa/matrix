@@ -4,10 +4,14 @@ import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useThemePersistence } from "../src/lib/theme-store";
 import { lightTheme, darkTheme } from "../src/lib/theme";
+import { QueryProvider } from "../src/lib/query-client";
+import { useRealtimeSync } from "../src/lib/realtime-sync";
 
-export default function RootLayout() {
+function AppContent() {
   const themeLoaded = useThemePersistence();
   const colorScheme = useColorScheme();
+  useRealtimeSync();
+
   const themeVars = colorScheme === "dark" ? darkTheme : lightTheme;
 
   if (!themeLoaded) {
@@ -30,5 +34,13 @@ export default function RootLayout() {
         />
       </View>
     </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <QueryProvider>
+      <AppContent />
+    </QueryProvider>
   );
 }

@@ -1,26 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "./supabase";
 import { User } from "../types/user";
-
-const AUTH_KEY = "@executive_auth";
-const CREDENTIALS_KEY = "@executive_credentials";
-
-interface StoredCredential {
-  email: string;
-  passwordHash: string;
-  userId: string;
-}
-
-// Simple hash for mock — NOT secure, replace with real auth
-function mockHash(password: string): string {
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return hash.toString(36);
-}
 
 let globalUser: User | null = null;
 let initialized = false;
@@ -30,38 +10,21 @@ function notify() {
   listeners.forEach((l) => l());
 }
 
-async function loadAuth(): Promise<User | null> {
-  try {
-    const json = await AsyncStorage.getItem(AUTH_KEY);
-    return json ? JSON.parse(json) : null;
-  } catch {
-    return null;
-  }
-}
-
-async function saveAuth(user: User | null) {
-  try {
-    if (user) {
-      await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(user));
-    } else {
-      await AsyncStorage.removeItem(AUTH_KEY);
-    }
-  } catch {}
-}
-
-async function loadCredentials(): Promise<StoredCredential[]> {
-  try {
-    const json = await AsyncStorage.getItem(CREDENTIALS_KEY);
-    return json ? JSON.parse(json) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function saveCredentials(creds: StoredCredential[]) {
-  try {
-    await AsyncStorage.setItem(CREDENTIALS_KEY, JSON.stringify(creds));
-  } catch {}
+function mapSupabaseUser(supaUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }): User {
+  return {
+    id: supaUser.id,
+    email: supaUser.email ?? "",
+    displayName:
+      (supaUser.user_metadata?.full_name as string) ??
+      (supaUser.user_metadata?.name as string) ??
+      supaUser.email?.split("@")[0] ??
+      "User",
+    avatarUrl:
+      (supaUser.user_metadata?.avatar_url as string) ??
+      (supaUser.user_metadata?.picture as string) ??
+      undefined,
+    createdAt: new Date().toISOString(),
+  };
 }
 
 export function useAuth() {
@@ -75,14 +38,26 @@ export function useAuth() {
 
     if (!initialized) {
       initialized = true;
-      loadAuth().then((loaded) => {
-        globalUser = loaded;
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.user) {
+          globalUser = mapSupabaseUser(data.session.user);
+        }
         notify();
       });
     }
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        globalUser = mapSupabaseUser(session.user);
+      } else {
+        globalUser = null;
+      }
+      notify();
+    });
+
     return () => {
       if (listenerRef.current) listeners.delete(listenerRef.current);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -91,67 +66,66 @@ export function useAuth() {
     isAuthenticated: globalUser !== null,
 
     signUp: async (email: string, password: string, displayName: string) => {
-      const creds = await loadCredentials();
-      if (creds.some((c) => c.email === email.toLowerCase())) {
-        return { success: false, error: "Email already registered" };
-      }
-
-      const user: User = {
-        id: Date.now().toString(),
-        email: email.toLowerCase(),
-        displayName,
-        createdAt: new Date().toISOString(),
-      };
-
-      creds.push({
-        email: email.toLowerCase(),
-        passwordHash: mockHash(password),
-        userId: user.id,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: displayName },
+        },
       });
 
-      await saveCredentials(creds);
-      globalUser = user;
-      await saveAuth(user);
-      notify();
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Supabase returns a user with empty identities if the email already exists
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        return { success: false, error: "An account with this email already exists. Please sign in instead." };
+      }
+
+      if (data.user) {
+        globalUser = mapSupabaseUser(data.user);
+        notify();
+      }
+
       return { success: true, error: null };
     },
 
     signIn: async (email: string, password: string) => {
-      const creds = await loadCredentials();
-      const match = creds.find(
-        (c) =>
-          c.email === email.toLowerCase() &&
-          c.passwordHash === mockHash(password)
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (!match) {
-        return { success: false, error: "Invalid email or password" };
+      if (error) {
+        return { success: false, error: error.message };
       }
 
-      const user: User = {
-        id: match.userId,
-        email: match.email,
-        displayName: match.email.split("@")[0],
-        createdAt: new Date().toISOString(),
-      };
+      if (data.user) {
+        globalUser = mapSupabaseUser(data.user);
+        notify();
+      }
 
-      globalUser = user;
-      await saveAuth(user);
-      notify();
       return { success: true, error: null };
     },
 
     signOut: async () => {
+      await supabase.auth.signOut();
       globalUser = null;
-      await saveAuth(null);
       notify();
     },
 
     updateProfile: async (updates: Partial<Pick<User, "displayName">>) => {
       if (!globalUser) return;
-      globalUser = { ...globalUser, ...updates };
-      await saveAuth(globalUser);
-      notify();
+
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: updates.displayName },
+      });
+
+      if (!error && updates.displayName) {
+        globalUser = { ...globalUser, displayName: updates.displayName };
+        notify();
+      }
     },
   };
 }

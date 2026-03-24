@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
 import { Header } from "../../src/components/Header";
@@ -8,6 +8,7 @@ import { MetricTile } from "../../src/components/MetricTile";
 import { DraggableMatrix } from "../../src/components/DraggableMatrix";
 import { useTasks } from "../../src/lib/store";
 import { useProjects } from "../../src/lib/projects-store";
+import { usePullRefresh } from "../../src/lib/use-pull-refresh";
 import { QUADRANTS, Quadrant, Task } from "../../src/types/task";
 
 type ViewMode = "focus" | "matrix";
@@ -23,6 +24,8 @@ export default function FocusDashboard() {
   const handleDragStateChange = useCallback((dragging: boolean) => {
     setScrollEnabled(!dragging);
   }, []);
+
+  const { refreshing, onRefresh } = usePullRefresh();
 
   const filterByProject = (list: Task[]) =>
     selectedProject ? list.filter((t) => t.project === selectedProject) : list;
@@ -41,6 +44,7 @@ export default function FocusDashboard() {
         contentContainerClassName="pb-32"
         showsVerticalScrollIndicator={false}
         scrollEnabled={scrollEnabled}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />}
       >
         {/* ── View Mode Toggle ── */}
         <View className="px-7 pt-4">

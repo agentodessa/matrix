@@ -4,6 +4,7 @@ import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { Header } from "../../src/components/Header";
+import { GoogleSignInButton } from "../../src/components/GoogleSignInButton";
 import { useAuth } from "../../src/lib/auth-store";
 
 interface FormData {
@@ -120,6 +121,16 @@ export default function SignInScreen() {
             {loading ? "Signing in..." : "Sign In"}
           </Text>
         </Pressable>
+
+        {/* Divider */}
+        <View className="flex-row items-center gap-3">
+          <View className="flex-1 h-px bg-border" />
+          <Text className="font-body text-xs text-meta">or</Text>
+          <View className="flex-1 h-px bg-border" />
+        </View>
+
+        {/* Google */}
+        <GoogleSignInButton onSuccess={() => router.back()} />
 
         {/* Switch to sign up */}
         <Pressable
