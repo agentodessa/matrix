@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "./supabase";
+import { useWorkspace } from "@/lib/workspace-context";
 
 /**
  * Shared Pro user status — cached globally to avoid repeated Supabase calls.
@@ -86,6 +87,7 @@ supabase.auth.onAuthStateChange(() => {
 
 export const useProStatus = (): { userId: string | null; isPro: boolean } => {
   const [, update] = useState(0);
+  const { workspaceType } = useWorkspace();
 
   useEffect(() => {
     const listener = () => update((n) => n + 1);
@@ -95,6 +97,11 @@ export const useProStatus = (): { userId: string | null; isPro: boolean } => {
     }
     return () => { listeners.delete(listener); };
   }, []);
+
+  // Team workspaces always have Pro features (owner pays for Pro Team)
+  if (workspaceType === "team") {
+    return { userId: cachedUserId, isPro: true };
+  }
 
   return {
     userId: cachedUserId,
