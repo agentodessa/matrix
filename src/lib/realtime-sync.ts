@@ -4,6 +4,7 @@ import { queryClient } from "./query-client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 let channel: RealtimeChannel | null = null;
+let teamChannel: RealtimeChannel | null = null;
 let subscribedUserId: string | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -29,6 +30,26 @@ export const useRealtimeSync = () => {
       if (!session || !mounted) return;
 
       const userId = session.user.id;
+
+      // Team realtime — available for all authenticated users (not Pro-gated)
+      if (!teamChannel) {
+        teamChannel = supabase
+          .channel(`teams-${userId}`)
+          .on("postgres_changes", {
+            event: "*", schema: "public", table: "team_members",
+            filter: `user_id=eq.${userId}`,
+          }, () => {
+            queryClient.invalidateQueries({ queryKey: ["teams"] });
+            queryClient.invalidateQueries({ queryKey: ["team_members"] });
+          })
+          .on("postgres_changes", {
+            event: "*", schema: "public", table: "team_invites",
+          }, () => {
+            queryClient.invalidateQueries({ queryKey: ["team_invites"] });
+            queryClient.invalidateQueries({ queryKey: ["pending_invites"] });
+          })
+          .subscribe();
+      }
 
       const { data: sub } = await supabase
         .from("subscriptions")
@@ -71,6 +92,10 @@ export const useRealtimeSync = () => {
           supabase.removeChannel(channel);
           channel = null;
           subscribedUserId = null;
+        }
+        if (teamChannel) {
+          supabase.removeChannel(teamChannel);
+          teamChannel = null;
         }
       }
     });
