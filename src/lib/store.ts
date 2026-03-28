@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Task, Quadrant, getQuadrant, TaskStatus } from "@/types/task";
 import { supabase } from "./supabase";
 import { useProStatus } from "./use-pro-status";
+import { useWorkspace } from "@/lib/workspace-context";
 
 const STORAGE_KEY = "@executive_tasks";
 
@@ -22,11 +23,11 @@ async function saveLocal(tasks: Task[]) {
 
 /* ── Supabase helpers ── */
 
-async function fetchRemoteTasks(userId: string): Promise<Task[]> {
+async function fetchRemoteTasks(workspaceId: string): Promise<Task[]> {
   const { data, error } = await supabase
     .from("tasks")
     .select("*")
-    .eq("user_id", userId)
+    .eq("workspace_id", workspaceId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []).map(mapRemoteTask);
@@ -46,13 +47,16 @@ const mapRemoteTask = (r: Record<string, unknown>): Task => {
     project: (r.project as string) ?? undefined,
     created_at: r.created_at as string,
     completed_at: (r.completed_at as string) ?? undefined,
+    workspace_id: (r.workspace_id as string) ?? undefined,
+    created_by: (r.created_by as string) ?? undefined,
   };
 };
 
-const toRemoteRow = (task: Task, userId: string) => {
+const toRemoteRow = (task: Task, workspaceId: string, createdBy: string) => {
   return {
     id: task.id,
-    user_id: userId,
+    workspace_id: workspaceId,
+    created_by: createdBy,
     title: task.title,
     description: task.description ?? null,
     urgency: task.urgency,
@@ -118,32 +122,32 @@ const useLocalTasks = () => {
 
 /* ── Cloud store (Pro users) ── */
 
-const useCloudTasks = (userId: string) => {
+const useCloudTasks = (workspaceId: string, userId: string) => {
   const qc = useQueryClient();
 
   const { data: tasks = [] } = useQuery<Task[]>({
-    queryKey: ["tasks", userId],
-    queryFn: () => fetchRemoteTasks(userId),
-    enabled: userId !== "__none__",
+    queryKey: ["tasks", workspaceId],
+    queryFn: () => fetchRemoteTasks(workspaceId),
+    enabled: workspaceId !== "__none__",
     staleTime: 1000 * 30,
   });
 
   const addMutation = useMutation({
     mutationFn: async (task: Omit<Task, "id" | "created_at" | "status">) => {
       const newTask: Task = { ...task, id: Date.now().toString(), status: "active", created_at: new Date().toISOString() };
-      const { error } = await supabase.from("tasks").insert(toRemoteRow(newTask, userId));
+      const { error } = await supabase.from("tasks").insert(toRemoteRow(newTask, workspaceId, userId));
       if (error) throw error;
       return newTask;
     },
     onMutate: async (task) => {
-      await qc.cancelQueries({ queryKey: ["tasks", userId] });
-      const prev = qc.getQueryData<Task[]>(["tasks", userId]);
+      await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
+      const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
       const optimistic: Task = { ...task, id: `temp-${Date.now()}`, status: "active", created_at: new Date().toISOString() };
-      qc.setQueryData<Task[]>(["tasks", userId], (old = []) => [optimistic, ...old]);
+      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => [optimistic, ...old]);
       return { prev };
     },
-    onError: (_e, _t, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", userId] }),
+    onError: (_e, _t, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   const toggleMutation = useMutation({
@@ -153,51 +157,51 @@ const useCloudTasks = (userId: string) => {
       const newStatus = task.status === "active" ? "completed" : "active";
       const { error } = await supabase.from("tasks")
         .update({ status: newStatus, completed_at: newStatus === "completed" ? new Date().toISOString() : null })
-        .eq("id", id).eq("user_id", userId);
+        .eq("id", id).eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ["tasks", userId] });
-      const prev = qc.getQueryData<Task[]>(["tasks", userId]);
-      qc.setQueryData<Task[]>(["tasks", userId], (old = []) =>
+      await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
+      const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
+      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) =>
         old.map((t) => t.id === id ? {
           ...t, status: (t.status === "active" ? "completed" : "active") as TaskStatus,
           completed_at: t.status === "active" ? new Date().toISOString() : undefined,
         } : t));
       return { prev };
     },
-    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", userId] }),
+    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pick<Task, "urgency" | "importance" | "project">> }) => {
-      const { error } = await supabase.from("tasks").update(updates).eq("id", id).eq("user_id", userId);
+      const { error } = await supabase.from("tasks").update(updates).eq("id", id).eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async ({ id, updates }) => {
-      await qc.cancelQueries({ queryKey: ["tasks", userId] });
-      const prev = qc.getQueryData<Task[]>(["tasks", userId]);
-      qc.setQueryData<Task[]>(["tasks", userId], (old = []) => old.map((t) => t.id === id ? { ...t, ...updates } : t));
+      await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
+      const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
+      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => old.map((t) => t.id === id ? { ...t, ...updates } : t));
       return { prev };
     },
-    onError: (_e, _v, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", userId] }),
+    onError: (_e, _v, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("tasks").delete().eq("id", id).eq("user_id", userId);
+      const { error } = await supabase.from("tasks").delete().eq("id", id).eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: ["tasks", userId] });
-      const prev = qc.getQueryData<Task[]>(["tasks", userId]);
-      qc.setQueryData<Task[]>(["tasks", userId], (old = []) => old.filter((t) => t.id !== id));
+      await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
+      const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
+      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => old.filter((t) => t.id !== id));
       return { prev };
     },
-    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", userId] }),
+    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   return {
@@ -206,7 +210,7 @@ const useCloudTasks = (userId: string) => {
     toggleTask: (id: string) => toggleMutation.mutate(id),
     updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance" | "project">>) => updateMutation.mutate({ id, updates }),
     deleteTask: (id: string) => deleteMutation.mutate(id),
-    reload: async () => { await qc.invalidateQueries({ queryKey: ["tasks", userId] }); },
+    reload: async () => { await qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }); },
   };
 };
 
@@ -214,8 +218,9 @@ const useCloudTasks = (userId: string) => {
 
 export const useTasks = () => {
   const { userId, isPro } = useProStatus();
+  const { workspaceId } = useWorkspace();
   const local = useLocalTasks();
-  const cloud = useCloudTasks(isPro && userId ? userId : "__none__");
+  const cloud = useCloudTasks(isPro && workspaceId ? workspaceId : "__none__", userId ?? "");
   const store = isPro && userId ? cloud : local;
 
   return {
