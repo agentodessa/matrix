@@ -17,6 +17,8 @@ export interface Task {
   project?: string;
   created_at: string;
   completed_at?: string;
+  workspace_id?: string;
+  created_by?: string;
 }
 
 export interface QuadrantClasses {
