@@ -17,8 +17,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npx expo start --clear`                   | Start with cleared Metro cache (required after config changes) |
 | `npx expo prebuild --platform ios --clean` | Regenerate iOS native project + reinstall pods                 |
 | `cargo install tauri-cli`                  | Install Tauri CLI (prerequisite for tauri commands)            |
+| `npm run lint`                             | Run oxlint type-aware checks                                   |
+| `npm run fmt`                              | Format all files with oxfmt                                    |
+| `npm run fmt:check`                        | Check formatting without writing                               |
 
-No linting or test commands — neither ESLint/Prettier nor a test framework are configured.
+No test framework is configured. Linting (oxlint) and formatting (oxfmt) run automatically on staged files via a husky pre-commit hook.
 
 ## Code Conventions
 
