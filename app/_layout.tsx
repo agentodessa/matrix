@@ -7,11 +7,13 @@ import { useThemePersistence } from "@/lib/theme-store";
 import { lightTheme, darkTheme } from "@/lib/theme";
 import { QueryProvider } from "@/lib/query-client";
 import { useRealtimeSync } from "@/lib/realtime-sync";
+import { usePendingJoin } from "@/lib/teams-store";
 
 const AppContent = () => {
   const themeLoaded = useThemePersistence();
   const colorScheme = useColorScheme();
   useRealtimeSync();
+  usePendingJoin();
 
   const themeVars = colorScheme === "dark" ? darkTheme : lightTheme;
 

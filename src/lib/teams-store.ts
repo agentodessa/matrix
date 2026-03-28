@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
 import { useAuth } from "./auth-store";
 import type { Team, TeamMember, TeamInvite } from "@/types/team";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 
 /* ── Helper ── */
 
@@ -264,4 +267,26 @@ export const useTeamMutations = () => {
     leaveTeam,
     deleteTeam,
   };
+};
+
+/* ── Pending Join ── */
+
+export const usePendingJoin = () => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { joinByCode } = useTeamMutations();
+
+  useEffect(() => {
+    if (!user) return;
+
+    AsyncStorage.getItem("@executive_pending_join").then((code) => {
+      if (!code) return;
+      AsyncStorage.removeItem("@executive_pending_join");
+      joinByCode.mutate(code, {
+        onSuccess: (team) => {
+          router.replace(`/team/${team.id}`);
+        },
+      });
+    });
+  }, [user]);
 };
