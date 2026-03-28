@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import { Task, Quadrant, QUADRANTS, getQuadrant, quadrantToProperties } from "@/types/task";
+import { Task, Quadrant, getQuadrant, quadrantToProperties } from "@/types/task";
 import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 interface LayoutRect {
@@ -257,10 +257,9 @@ const DroppableQuadrant = ({
 }: DroppableQuadrantProps) => {
   const { t } = useTranslation();
   const quadrantT = useQuadrantT();
-  const info = QUADRANTS[quadrant];
   const qText = quadrantT(quadrant);
-  const active = tasks.filter((t) => t.status === "active");
-  const completed = tasks.filter((t) => t.status === "completed");
+  const active = tasks.filter((task) => task.status === "active");
+  const completed = tasks.filter((task) => task.status === "completed");
   const MAX_VISIBLE = 4;
   const accent = QUADRANT_ACCENT[quadrant];
 
@@ -290,7 +289,7 @@ const DroppableQuadrant = ({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-3">
             <Text className="font-display text-sm font-bold text-heading">{qText.title}</Text>
-            <View style={{ backgroundColor: accent + "20" }} className="rounded-full px-2.5 py-1">
+            <View style={{ backgroundColor: `${accent}20` }} className="rounded-full px-2.5 py-1">
               <Text style={{ color: accent }} className="font-body text-xs font-bold">
                 {active.length}
               </Text>
@@ -460,7 +459,7 @@ const DraggableTaskRow = ({
         onPress={handleToggle}
       >
         <View
-          style={{ borderColor: accent + "40" }}
+          style={{ borderColor: `${accent}40` }}
           className="w-4.5 h-4.5 mt-0.5 rounded border items-center justify-center"
         />
         <Text className="font-body text-[13px] text-body flex-1 leading-[18px]" numberOfLines={2}>
@@ -474,7 +473,7 @@ const DraggableTaskRow = ({
     <GestureDetector gesture={gesture}>
       <Animated.View style={[{ flexDirection: "row", alignItems: "flex-start", gap: 8 }, rowStyle]}>
         <View
-          style={{ borderColor: accent + "50" }}
+          style={{ borderColor: `${accent}50` }}
           className="w-4.5 h-4.5 mt-0.5 rounded border items-center justify-center"
         />
         <Text className="font-body text-[13px] text-body flex-1 leading-[18px]" numberOfLines={2}>

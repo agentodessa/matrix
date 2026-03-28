@@ -35,12 +35,14 @@ export default function FocusDashboard() {
   const { refreshing, onRefresh } = usePullRefresh();
 
   const filterByProject = (list: Task[]) =>
-    selectedProject ? list.filter((t) => t.project === selectedProject) : list;
+    selectedProject ? list.filter((task) => task.project === selectedProject) : list;
 
   const filteredTasks = filterByProject(tasks);
-  const q1Active = filterByProject(getTasksByQuadrant(1)).filter((t) => t.status === "active");
-  const totalActive = filteredTasks.filter((t) => t.status === "active").length;
-  const totalCompleted = filteredTasks.filter((t) => t.status === "completed").length;
+  const q1Active = filterByProject(getTasksByQuadrant(1)).filter(
+    (task) => task.status === "active",
+  );
+  const totalActive = filteredTasks.filter((task) => task.status === "active").length;
+  const totalCompleted = filteredTasks.filter((task) => task.status === "completed").length;
   const completionRate =
     filteredTasks.length > 0 ? Math.round((totalCompleted / filteredTasks.length) * 100) : 0;
 
@@ -230,7 +232,7 @@ const FocusView = ({
           {([1, 2, 3, 4] as Quadrant[]).map((q) => {
             const info = QUADRANTS[q];
             const count = filterByProject(getTasksByQuadrant(q)).filter(
-              (t) => t.status === "active",
+              (task) => task.status === "active",
             ).length;
             return (
               <Pressable

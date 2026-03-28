@@ -11,11 +11,11 @@ export const OrganizationSection = () => {
   const { teams } = useTeams();
   const { invites: pendingInvites } = usePendingInvites();
 
-  const teamSubtitle = !user
-    ? t("Sign in to create a team")
-    : teams.length > 0
+  const teamSubtitle = user
+    ? teams.length > 0
       ? t("{{count}} team", { count: teams.length })
-      : t("Create or join a team");
+      : t("Create or join a team")
+    : t("Sign in to create a team");
 
   return (
     <View className="gap-3">

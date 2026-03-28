@@ -17,6 +17,11 @@
     "import/exports-last": "off",
     "import/consistent-type-specifier-style": "off",
     "import/first": "off",
+    "import/max-dependencies": "off",
+    "import/no-unassigned-import": "off",
+    "import/no-namespace": "off",
+    "import/no-anonymous-default-export": "off",
+    "import/no-named-as-default-member": "off",
     "no-magic-numbers": "off",
     "no-ternary": "off",
     "no-nested-ternary": "off",
@@ -29,7 +34,20 @@
     "max-lines": "off",
     "func-style": "off",
     "arrow-body-style": "off",
-    "typescript/consistent-type-imports": "off"
+    "typescript/consistent-type-imports": "off",
+    "no-template-curly-in-string": "off",
+    "no-warning-comments": "off",
+    "capitalized-comments": "off",
+    "init-declarations": "off",
+    "no-inline-comments": "off",
+    "no-implicit-coercion": "off",
+    "new-cap": "off",
+    "no-continue": "off",
+    "max-params": "off",
+    "typescript/array-type": "off",
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/tsconfig-error": "off"
   },
   "env": {
     "builtin": true

@@ -301,5 +301,5 @@ export const usePendingJoin = () => {
         },
       });
     });
-  }, [userId]);
+  }, [userId, router]);
 };

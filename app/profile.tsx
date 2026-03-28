@@ -13,10 +13,10 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { tasks } = useTasks();
   const { user, isAuthenticated, signOut } = useAuth();
-  const { plan, isPro } = useSubscription();
+  const { isPro } = useSubscription();
 
-  const totalCompleted = tasks.filter((t) => t.status === "completed").length;
-  const totalActive = tasks.filter((t) => t.status === "active").length;
+  const totalCompleted = tasks.filter((task) => task.status === "completed").length;
+  const totalActive = tasks.filter((task) => task.status === "active").length;
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -180,7 +180,7 @@ export default function ProfileScreen() {
 
         <Text className="font-body text-xs text-meta text-center leading-4">
           {t("Your tasks are stored locally on this device.")}
-          {isAuthenticated && isPro ? "\n" + t("Pro users get cloud sync.") : ""}
+          {isAuthenticated && isPro ? `\n${t("Pro users get cloud sync.")}` : ""}
         </Text>
       </ScrollView>
     </SafeAreaView>

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, Text, Pressable, useColorScheme } from "react-native";
+import { View, Pressable, useColorScheme } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -33,7 +33,7 @@ export const WebViewModeToggle = ({ value, onChange }: Props) => {
 
   useEffect(() => {
     progress.value = withSpring(value === "focus" ? 0 : 1, SPRING_CONFIG);
-  }, [value]);
+  }, [value]); // oxlint-disable-line react-hooks/exhaustive-deps -- progress is a Reanimated shared value
 
   const pillStyle = useAnimatedStyle(() => ({
     position: "absolute" as const,

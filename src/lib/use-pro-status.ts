@@ -11,7 +11,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 const PRO_CACHE_KEY = "@executive_pro_status";
 
 let cachedUserId: string | null = null;
-let cachedIsPro: boolean = false;
+let cachedIsPro = false;
 let resolved = false;
 let resolvePromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();

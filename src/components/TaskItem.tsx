@@ -21,7 +21,7 @@ export const TaskItem = ({ task, onToggle, onDelete }: TaskItemProps) => {
   const quadrant = getQuadrant(task);
   const info = QUADRANTS[quadrant];
   const qText = quadrantT(quadrant);
-  const classes = info.classes;
+  const { classes } = info;
   const isCompleted = task.status === "completed";
 
   return (

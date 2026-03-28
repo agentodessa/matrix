@@ -13,7 +13,9 @@ export async function processPayment(
   method: PaymentMethod,
 ): Promise<PaymentResult> {
   // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await new Promise((resolve) => {
+    void setTimeout(resolve, 1500);
+  });
 
   // Mock: always succeeds
   return {

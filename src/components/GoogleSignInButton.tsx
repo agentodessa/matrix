@@ -12,7 +12,7 @@ if (Platform.OS === "web") {
 
 // On web: extract tokens from URL hash on page load (Tauri redirect)
 if (Platform.OS === "web" && typeof window !== "undefined") {
-  const hash = window.location.hash;
+  const { hash } = window.location;
   if (hash && hash.includes("access_token")) {
     const params = extractHashParams(window.location.href);
     if (params.access_token && params.refresh_token) {
@@ -129,7 +129,7 @@ export const GoogleSignInButton = ({ onSuccess }: { onSuccess?: () => void }) =>
 };
 
 const extractHashParams = (url: string): Record<string, string> => {
-  const hash = url.split("#")[1];
+  const [, hash] = url.split("#");
   if (!hash) return {};
   const params: Record<string, string> = {};
   hash.split("&").forEach((pair) => {

@@ -139,7 +139,7 @@ export const useRealtimeSync = () => {
       subscription.unsubscribe();
       if (debounceTimer) clearTimeout(debounceTimer);
     };
-  }, []);
+  }, []); // oxlint-disable-line react-hooks/exhaustive-deps -- intentionally runs once; workspace changes handled by second useEffect below
 
   // Re-subscribe Pro channel when workspace changes
   useEffect(() => {

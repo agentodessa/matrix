@@ -22,7 +22,7 @@ const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string
       duration: 350,
       easing: Easing.out(Easing.cubic),
     });
-  }, [value]);
+  }, [value]); // oxlint-disable-line react-hooks/exhaustive-deps -- animatedValue is a Reanimated shared value
 
   const animatedProps = useAnimatedProps(() => {
     return {
@@ -55,7 +55,7 @@ const AnimatedProgressBar = ({ progress }: { progress: number }) => {
       duration: 350,
       easing: Easing.out(Easing.cubic),
     });
-  }, [progress]);
+  }, [progress]); // oxlint-disable-line react-hooks/exhaustive-deps -- animatedProgress is a Reanimated shared value
 
   const barStyle = useAnimatedStyle(() => ({
     width: `${animatedProgress.value}%`,
@@ -118,7 +118,7 @@ export const MetricTile = ({
         </Text>
       ) : null}
 
-      {progress !== undefined ? <AnimatedProgressBar progress={progress} /> : null}
+      {progress === undefined ? null : <AnimatedProgressBar progress={progress} />}
 
       {children}
     </View>

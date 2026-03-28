@@ -24,7 +24,7 @@ export default function ProjectsScreen() {
   const atLimit = !canCreateProject(projects.length, plan);
 
   const taskCountFor = (project: string) =>
-    tasks.filter((t) => t.project === project && t.status === "active").length;
+    tasks.filter((task) => task.project === project && task.status === "active").length;
 
   const trimmed = newName.trim();
   const isDuplicate =

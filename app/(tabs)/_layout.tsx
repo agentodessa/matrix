@@ -7,7 +7,7 @@ import { WebSidebar } from "@/components/WebSidebar";
 export default function TabLayout() {
   const { t } = useTranslation();
   const { getTasksByQuadrant } = useTasks();
-  const urgentCount = getTasksByQuadrant(1).filter((t) => t.status === "active").length;
+  const urgentCount = getTasksByQuadrant(1).filter((task) => task.status === "active").length;
 
   if (Platform.OS === "web") {
     return <WebSidebar urgentCount={urgentCount} />;

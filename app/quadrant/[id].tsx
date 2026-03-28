@@ -18,8 +18,8 @@ export default function QuadrantScreen() {
   const quadrant = QUADRANTS[quadrantId];
   const { getTasksByQuadrant, toggleTask } = useTasks();
   const tasks = getTasksByQuadrant(quadrantId);
-  const activeTasks = tasks.filter((t) => t.status === "active");
-  const completedTasks = tasks.filter((t) => t.status === "completed");
+  const activeTasks = tasks.filter((task) => task.status === "active");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
   if (!quadrant) return null;
@@ -27,8 +27,8 @@ export default function QuadrantScreen() {
   const qText = quadrantT(quadrantId);
   const cls = quadrant.classes;
   const titleWords = qText.title.split(" ");
-  const firstWord = titleWords[0];
-  const restWords = titleWords.slice(1).join(" ");
+  const [firstWord, ...restArr] = titleWords;
+  const restWords = restArr.join(" ");
   const displayedTasks = activeTab === "active" ? activeTasks : completedTasks;
   const completionRate =
     tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;

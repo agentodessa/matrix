@@ -16,7 +16,7 @@ export const ProGate = ({ feature, featureLabel, children }: ProGateProps) => {
   const router = useRouter();
 
   if (isFeatureAvailable(feature, plan)) {
-    return <>{children}</>;
+    return children as React.ReactElement;
   }
 
   return (

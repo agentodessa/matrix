@@ -47,7 +47,7 @@ export default function TeamJoinScreen() {
         }
         setLoading(false);
       });
-  }, [code, user]);
+  }, [code, user, router]);
 
   const handleJoin = () => {
     if (!code || !team) return;

@@ -18,7 +18,9 @@ export const usePullRefresh = () => {
       await qc.invalidateQueries();
     } catch {}
 
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise((r) => {
+      void setTimeout(r, 300);
+    });
     setRefreshing(false);
   }, [qc]);
 

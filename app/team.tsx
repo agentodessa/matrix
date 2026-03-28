@@ -13,7 +13,7 @@ export default function TeamScreen() {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { isProTeam } = useSubscription();
   const { teams } = useTeams();
   const { invites: pendingInvites } = usePendingInvites();
@@ -34,7 +34,7 @@ export default function TeamScreen() {
     });
   };
 
-  const handleAccept = (inviteId: string, teamId: string) => {
+  const handleAccept = (inviteId: string, _teamId: string) => {
     acceptInvite.mutate(inviteId, {
       onError: (err: any) => {
         Alert.alert(t("Error"), err?.message ?? t("Failed to accept invite."));

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, Platform, RefreshControl } from "react-native";
 import { SafeAreaView } from "@/lib/styled";
 import { Header } from "@/components/Header";
-import { TaskItem } from "@/components/TaskItem";
 import { ProGate } from "@/components/ProGate";
 import { useTasks } from "@/lib/store";
 import { useProjects } from "@/lib/projects-store";
@@ -99,7 +98,7 @@ export default function CalendarScreen() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
 
   const filteredTasks = useMemo(
-    () => (selectedProject ? tasks.filter((t) => t.project === selectedProject) : tasks),
+    () => (selectedProject ? tasks.filter((task) => task.project === selectedProject) : tasks),
     [tasks, selectedProject],
   );
   const selectedTasks = useMemo(
@@ -333,8 +332,8 @@ const MonthView = ({
     selectedDate.getMonth() === month &&
     selectedDate.getDate() === d;
 
-  const activeTasks = selectedTasks.filter((t) => t.status === "active");
-  const completedTasks = selectedTasks.filter((t) => t.status === "completed");
+  const activeTasks = selectedTasks.filter((task) => task.status === "active");
+  const completedTasks = selectedTasks.filter((task) => task.status === "completed");
   const isSelectedToday =
     selectedDate.getFullYear() === today.year &&
     selectedDate.getMonth() === today.month &&
@@ -393,7 +392,7 @@ const MonthView = ({
             const todayFlag = isToday(day);
             const selectedFlag = isSelected(day);
             const dayTasks = tasksByDay[day] ?? [];
-            const activeDayTasks = dayTasks.filter((t) => t.status === "active");
+            const activeDayTasks = dayTasks.filter((task) => task.status === "active");
             const overflow =
               activeDayTasks.length > MAX_EVENTS ? activeDayTasks.length - MAX_EVENTS : 0;
 
@@ -443,7 +442,7 @@ const MonthView = ({
                     <View
                       key={task.id}
                       style={{
-                        backgroundColor: color + "25",
+                        backgroundColor: `${color}25`,
                         borderLeftWidth: 2,
                         borderLeftColor: color,
                         borderRadius: 2,
@@ -474,7 +473,7 @@ const MonthView = ({
             <View className="flex-row items-center justify-between pb-3">
               <Text className="font-body text-xs font-bold text-heading">{selectedLabel}</Text>
               <Text className="font-body text-[10px] text-meta">
-                {activeTasks.length} {activeTasks.length !== 1 ? t("tasks") : t("task")}
+                {activeTasks.length} {activeTasks.length === 1 ? t("task") : t("tasks")}
               </Text>
             </View>
 
@@ -519,7 +518,7 @@ const CalendarTaskRow = ({ task, onToggle }: { task: Task; onToggle: (id: string
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: color + "0a",
+        backgroundColor: `${color}0a`,
         borderLeftWidth: 3,
         borderLeftColor: color,
         borderRadius: 8,

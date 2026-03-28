@@ -16,7 +16,7 @@ const SpinningIcon = () => {
   useEffect(() => {
     rotation.value = withRepeat(withTiming(360, { duration: 1000, easing: Easing.linear }), -1);
     return () => cancelAnimation(rotation);
-  }, []);
+  }, []); // oxlint-disable-line react-hooks/exhaustive-deps -- rotation is a Reanimated shared value; animation starts once on mount
 
   const style = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],

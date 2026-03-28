@@ -86,7 +86,7 @@ export const WorkspacePill = () => {
   const { width: screenWidth } = useWindowDimensions();
 
   const displayName = workspaceType === "personal" ? t("Personal") : workspaceName;
-  const truncated = displayName.length > 14 ? displayName.slice(0, 14) + "…" : displayName;
+  const truncated = displayName.length > 14 ? `${displayName.slice(0, 14)}…` : displayName;
 
   const handleClose = useCallback(() => setOpen(false), []);
 

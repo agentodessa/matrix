@@ -50,11 +50,11 @@ async function restoreCache() {
   try {
     const json = await AsyncStorage.getItem(CACHE_KEY);
     if (!json) return;
-    const entries = JSON.parse(json) as Array<{
+    const entries = JSON.parse(json) as {
       queryKey: unknown[];
       data: unknown;
       dataUpdatedAt: number;
-    }>;
+    }[];
     for (const entry of entries) {
       queryClient.setQueryData(entry.queryKey, entry.data, {
         updatedAt: entry.dataUpdatedAt,

@@ -67,8 +67,8 @@ export const Header = ({ title, showBack = false }: HeaderProps) => {
   const avatarBg = isAuthenticated
     ? user?.avatarUrl
       ? "transparent"
-      : userColor + "20"
-    : guestAvatar.color + "20";
+      : `${userColor}20`
+    : `${guestAvatar.color}20`;
 
   return (
     <View className="bg-header-bg px-5 pb-3 pt-3">

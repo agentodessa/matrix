@@ -8,7 +8,7 @@ import { TaskItem } from "@/components/TaskItem";
 import { useTasks } from "@/lib/store";
 import { useProjects } from "@/lib/projects-store";
 import { usePullRefresh } from "@/lib/use-pull-refresh";
-import { QUADRANTS, Quadrant } from "@/types/task";
+import { Quadrant } from "@/types/task";
 
 type FilterKey = "all" | "1" | "2" | "3" | "4";
 
@@ -30,18 +30,18 @@ export default function TasksScreen() {
   const { refreshing, onRefresh } = usePullRefresh();
 
   const projectFiltered = selectedProject
-    ? tasks.filter((t) => t.project === selectedProject)
+    ? tasks.filter((task) => task.project === selectedProject)
     : tasks;
 
   const filteredTasks =
     activeFilter === "all"
       ? projectFiltered
-      : projectFiltered.filter((t) =>
-          getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant).some((q) => q.id === t.id),
+      : projectFiltered.filter((task) =>
+          getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant).some((q) => q.id === task.id),
         );
 
-  const activeTasks = filteredTasks.filter((t) => t.status === "active");
-  const completedTasks = filteredTasks.filter((t) => t.status === "completed");
+  const activeTasks = filteredTasks.filter((task) => task.status === "active");
+  const completedTasks = filteredTasks.filter((task) => task.status === "completed");
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -122,10 +122,11 @@ export default function TasksScreen() {
             const isActive = activeFilter === filter.key;
             const count =
               filter.key === "all"
-                ? projectFiltered.filter((t) => t.status === "active").length
+                ? projectFiltered.filter((task) => task.status === "active").length
                 : getTasksByQuadrant(parseInt(filter.key, 10) as Quadrant).filter(
-                    (t) =>
-                      t.status === "active" && (!selectedProject || t.project === selectedProject),
+                    (task) =>
+                      task.status === "active" &&
+                      (!selectedProject || task.project === selectedProject),
                   ).length;
 
             return (

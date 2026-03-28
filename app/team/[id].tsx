@@ -33,7 +33,7 @@ export default function TeamDetailScreen() {
 
   const [inviteEmail, setInviteEmail] = useState("");
 
-  const team = teams.find((t) => t.id === id);
+  const team = teams.find((item) => item.id === id);
   const myMembership = members.find((m) => m.user_id === user?.id);
   const isOwner = myMembership?.role === "owner";
   const isAdmin = myMembership?.role === "admin";
