@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../lib/auth-store";
+import { useSyncStatus } from "../lib/use-online-status";
+import { SyncPill } from "./SyncPill";
 
 interface HeaderProps {
   title?: string;
@@ -28,6 +30,7 @@ function useGuestAvatar() {
 export function Header({ title = "The Executive", showBack = false }: HeaderProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
+  const syncStatus = useSyncStatus();
   const guestAvatar = useGuestAvatar();
 
   const userInitial = user?.displayName?.charAt(0)?.toUpperCase() ?? "?";
@@ -92,6 +95,7 @@ export function Header({ title = "The Executive", showBack = false }: HeaderProp
             {title}
           </Text>
         </View>
+        <SyncPill status={syncStatus} />
       </View>
     </View>
   );

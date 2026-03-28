@@ -9,6 +9,7 @@ import { DraggableMatrix } from "../../src/components/DraggableMatrix";
 import { useTasks } from "../../src/lib/store";
 import { useProjects } from "../../src/lib/projects-store";
 import { usePullRefresh } from "../../src/lib/use-pull-refresh";
+import { ViewModeToggle } from "../../src/components/ViewModeToggle";
 import { QUADRANTS, Quadrant, Task } from "../../src/types/task";
 
 type ViewMode = "focus" | "matrix";
@@ -48,44 +49,7 @@ export default function FocusDashboard() {
       >
         {/* ── View Mode Toggle ── */}
         <View className="px-7 pt-4">
-          <View className="flex-row bg-btn-surface rounded-lg p-1">
-            <Pressable
-              className={
-                viewMode === "focus"
-                  ? "flex-1 rounded-md bg-bg py-2 items-center"
-                  : "flex-1 rounded-md py-2 items-center active:opacity-70"
-              }
-              onPress={() => setViewMode("focus")}
-            >
-              <Text
-                className={
-                  viewMode === "focus"
-                    ? "font-body text-xs font-bold text-heading"
-                    : "font-body text-xs font-bold text-meta"
-                }
-              >
-                Focus
-              </Text>
-            </Pressable>
-            <Pressable
-              className={
-                viewMode === "matrix"
-                  ? "flex-1 rounded-md bg-bg py-2 items-center"
-                  : "flex-1 rounded-md py-2 items-center active:opacity-70"
-              }
-              onPress={() => setViewMode("matrix")}
-            >
-              <Text
-                className={
-                  viewMode === "matrix"
-                    ? "font-body text-xs font-bold text-heading"
-                    : "font-body text-xs font-bold text-meta"
-                }
-              >
-                Matrix
-              </Text>
-            </Pressable>
-          </View>
+          <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </View>
 
         {/* ── Project Filter ── */}

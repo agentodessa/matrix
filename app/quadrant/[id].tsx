@@ -148,16 +148,13 @@ export default function QuadrantScreen() {
           )}
         </View>
 
-        {/* ── Separator ── */}
-        <View className="mx-7 my-8 h-px bg-border" />
-
         {/* ── Velocity Insight Card ── */}
-        <View className="px-7 pb-6">
+        <View className="px-7 pt-10 pb-6">
           <View className="bg-tile rounded-lg p-8 gap-4">
             <Text className="font-body text-xs font-bold text-label uppercase tracking-widest">
               Velocity Insight
             </Text>
-            <View className="flex-row items-center gap-6">
+            <View className="flex-row items-center gap-8">
               <View className="items-center">
                 <Text className="font-display text-3xl font-extrabold text-heading">
                   42m
@@ -166,7 +163,6 @@ export default function QuadrantScreen() {
                   Avg. Resolution
                 </Text>
               </View>
-              <View className="w-px h-10 bg-border" />
               <View className="items-center">
                 <Text className="font-display text-3xl font-extrabold text-heading">
                   {tasks.length}
@@ -175,7 +171,6 @@ export default function QuadrantScreen() {
                   Total Tasks
                 </Text>
               </View>
-              <View className="w-px h-10 bg-border" />
               <View className="items-center">
                 <Text className="font-display text-3xl font-extrabold text-heading">
                   {completionRate}%

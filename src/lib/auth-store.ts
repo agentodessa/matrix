@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "./supabase";
 import { User } from "../types/user";
+
+const USER_CACHE_KEY = "@executive_cached_user";
 
 let globalUser: User | null = null;
 let initialized = false;
@@ -8,6 +11,25 @@ const listeners = new Set<() => void>();
 
 function notify() {
   listeners.forEach((l) => l());
+}
+
+async function persistUser(user: User | null) {
+  try {
+    if (user) {
+      await AsyncStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+    } else {
+      await AsyncStorage.removeItem(USER_CACHE_KEY);
+    }
+  } catch {}
+}
+
+async function restoreCachedUser(): Promise<User | null> {
+  try {
+    const json = await AsyncStorage.getItem(USER_CACHE_KEY);
+    return json ? JSON.parse(json) : null;
+  } catch {
+    return null;
+  }
 }
 
 function mapSupabaseUser(supaUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }): User {
@@ -41,6 +63,14 @@ export function useAuth() {
       supabase.auth.getSession().then(({ data }) => {
         if (data.session?.user) {
           globalUser = mapSupabaseUser(data.session.user);
+          persistUser(globalUser);
+        }
+        notify();
+      }).catch(async () => {
+        // Offline — restore cached user so app doesn't appear logged out
+        const cached = await restoreCachedUser();
+        if (cached) {
+          globalUser = cached;
         }
         notify();
       });
@@ -49,8 +79,10 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         globalUser = mapSupabaseUser(session.user);
+        persistUser(globalUser);
       } else {
         globalUser = null;
+        persistUser(null);
       }
       notify();
     });

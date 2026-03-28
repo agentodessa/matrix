@@ -26,6 +26,9 @@
       "expo-font",
       "@react-native-community/datetimepicker",
       "expo-web-browser"
-    ]
+    ],
+    "android": {
+      "package": "com.executive.app"
+    }
   }
 }

@@ -175,8 +175,7 @@ export default function SystemScreen() {
                 )}
               </View>
             </Pressable>
-            <View className="h-px bg-border mx-5" />
-            <View className="px-5 py-4 gap-1">
+            <View className="px-5 pt-5 pb-4 gap-1">
               <Text className="font-body text-base font-bold text-heading">
                 Export Data
               </Text>
@@ -192,16 +191,17 @@ export default function SystemScreen() {
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
             About
           </Text>
-          <View className="bg-bg-card rounded-lg p-6 gap-3">
-            <Text className="font-display text-lg font-extrabold text-heading tracking-tight">
-              The Executive
-            </Text>
-            <Text className="font-body text-sm text-body leading-6">
-              Eisenhower Matrix task manager.{"\n"}
-              Designed for focus, power, and clarity.
-            </Text>
-            <Text className="font-body text-[10px] font-bold text-meta tracking-[2px] uppercase pt-2">
-              Built with Expo · NativeWind · Liquid Glass
+          <View className="bg-bg-card rounded-lg px-5 py-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="font-display text-base font-extrabold text-heading tracking-tight">
+                The Executive
+              </Text>
+              <Text className="font-body text-[10px] font-bold text-meta">
+                v1.0.0
+              </Text>
+            </View>
+            <Text className="font-body text-xs text-meta pt-1">
+              Eisenhower Matrix task manager for iOS and macOS
             </Text>
           </View>
         </View>

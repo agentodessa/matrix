@@ -21,13 +21,13 @@ export default function ProjectsScreen() {
   const taskCountFor = (project: string) =>
     tasks.filter((t) => t.project === project && t.status === "active").length;
 
+  const trimmed = newName.trim();
+  const isDuplicate = trimmed.length > 0 && projects.some(
+    (p) => p.toLowerCase() === trimmed.toLowerCase()
+  );
+
   const handleAdd = () => {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    if (projects.includes(trimmed)) {
-      Alert.alert("Duplicate", `"${trimmed}" already exists.`);
-      return;
-    }
+    if (!trimmed || isDuplicate) return;
     if (atLimit) {
       Alert.alert(
         "Project Limit",
@@ -97,35 +97,42 @@ export default function ProjectsScreen() {
               </View>
             </Pressable>
           ) : (
-            <View className="flex-row items-center gap-3">
-              <TextInput
-                className="flex-1 font-body text-lg font-bold text-heading border-b border-border pb-3"
-                placeholder="Project name..."
-                placeholderTextColor={placeholderColor}
-                value={newName}
-                onChangeText={setNewName}
-                returnKeyType="done"
-                onSubmitEditing={handleAdd}
-              />
-              <Pressable
-                className={
-                  newName.trim()
-                    ? "bg-success rounded-full px-5 py-2.5 active:opacity-80"
-                    : "bg-btn-surface rounded-full px-5 py-2.5 opacity-50"
-                }
-                onPress={handleAdd}
-                disabled={!newName.trim()}
-              >
-                <Text
+            <View className="gap-2">
+              <View className="flex-row items-center gap-3">
+                <TextInput
+                  className="flex-1 font-body text-lg font-bold text-heading border-b border-border pb-3"
+                  placeholder="Project name..."
+                  placeholderTextColor={placeholderColor}
+                  value={newName}
+                  onChangeText={setNewName}
+                  returnKeyType="done"
+                  onSubmitEditing={handleAdd}
+                />
+                <Pressable
                   className={
-                    newName.trim()
-                      ? "font-body text-sm font-bold text-bg"
-                      : "font-body text-sm font-bold text-meta"
+                    trimmed && !isDuplicate
+                      ? "bg-success rounded-full px-5 py-2.5 active:opacity-80"
+                      : "bg-btn-surface rounded-full px-5 py-2.5 opacity-50"
                   }
+                  onPress={handleAdd}
+                  disabled={!trimmed || isDuplicate}
                 >
-                  Create
+                  <Text
+                    className={
+                      trimmed && !isDuplicate
+                        ? "font-body text-sm font-bold text-bg"
+                        : "font-body text-sm font-bold text-meta"
+                    }
+                  >
+                    Create
+                  </Text>
+                </Pressable>
+              </View>
+              {isDuplicate && (
+                <Text className="font-body text-xs text-urgent">
+                  A project named "{trimmed}" already exists
                 </Text>
-              </Pressable>
+              )}
             </View>
           )}
         </View>

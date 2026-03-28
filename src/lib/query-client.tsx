@@ -1,7 +1,15 @@
 import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState, Platform } from "react-native";
 import { useEffect } from "react";
+
+// Wire React Query to actual network state — pauses queries/mutations when offline
+onlineManager.setEventListener((setOnline) => {
+  return NetInfo.addEventListener((state) => {
+    setOnline(!!state.isConnected);
+  });
+});
 
 // Persist query cache to AsyncStorage
 const CACHE_KEY = "@executive_query_cache";

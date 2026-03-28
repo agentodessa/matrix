@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "./supabase";
 
 /**
  * Shared Pro user status — cached globally to avoid repeated Supabase calls.
- * Returns the user ID if Pro + authenticated, null otherwise.
+ * Persists to AsyncStorage so Pro status survives offline/restarts.
  */
+
+const PRO_CACHE_KEY = "@executive_pro_status";
 
 let cachedUserId: string | null = null;
 let cachedIsPro: boolean = false;
@@ -14,6 +17,28 @@ const listeners = new Set<() => void>();
 
 function notify() { listeners.forEach((l) => l()); }
 
+async function persistProStatus() {
+  try {
+    await AsyncStorage.setItem(
+      PRO_CACHE_KEY,
+      JSON.stringify({ userId: cachedUserId, isPro: cachedIsPro })
+    );
+  } catch {}
+}
+
+async function restoreProStatus(): Promise<boolean> {
+  try {
+    const json = await AsyncStorage.getItem(PRO_CACHE_KEY);
+    if (!json) return false;
+    const { userId, isPro } = JSON.parse(json);
+    cachedUserId = userId;
+    cachedIsPro = isPro;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function refresh() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -21,6 +46,7 @@ async function refresh() {
       cachedUserId = null;
       cachedIsPro = false;
       resolved = true;
+      await persistProStatus();
       notify();
       return;
     }
@@ -35,10 +61,13 @@ async function refresh() {
 
     cachedIsPro = sub?.plan === "pro" && sub?.status === "active";
     resolved = true;
+    await persistProStatus();
     notify();
   } catch {
-    cachedUserId = null;
-    cachedIsPro = false;
+    // Network failure — restore last known status instead of wiping to free
+    if (!resolved) {
+      await restoreProStatus();
+    }
     resolved = true;
     notify();
   }

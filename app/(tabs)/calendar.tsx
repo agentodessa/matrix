@@ -101,7 +101,7 @@ export default function CalendarScreen() {
       <ProGate feature="calendarFullView" featureLabel="Full Calendar View">
 
       {/* ── Toolbar ── */}
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
+      <View className="px-5 pt-3 pb-2">
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <Pressable onPress={prev} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
             <Text className="text-heading text-xs">‹</Text>
@@ -114,30 +114,58 @@ export default function CalendarScreen() {
           <Pressable onPress={next} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
             <Text className="text-heading text-xs">›</Text>
           </Pressable>
-          <Pressable onPress={goToday} style={{ borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }} className="bg-btn-surface border border-border active:opacity-70">
+          <Pressable onPress={goToday} className="bg-btn-surface rounded-md px-2.5 py-1 active:opacity-70">
             <Text className="font-body text-[11px] font-bold text-heading">Today</Text>
           </Pressable>
         </View>
+      </View>
 
-        {projects.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-1.5">
+      {/* ── Project Filter ── */}
+      {projects.length > 0 && (
+        <View className="px-5 pb-2">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
             <Pressable
-              className={selectedProject === null ? "rounded-full bg-slate px-2.5 py-0.5" : "rounded-full bg-btn-surface border border-border px-2.5 py-0.5 active:opacity-70"}
+              className={
+                selectedProject === null
+                  ? "rounded-full bg-slate px-4 py-1.5"
+                  : "rounded-full bg-btn-surface px-4 py-1.5 active:opacity-70"
+              }
               onPress={() => setSelectedProject(null)}
             >
-              <Text className={selectedProject === null ? "font-body text-[10px] font-bold text-white" : "font-body text-[10px] font-bold text-heading"}>All</Text>
+              <Text
+                className={
+                  selectedProject === null
+                    ? "font-body text-xs font-bold text-white"
+                    : "font-body text-xs font-bold text-heading"
+                }
+              >
+                All
+              </Text>
             </Pressable>
             {projects.map((p) => (
-              <Pressable key={p}
-                className={selectedProject === p ? "rounded-full bg-slate px-2.5 py-0.5" : "rounded-full bg-btn-surface border border-border px-2.5 py-0.5 active:opacity-70"}
+              <Pressable
+                key={p}
+                className={
+                  selectedProject === p
+                    ? "rounded-full bg-slate px-4 py-1.5"
+                    : "rounded-full bg-btn-surface px-4 py-1.5 active:opacity-70"
+                }
                 onPress={() => setSelectedProject(selectedProject === p ? null : p)}
               >
-                <Text className={selectedProject === p ? "font-body text-[10px] font-bold text-white" : "font-body text-[10px] font-bold text-heading"}>{p}</Text>
+                <Text
+                  className={
+                    selectedProject === p
+                      ? "font-body text-xs font-bold text-white"
+                      : "font-body text-xs font-bold text-heading"
+                  }
+                >
+                  {p}
+                </Text>
               </Pressable>
             ))}
           </ScrollView>
-        )}
-      </View>
+        </View>
+      )}
 
       {view === "month" ? (
         <MonthView
@@ -302,8 +330,8 @@ function MonthView({
         </View>
 
         {/* ── Selected day detail ── */}
-        <View className="px-5 pt-4">
-          <View className="border-t border-border pt-4">
+        <View className="px-5 pt-6">
+          <View className="bg-bg-tile rounded-lg p-5">
             <View className="flex-row items-center justify-between pb-3">
               <Text className="font-body text-xs font-bold text-heading">
                 {selectedLabel}

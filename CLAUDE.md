@@ -17,6 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npx expo prebuild --platform ios --clean` | Regenerate iOS native project + reinstall pods |
 | `cargo install tauri-cli` | Install Tauri CLI (prerequisite for tauri commands) |
 
+No linting or test commands — neither ESLint/Prettier nor a test framework are configured.
+
 ## Architecture
 
 **"The Executive"** — Eisenhower Matrix task manager for iOS (Expo) and macOS (Tauri).
@@ -25,30 +27,64 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **iOS**: Expo React Native (native build)
 - **macOS**: Tauri v2 wraps Expo's web export (`dist/`)
 - **Shared UI**: One React Native codebase, Expo builds both iOS and web
+- **Tab layout**: `NativeTabs` (liquid glass tab bar) on iOS, `WebSidebar` on web — switched in `app/(tabs)/_layout.tsx`
 
 ### Routing
 Expo Router with file-based routing. `app/` directory maps directly to screens:
-- `app/(tabs)/` — 4-tab layout using `NativeTabs` (native iOS liquid glass tab bar on iOS 26+)
+- `app/(tabs)/` — 5-tab layout: Focus, Tasks, Add, Calendar, Settings
 - `app/quadrant/[id].tsx` — dynamic route for quadrant detail
+- `app/auth/` — sign-in, sign-up, OAuth callback
+- `app/projects.tsx`, `app/paywall.tsx`, `app/profile.tsx` — standalone screens
 
-### State Management
-Global closure-based store (`src/lib/store.ts`) — NOT Redux/Context. `useTasks()` hook provides `tasks`, `addTask()`, `toggleTask()`, `deleteTask()`, `getTasksByQuadrant()`. Persisted to AsyncStorage (`@executive_tasks`).
+### Data Model
+Tasks have `urgency` (urgent/routine) × `importance` (high/casual) → mapped to 4 Eisenhower quadrants via `getQuadrant()` in `src/types/task.ts`.
+
+### State Management — Dual-Mode Stores
+Stores in `src/lib/` use a dual-mode pattern — **not** Redux/Context:
+- **Free users**: Local AsyncStorage with closure-based global state + listener pattern
+- **Pro users**: Supabase + React Query with optimistic updates
+
+`useTasks()` and `useProjects()` automatically switch based on `useProStatus()`. Both return the same API shape regardless of mode.
+
+React Query config in `src/lib/query-client.tsx`: 30s stale time, 1h GC, cache persisted to AsyncStorage (`@executive_query_cache`).
+
+### Auth & Real-time
+- `useAuth()` hook (`src/lib/auth-store.ts`) — Supabase auth with Google OAuth
+- `useRealtimeSync()` (`src/lib/realtime-sync.ts`) — Postgres changes subscription for tasks & projects (Pro only), debounced 500ms invalidation
+
+### Pro/Free Feature Gating
+- `src/lib/features.ts` — Pro-gated features: `calendarFullView`, `cloudSync`, `unlimitedProjects`
+- Free limit: 2 projects (`FREE_PROJECT_LIMIT`)
+- `ProGate` component wraps Pro-only UI with upgrade prompt
+- `useProStatus()` / `getProUserIdSync()` for checking Pro status
+- Payment via `src/lib/mock-payment.ts` — **TODO: replace with real Stripe/Apple Pay**
 
 ### Theming
 - Design tokens defined in `global.css` using OKLch color space with `@variant light/dark`
+- Runtime theme objects in `src/lib/theme.ts` using nativewind `vars()`, applied via `style` on root View
 - Theme persisted to AsyncStorage (`@executive_theme`)
 - `saveTheme()` / `useThemePersistence()` in `src/lib/theme-store.ts`
-- React Navigation `ThemeProvider` synced with Uniwind via `useUniwind()` in root layout
 - Quadrant colors: Q1 red `#ac0b18`, Q2 blue `#0051d5`, Q3 amber `#874200`, Q4 gray `#737686`
+- Fonts: **Manrope** (display/headings), **Inter** (body) — loaded at runtime via `@expo-google-fonts`
 
 ### Liquid Glass
 `GlassCard` component wraps `expo-glass-effect`'s `GlassView` on iOS 26+, falls back to plain `View` with background on older versions. Detection cached via `isGlassAvailable()`.
 
-### Data Model
-Tasks have `urgency` (urgent/routine) x `importance` (high/casual) → mapped to 4 Eisenhower quadrants via `getQuadrant()`.
-
 ### Database
-`@neondatabase/serverless` is installed but not yet connected. Currently all data is local via AsyncStorage. When wiring up Neon, use the SDK directly (no ORM) — this was an explicit project decision.
+Supabase is the primary backend. Migrations in `supabase/migrations/` define: `subscriptions`, `tasks`, `projects` tables with RLS and realtime enabled. `@neondatabase/serverless` is installed but not yet connected — when wiring up Neon, use the SDK directly (no ORM).
+
+---
+
+## Design Philosophy
+
+See `docs/best-practices/DESIGN.md` for full spec. Key rules:
+
+- **"No-Line" Rule**: Borders are prohibited for sectioning — use background color shifts instead
+- **Surface hierarchy**: Base → container-low → container-high → bright (stacked material metaphor)
+- **No pure white in dark mode** — use `on-surface` (#e5e2e1)
+- **No divider lines between list items** — use spacing (2rem gap)
+- **Shadows must be subtle** — tinted with 4% on-surface, never pure black
+- **Ghost borders only** — if a border is required for accessibility, use `outline-variant` at 15% opacity
 
 ---
 

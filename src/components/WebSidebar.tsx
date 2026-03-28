@@ -35,13 +35,11 @@ export function WebSidebar({ urgentCount }: { urgentCount: number }) {
       <View
         style={{
           width: 220,
-          borderRightWidth: 1,
-          borderRightColor: "rgba(150,150,150,0.15)",
           paddingTop: 24,
           paddingBottom: 24,
           justifyContent: "space-between",
         }}
-        className="bg-header-bg"
+        className="bg-bg-elevated"
       >
         <View>
           {/* Logo */}

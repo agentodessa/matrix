@@ -124,9 +124,9 @@ export default function SignInScreen() {
 
         {/* Divider */}
         <View className="flex-row items-center gap-3">
-          <View className="flex-1 h-px bg-border" />
+          <View className="flex-1 h-px bg-border/15" />
           <Text className="font-body text-xs text-meta">or</Text>
-          <View className="flex-1 h-px bg-border" />
+          <View className="flex-1 h-px bg-border/15" />
         </View>
 
         {/* Google */}

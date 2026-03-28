@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(xcodebuild -version)",
+      "Bash(xcodebuild -showsdks)",
+      "Bash(xcodebuild:*)",
+      "Bash(find /Users/test/repos/pet/matrix -maxdepth 3 -type f \\\\\\(-name *.cursorrules -o -name rules.md -o -name README.md \\\\\\) -o -path */.cursor/rules*)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js|jsx\\)$\")",
+      "Bash(find /Users/test/repos/pet/matrix -name *.test.* -o -name *.spec.* -o -name jest.config.* -o -name vitest.config.*)",
+      "Bash(find /Users/test/repos/pet/matrix -maxdepth 3 -not -path */node_modules/* -not -path */.expo/* -not -path */ios/* -not -path */dist/* -not -path */.git/* -not -path */src-tauri/* -type d)",
+      "Bash(wc:*)",
+      "Bash(for file:*)",
+      "Bash(do)",
+      "Bash(echo \"=== $file ===\")",
+      "Read(//Users/test/repos/pet/matrix/**)",
+      "Bash(/Users/test/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/scripts/start-server.sh --project-dir /Users/test/repos/pet/matrix 2>&1)",
+      "Bash(bash /Users/test/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/start-server.sh --project-dir /Users/test/repos/pet/matrix 2>&1)",
+      "Bash(npm search:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
