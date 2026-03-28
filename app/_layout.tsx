@@ -1,3 +1,4 @@
+import "../src/lib/i18n";
 import "../global.css";
 import { ActivityIndicator, View, useColorScheme } from "react-native";
 import { Stack } from "expo-router";
