@@ -115,6 +115,11 @@ export const useTeamMutations = () => {
         .from("team_members")
         .insert({ team_id: team.id, user_id: user!.id, role: "owner" });
       if (memberError) throw memberError;
+      // Create team workspace
+      const { error: wsErr } = await supabase
+        .from("workspaces")
+        .insert({ type: "team", team_id: team.id });
+      if (wsErr) throw wsErr;
       return team as Team;
     },
     onSuccess: () => {
