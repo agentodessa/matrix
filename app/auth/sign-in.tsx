@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Header } from "../../src/components/Header";
 import { GoogleSignInButton } from "../../src/components/GoogleSignInButton";
 import { useAuth } from "../../src/lib/auth-store";
+import { useTranslation } from "react-i18next";
 
 interface FormData {
   email: string;
@@ -15,6 +16,7 @@ interface FormData {
 export default function SignInScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
   const [loading, setLoading] = useState(false);
@@ -37,13 +39,13 @@ export default function SignInScreen() {
     if (result.success) {
       router.back();
     } else {
-      Alert.alert("Sign In Failed", result.error ?? "Something went wrong");
+      Alert.alert(t("Sign In Failed"), result.error ?? t("Something went wrong"));
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header title="Sign In" showBack />
+      <Header title={t("Sign In")} showBack />
       <ScrollView
         contentContainerClassName="px-7 pt-6 pb-40 gap-5"
         showsVerticalScrollIndicator={false}
@@ -52,7 +54,7 @@ export default function SignInScreen() {
         {/* Email */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Email
+            {t("Email")}
           </Text>
           <Controller
             control={control}
@@ -64,7 +66,7 @@ export default function SignInScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 className="font-body text-lg font-bold text-heading border-b border-border pb-3"
-                placeholder="you@email.com"
+                placeholder={t("you@email.com")}
                 placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
@@ -80,7 +82,7 @@ export default function SignInScreen() {
         {/* Password */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Password
+            {t("Password")}
           </Text>
           <Controller
             control={control}
@@ -89,7 +91,7 @@ export default function SignInScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 className="font-body text-lg font-bold text-heading border-b border-border pb-3"
-                placeholder="Your password"
+                placeholder={t("Your password")}
                 placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
@@ -118,14 +120,14 @@ export default function SignInScreen() {
                 : "font-body text-base font-bold text-meta"
             }
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t("Signing in...") : t("Sign In")}
           </Text>
         </Pressable>
 
         {/* Divider */}
         <View className="flex-row items-center gap-3">
           <View className="flex-1 h-px bg-border/15" />
-          <Text className="font-body text-xs text-meta">or</Text>
+          <Text className="font-body text-xs text-meta">{t("or")}</Text>
           <View className="flex-1 h-px bg-border/15" />
         </View>
 
@@ -138,8 +140,8 @@ export default function SignInScreen() {
           onPress={() => router.replace("/auth/sign-up")}
         >
           <Text className="font-body text-sm text-meta">
-            Don't have an account?{" "}
-            <Text className="font-bold text-heading">Create One</Text>
+            {t("Don't have an account?")}{" "}
+            <Text className="font-bold text-heading">{t("Create One")}</Text>
           </Text>
         </Pressable>
       </ScrollView>

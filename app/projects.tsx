@@ -7,9 +7,11 @@ import { useProjects } from "../src/lib/projects-store";
 import { useTasks } from "../src/lib/store";
 import { useSubscription } from "../src/lib/subscription-store";
 import { canCreateProject, FREE_PROJECT_LIMIT } from "../src/lib/features";
+import { useTranslation } from "react-i18next";
 
 export default function ProjectsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
   const { projects, addProject, removeProject } = useProjects();
@@ -30,11 +32,11 @@ export default function ProjectsScreen() {
     if (!trimmed || isDuplicate) return;
     if (atLimit) {
       Alert.alert(
-        "Project Limit",
-        `Free plan allows up to ${FREE_PROJECT_LIMIT} projects. Upgrade to Pro for unlimited projects.`,
+        t("Project Limit"),
+        t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", { count: FREE_PROJECT_LIMIT }),
         [
-          { text: "Cancel", style: "cancel" },
-          { text: "Upgrade", onPress: () => router.push("/paywall") },
+          { text: t("Cancel"), style: "cancel" },
+          { text: t("Upgrade"), onPress: () => router.push("/paywall") },
         ]
       );
       return;
@@ -47,18 +49,18 @@ export default function ProjectsScreen() {
     const count = taskCountFor(name);
     const message =
       count > 0
-        ? `"${name}" has ${count} active task${count > 1 ? "s" : ""}. Tasks won't be deleted, but they'll lose their project label.`
-        : `Delete "${name}"?`;
+        ? t('"{{name}}" has {{count}} active task. Tasks won\'t be deleted, but they\'ll lose their project label.', { name, count })
+        : t('Delete "{{name}}"?', { name });
 
-    Alert.alert("Remove Project", message, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Remove", style: "destructive", onPress: () => removeProject(name) },
+    Alert.alert(t("Remove Project"), message, [
+      { text: t("Cancel"), style: "cancel" },
+      { text: t("Remove"), style: "destructive", onPress: () => removeProject(name) },
     ]);
   };
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header title="Projects" showBack />
+      <Header title={t("Projects")} showBack />
       <ScrollView
         contentContainerClassName="px-7 pt-6 pb-40 gap-6"
         showsVerticalScrollIndicator={false}
@@ -68,7 +70,7 @@ export default function ProjectsScreen() {
         <View className="gap-2">
           <View className="flex-row items-center justify-between">
             <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-              New Project
+              {t("New Project")}
             </Text>
             {plan === "free" && (
               <Text className="font-body text-[10px] font-bold text-meta">
@@ -84,15 +86,15 @@ export default function ProjectsScreen() {
               <View className="flex-row items-center gap-2">
                 <Text style={{ fontSize: 16 }}>🔒</Text>
                 <Text className="font-body text-sm font-bold text-heading">
-                  Project limit reached
+                  {t("Project limit reached")}
                 </Text>
               </View>
               <Text className="font-body text-xs text-meta leading-4">
-                Free plan allows {FREE_PROJECT_LIMIT} projects. Upgrade to Pro for unlimited.
+                {t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", { count: FREE_PROJECT_LIMIT })}
               </Text>
               <View className="bg-success/15 self-start rounded-full px-3 py-1 mt-1">
                 <Text className="font-body text-xs font-bold text-success">
-                  Upgrade to Pro
+                  {t("Upgrade to Pro")}
                 </Text>
               </View>
             </Pressable>
@@ -101,7 +103,7 @@ export default function ProjectsScreen() {
               <View className="flex-row items-center gap-3">
                 <TextInput
                   className="flex-1 font-body text-lg font-bold text-heading border-b border-border pb-3"
-                  placeholder="Project name..."
+                  placeholder={t("Project name...")}
                   placeholderTextColor={placeholderColor}
                   value={newName}
                   onChangeText={setNewName}
@@ -124,13 +126,13 @@ export default function ProjectsScreen() {
                         : "font-body text-sm font-bold text-meta"
                     }
                   >
-                    Create
+                    {t("Create")}
                   </Text>
                 </Pressable>
               </View>
               {isDuplicate && (
                 <Text className="font-body text-xs text-urgent">
-                  A project named "{trimmed}" already exists
+                  {t('A project named "{{name}}" already exists', { name: trimmed })}
                 </Text>
               )}
             </View>
@@ -140,15 +142,15 @@ export default function ProjectsScreen() {
         {/* ── List ── */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Your Projects
+            {t("Your Projects")}
           </Text>
           {projects.length === 0 ? (
             <View className="bg-bg-card rounded-lg py-10 items-center gap-2">
               <Text className="font-display text-base font-bold text-heading">
-                No projects yet
+                {t("No projects yet")}
               </Text>
               <Text className="font-body text-sm text-meta">
-                Create your first project above.
+                {t("Create your first project above.")}
               </Text>
             </View>
           ) : (
@@ -165,7 +167,7 @@ export default function ProjectsScreen() {
                         {project}
                       </Text>
                       <Text className="font-body text-xs text-meta">
-                        {count} active task{count !== 1 ? "s" : ""}
+                        {t("{{count}} active task", { count })}
                       </Text>
                     </View>
                     <Pressable
@@ -173,7 +175,7 @@ export default function ProjectsScreen() {
                       onPress={() => handleDelete(project)}
                     >
                       <Text className="font-body text-xs font-semibold text-urgent">
-                        Remove
+                        {t("Remove")}
                       </Text>
                     </Pressable>
                   </View>

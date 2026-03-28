@@ -6,9 +6,11 @@ import { GoogleSignInButton } from "../src/components/GoogleSignInButton";
 import { useTasks } from "../src/lib/store";
 import { useAuth } from "../src/lib/auth-store";
 import { useSubscription } from "../src/lib/subscription-store";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tasks } = useTasks();
   const { user, isAuthenticated, signOut } = useAuth();
   const { plan, isPro } = useSubscription();
@@ -18,7 +20,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header title="Profile" showBack />
+      <Header title={t("Profile")} showBack />
       <ScrollView
         contentContainerClassName="px-7 pt-8 pb-40 gap-8"
         showsVerticalScrollIndicator={false}
@@ -58,7 +60,7 @@ export default function ProfileScreen() {
                         : "font-body text-xs font-bold text-meta"
                     }
                   >
-                    {isPro ? "Pro Plan" : "Free Plan"}
+                    {isPro ? t("Pro Plan") : t("Free Plan")}
                   </Text>
                 </View>
               </View>
@@ -70,10 +72,10 @@ export default function ProfileScreen() {
               </View>
               <View className="items-center gap-1">
                 <Text className="font-display text-xl font-extrabold text-heading">
-                  Guest User
+                  {t("Guest User")}
                 </Text>
                 <Text className="font-body text-sm text-meta">
-                  Sign up to sync your data across devices
+                  {t("Sign up to sync your data across devices")}
                 </Text>
               </View>
             </>
@@ -87,7 +89,7 @@ export default function ProfileScreen() {
               {totalActive}
             </Text>
             <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
-              Active
+              {t("Active")}
             </Text>
           </View>
           <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
@@ -95,7 +97,7 @@ export default function ProfileScreen() {
               {totalCompleted}
             </Text>
             <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
-              Completed
+              {t("Completed")}
             </Text>
           </View>
           <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
@@ -103,7 +105,7 @@ export default function ProfileScreen() {
               {tasks.length}
             </Text>
             <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
-              Total
+              {t("Total")}
             </Text>
           </View>
         </View>
@@ -117,17 +119,17 @@ export default function ProfileScreen() {
                 onPress={() => router.push("/paywall")}
               >
                 <Text className="font-body text-base font-extrabold text-bg tracking-wide">
-                  Upgrade to Pro — $4.99/mo
+                  {t("Upgrade to Pro — $4.99/mo")}
                 </Text>
               </Pressable>
             )}
             {isPro && (
               <View className="bg-bg-card rounded-xl p-5 gap-2">
                 <Text className="font-body text-sm font-bold text-heading">
-                  Subscription
+                  {t("Subscription")}
                 </Text>
                 <Text className="font-body text-sm text-body leading-5">
-                  You're on the Pro plan. All features are unlocked.
+                  {t("You're on the Pro plan. All features are unlocked.")}
                 </Text>
               </View>
             )}
@@ -139,7 +141,7 @@ export default function ProfileScreen() {
               }}
             >
               <Text className="font-body text-base font-bold text-urgent">
-                Sign Out
+                {t("Sign Out")}
               </Text>
             </Pressable>
           </View>
@@ -151,7 +153,7 @@ export default function ProfileScreen() {
               onPress={() => router.push("/auth/sign-up")}
             >
               <Text className="font-body text-base font-extrabold text-bg tracking-wide">
-                Create Account
+                {t("Create Account")}
               </Text>
             </Pressable>
             <Pressable
@@ -159,7 +161,7 @@ export default function ProfileScreen() {
               onPress={() => router.push("/auth/sign-in")}
             >
               <Text className="font-body text-base font-bold text-heading">
-                Sign In
+                {t("Sign In")}
               </Text>
             </Pressable>
           </View>
@@ -169,25 +171,25 @@ export default function ProfileScreen() {
         {!isAuthenticated && (
           <View className="bg-bg-card rounded-xl p-5 gap-2">
             <Text className="font-body text-sm font-bold text-heading">
-              Why create an account?
+              {t("Why create an account?")}
             </Text>
             <View className="gap-1.5">
               <Text className="font-body text-sm text-body leading-5">
-                • Sync tasks across all your devices
+                • {t("Sync tasks across all your devices")}
               </Text>
               <Text className="font-body text-sm text-body leading-5">
-                • Back up your data to the cloud
+                • {t("Back up your data to the cloud")}
               </Text>
               <Text className="font-body text-sm text-body leading-5">
-                • Unlock Pro features like full calendar
+                • {t("Unlock Pro features like full calendar")}
               </Text>
             </View>
           </View>
         )}
 
         <Text className="font-body text-xs text-meta text-center leading-4">
-          Your tasks are stored locally on this device.
-          {isAuthenticated && isPro ? "\nPro users get cloud sync." : ""}
+          {t("Your tasks are stored locally on this device.")}
+          {isAuthenticated && isPro ? "\n" + t("Pro users get cloud sync.") : ""}
         </Text>
       </ScrollView>
     </SafeAreaView>

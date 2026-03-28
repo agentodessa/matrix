@@ -6,10 +6,12 @@ import { Header } from "../../src/components/Header";
 import { TaskItem } from "../../src/components/TaskItem";
 import { useTasks } from "../../src/lib/store";
 import { QUADRANTS, Quadrant } from "../../src/types/task";
+import { useTranslation } from "react-i18next";
 
 export default function QuadrantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const quadrantId = parseInt(id, 10) as Quadrant;
   const quadrant = QUADRANTS[quadrantId];
   const { getTasksByQuadrant, toggleTask } = useTasks();
@@ -41,7 +43,7 @@ export default function QuadrantScreen() {
           <View className="flex-row items-center gap-3">
             <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
             <Text className="font-body text-[10px] font-bold text-label tracking-[3px] uppercase">
-              {quadrant.label}
+              {t(quadrant.label)}
             </Text>
           </View>
 
@@ -55,19 +57,19 @@ export default function QuadrantScreen() {
           </Text>
 
           <Text className="font-body text-base text-body leading-7 pt-2 max-w-[520px]">
-            {quadrant.description}
+            {t(quadrant.description)}
           </Text>
 
           {/* Stat Row */}
           <View className="flex-row gap-3 pt-3">
             <View className={`${cls.badgeBg} rounded-full px-3 py-1.5`}>
               <Text className={`font-body text-[10px] font-bold ${cls.badgeText}`}>
-                {activeTasks.length} active
+                {activeTasks.length} {t("active")}
               </Text>
             </View>
             <View className="bg-btn-surface rounded-full px-3 py-1.5">
               <Text className="font-body text-[10px] font-bold text-meta">
-                {completedTasks.length} done
+                {completedTasks.length} {t("done")}
               </Text>
             </View>
           </View>
@@ -91,7 +93,7 @@ export default function QuadrantScreen() {
                     : "font-body text-xs font-bold text-label"
                 }
               >
-                Active ({activeTasks.length})
+                {t("Active")} ({activeTasks.length})
               </Text>
             </Pressable>
             <Pressable
@@ -109,7 +111,7 @@ export default function QuadrantScreen() {
                     : "font-body text-xs font-bold text-label"
                 }
               >
-                Completed ({completedTasks.length})
+                {t("Completed")} ({completedTasks.length})
               </Text>
             </Pressable>
           </View>
@@ -123,7 +125,7 @@ export default function QuadrantScreen() {
               onPress={() => router.push("/(tabs)/add")}
             >
               <Text className="font-body text-sm font-bold text-white">
-                + New Task
+                {t("+ New Task")}
               </Text>
             </Pressable>
           )}
@@ -132,13 +134,13 @@ export default function QuadrantScreen() {
             <View className="items-center py-12 gap-2">
               <Text className="font-display text-base font-bold text-heading">
                 {activeTab === "active"
-                  ? "No active tasks"
-                  : "Nothing completed yet"}
+                  ? t("No active tasks")
+                  : t("Nothing completed yet")}
               </Text>
               <Text className="font-body text-sm text-meta">
                 {activeTab === "active"
-                  ? "Everything's under control."
-                  : "Time to check something off."}
+                  ? t("Everything's under control.")
+                  : t("Time to check something off.")}
               </Text>
             </View>
           ) : (
@@ -152,7 +154,7 @@ export default function QuadrantScreen() {
         <View className="px-7 pt-10 pb-6">
           <View className="bg-tile rounded-lg p-8 gap-4">
             <Text className="font-body text-xs font-bold text-label uppercase tracking-widest">
-              Velocity Insight
+              {t("Velocity Insight")}
             </Text>
             <View className="flex-row items-center gap-8">
               <View className="items-center">
@@ -160,7 +162,7 @@ export default function QuadrantScreen() {
                   42m
                 </Text>
                 <Text className="font-body text-[9px] font-bold text-meta tracking-[1.5px] uppercase">
-                  Avg. Resolution
+                  {t("Avg. Resolution")}
                 </Text>
               </View>
               <View className="items-center">
@@ -168,7 +170,7 @@ export default function QuadrantScreen() {
                   {tasks.length}
                 </Text>
                 <Text className="font-body text-[9px] font-bold text-meta tracking-[1.5px] uppercase">
-                  Total Tasks
+                  {t("Total Tasks")}
                 </Text>
               </View>
               <View className="items-center">
@@ -176,7 +178,7 @@ export default function QuadrantScreen() {
                   {completionRate}%
                 </Text>
                 <Text className="font-body text-[9px] font-bold text-meta tracking-[1.5px] uppercase">
-                  Complete
+                  {t("Complete")}
                 </Text>
               </View>
             </View>
@@ -197,18 +199,17 @@ export default function QuadrantScreen() {
           <View className="px-7 pb-8">
             <View className="bg-dark rounded-lg p-8 gap-3">
               <Text className="font-body text-[10px] font-bold text-white/60 tracking-[2px] uppercase">
-                Deep Work
+                {t("Deep Work")}
               </Text>
               <Text className="font-display text-xl font-extrabold text-white leading-7">
-                Focus Shroud
+                {t("Focus Shroud")}
               </Text>
               <Text className="font-body text-sm text-white/80 leading-6">
-                Eliminate distractions. Only the current urgent task remains
-                visible.
+                {t("Eliminate distractions. Only the current urgent task remains visible.")}
               </Text>
               <Pressable className="self-start mt-2 bg-white/20 rounded-lg px-5 py-3 active:opacity-70">
                 <Text className="font-body text-sm font-bold text-white">
-                  Enter Focus Mode →
+                  {t("Enter Focus Mode →")}
                 </Text>
               </Pressable>
             </View>

@@ -5,6 +5,8 @@ import { Header } from "../../src/components/Header";
 import { saveTheme } from "../../src/lib/theme-store";
 import { useAuth } from "../../src/lib/auth-store";
 import { useSubscription } from "../../src/lib/subscription-store";
+import { useTranslation } from "react-i18next";
+import { setLanguage } from "../../src/lib/i18n";
 
 export default function SystemScreen() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function SystemScreen() {
   const isDark = colorScheme === "dark";
   const { user, isAuthenticated } = useAuth();
   const { isPro } = useSubscription();
+  const { t, i18n } = useTranslation();
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
@@ -23,7 +26,7 @@ export default function SystemScreen() {
         {/* ── Account Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            Account
+            {t("Account")}
           </Text>
           <Pressable
             className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
@@ -32,10 +35,10 @@ export default function SystemScreen() {
             <View className="flex-row items-center justify-between px-5 py-4">
               <View className="flex-1 gap-1">
                 <Text className="font-body text-base font-bold text-heading">
-                  {isAuthenticated ? user?.displayName : "Guest User"}
+                  {isAuthenticated ? user?.displayName : t("Guest User")}
                 </Text>
                 <Text className="font-body text-sm text-body">
-                  {isAuthenticated ? user?.email : "Tap to sign up or sign in"}
+                  {isAuthenticated ? user?.email : t("Tap to sign up or sign in")}
                 </Text>
               </View>
               <View className="flex-row items-center gap-2">
@@ -54,7 +57,7 @@ export default function SystemScreen() {
                           : "font-body text-[10px] font-bold text-meta"
                       }
                     >
-                      {isPro ? "Pro" : "Free"}
+                      {isPro ? t("Pro") : t("Free")}
                     </Text>
                   </View>
                 )}
@@ -67,7 +70,7 @@ export default function SystemScreen() {
         {/* ── Subscription Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            Subscription
+            {t("Subscription")}
           </Text>
           <Pressable
             className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
@@ -76,12 +79,12 @@ export default function SystemScreen() {
             <View className="flex-row items-center justify-between px-5 py-4">
               <View className="flex-1 gap-1">
                 <Text className="font-body text-base font-bold text-heading">
-                  {isPro ? "Pro Plan" : "Upgrade to Pro"}
+                  {isPro ? t("Pro Plan") : t("Upgrade to Pro")}
                 </Text>
                 <Text className="font-body text-sm text-body">
                   {isPro
-                    ? "All features unlocked"
-                    : "Calendar, cloud sync, and more — $4.99/mo"}
+                    ? t("All features unlocked")
+                    : t("Calendar, cloud sync, and more — $4.99/mo")}
                 </Text>
               </View>
               {!isPro && (
@@ -98,16 +101,16 @@ export default function SystemScreen() {
         {/* ── Appearance Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            Appearance
+            {t("Appearance")}
           </Text>
           <View className="bg-bg-card rounded-lg overflow-hidden">
             <View className="flex-row items-center justify-between px-5 py-4">
               <View className="flex-1 gap-1">
                 <Text className="font-body text-base font-bold text-heading">
-                  Dark Mode
+                  {t("Dark Mode")}
                 </Text>
                 <Text className="font-body text-sm text-body">
-                  Optimized for low-light environments
+                  {t("Optimized for low-light environments")}
                 </Text>
               </View>
               <Switch
@@ -117,13 +120,46 @@ export default function SystemScreen() {
                 thumbColor="#ffffff"
               />
             </View>
+            <View className="flex-row items-center justify-between px-5 py-4">
+              <View className="flex-1 gap-1">
+                <Text className="font-body text-base font-bold text-heading">
+                  {t("Language")}
+                </Text>
+                <Text className="font-body text-sm text-body">
+                  {({ en: "English", es: "Español", fr: "Français", ru: "Русский" } as Record<string, string>)[i18n.language] ?? "English"}
+                </Text>
+              </View>
+              <View className="flex-row gap-2">
+                {(["en", "es", "fr", "ru"] as const).map((lng) => (
+                  <Pressable
+                    key={lng}
+                    className={
+                      i18n.language === lng
+                        ? "rounded-full bg-slate px-3 py-1.5"
+                        : "rounded-full bg-btn-surface border border-border px-3 py-1.5 active:opacity-70"
+                    }
+                    onPress={() => setLanguage(lng)}
+                  >
+                    <Text
+                      className={
+                        i18n.language === lng
+                          ? "font-body text-xs font-bold text-white"
+                          : "font-body text-xs font-bold text-heading"
+                      }
+                    >
+                      {lng.toUpperCase()}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
           </View>
         </View>
 
         {/* ── Projects Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            Organization
+            {t("Organization")}
           </Text>
           <Pressable
             className="bg-bg-card rounded-lg overflow-hidden active:opacity-70"
@@ -132,10 +168,10 @@ export default function SystemScreen() {
             <View className="flex-row items-center justify-between px-5 py-4">
               <View className="flex-1 gap-1">
                 <Text className="font-body text-base font-bold text-heading">
-                  Projects
+                  {t("Projects")}
                 </Text>
                 <Text className="font-body text-sm text-body">
-                  Create and manage your projects
+                  {t("Create and manage your projects")}
                 </Text>
               </View>
               <Text className="text-meta text-base">→</Text>
@@ -146,7 +182,7 @@ export default function SystemScreen() {
         {/* ── Data Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            Data
+            {t("Data")}
           </Text>
           <View className="bg-bg-card rounded-lg overflow-hidden">
             <Pressable
@@ -158,14 +194,14 @@ export default function SystemScreen() {
               <View className="flex-row items-center justify-between px-5 py-4">
                 <View className="flex-1 gap-1">
                   <Text className="font-body text-base font-bold text-heading">
-                    Cloud Sync
+                    {t("Cloud Sync")}
                   </Text>
                   <Text className="font-body text-sm text-body">
                     {isPro && isAuthenticated
-                      ? "Connected"
+                      ? t("Connected")
                       : isPro
-                      ? "Sign in to enable"
-                      : "Pro feature"}
+                      ? t("Sign in to enable")
+                      : t("Pro feature")}
                   </Text>
                 </View>
                 {!isPro && (
@@ -177,10 +213,10 @@ export default function SystemScreen() {
             </Pressable>
             <View className="px-5 pt-5 pb-4 gap-1">
               <Text className="font-body text-base font-bold text-heading">
-                Export Data
+                {t("Export Data")}
               </Text>
               <Text className="font-body text-sm text-body">
-                Download your tasks as JSON
+                {t("Download your tasks as JSON")}
               </Text>
             </View>
           </View>
@@ -189,19 +225,19 @@ export default function SystemScreen() {
         {/* ── About Section ── */}
         <View className="gap-3">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            About
+            {t("About")}
           </Text>
           <View className="bg-bg-card rounded-lg px-5 py-4">
             <View className="flex-row items-center justify-between">
               <Text className="font-display text-base font-extrabold text-heading tracking-tight">
-                The Executive
+                {t("The Executive")}
               </Text>
               <Text className="font-body text-[10px] font-bold text-meta">
                 v1.0.0
               </Text>
             </View>
             <Text className="font-body text-xs text-meta pt-1">
-              Eisenhower Matrix task manager for iOS and macOS
+              {t("Eisenhower Matrix task manager for iOS and macOS")}
             </Text>
           </View>
         </View>
