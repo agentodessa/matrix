@@ -10,7 +10,10 @@
     "tauri": "cargo tauri",
     "tauri:dev": "cargo tauri dev",
     "tauri:build": "cargo tauri build",
-    "i18n:extract": "i18next-cli extract"
+    "i18n:extract": "i18next-cli extract",
+    "lint": "oxlint --type-aware",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check ."
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
