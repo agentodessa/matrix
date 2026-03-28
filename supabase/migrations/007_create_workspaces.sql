@@ -82,6 +82,12 @@ update public.tasks set
 alter table public.tasks alter column workspace_id set not null;
 alter table public.tasks alter column created_by set not null;
 
+-- Drop old RLS policies that reference user_id (must happen before dropping column)
+drop policy if exists "Users can read own tasks" on public.tasks;
+drop policy if exists "Users can insert own tasks" on public.tasks;
+drop policy if exists "Users can update own tasks" on public.tasks;
+drop policy if exists "Users can delete own tasks" on public.tasks;
+
 -- Drop old primary key, create new one
 alter table public.tasks drop constraint tasks_pkey;
 alter table public.tasks add primary key (id, workspace_id);
@@ -105,6 +111,11 @@ update public.projects set
 alter table public.projects alter column workspace_id set not null;
 alter table public.projects alter column created_by set not null;
 
+-- Drop old RLS policies that reference user_id (must happen before dropping column)
+drop policy if exists "Users can read own projects" on public.projects;
+drop policy if exists "Users can insert own projects" on public.projects;
+drop policy if exists "Users can delete own projects" on public.projects;
+
 -- Drop old constraints
 alter table public.projects drop constraint if exists projects_user_id_name_key;
 
@@ -115,13 +126,8 @@ alter table public.projects add constraint projects_workspace_name_key unique (w
 alter table public.projects drop column user_id;
 
 -- ============================================================
--- 6. Replace RLS policies on tasks
+-- 6. Create new RLS policies on tasks
 -- ============================================================
-
-drop policy if exists "Users can read own tasks" on public.tasks;
-drop policy if exists "Users can insert own tasks" on public.tasks;
-drop policy if exists "Users can update own tasks" on public.tasks;
-drop policy if exists "Users can delete own tasks" on public.tasks;
 
 create policy "Workspace members can read tasks"
   on public.tasks for select using (public.is_workspace_member(workspace_id));
@@ -133,12 +139,8 @@ create policy "Workspace members can delete tasks"
   on public.tasks for delete using (public.is_workspace_member(workspace_id));
 
 -- ============================================================
--- 7. Replace RLS policies on projects
+-- 7. Create new RLS policies on projects
 -- ============================================================
-
-drop policy if exists "Users can read own projects" on public.projects;
-drop policy if exists "Users can insert own projects" on public.projects;
-drop policy if exists "Users can delete own projects" on public.projects;
 
 create policy "Workspace members can read projects"
   on public.projects for select using (public.is_workspace_member(workspace_id));

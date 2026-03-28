@@ -9,15 +9,6 @@ create table if not exists public.teams (
 
 alter table public.teams enable row level security;
 
--- Members can view their teams; any authenticated user can look up a team by invite_code (for join flow)
-create policy "Members can view their teams"
-  on public.teams for select
-  using (exists (
-    select 1 from public.team_members
-    where team_members.team_id = teams.id
-    and team_members.user_id = auth.uid()
-  ));
-
 create policy "Authenticated users can lookup team by invite code"
   on public.teams for select
   using (auth.uid() is not null);
@@ -46,6 +37,15 @@ create table if not exists public.team_members (
 
 alter table public.team_members enable row level security;
 
+-- Deferred: teams SELECT policy that references team_members
+create policy "Members can view their teams"
+  on public.teams for select
+  using (exists (
+    select 1 from public.team_members
+    where team_members.team_id = teams.id
+    and team_members.user_id = auth.uid()
+  ));
+
 create policy "Members can view team members"
   on public.team_members for select
   using (exists (
@@ -56,12 +56,21 @@ create policy "Members can view team members"
 
 create policy "Owner or admin can add members"
   on public.team_members for insert
-  with check (exists (
-    select 1 from public.team_members as my
-    where my.team_id = team_members.team_id
-    and my.user_id = auth.uid()
-    and my.role in ('owner', 'admin')
-  ));
+  with check (
+    -- Team owner can always add (needed for initial owner insert)
+    exists (
+      select 1 from public.teams
+      where teams.id = team_members.team_id
+      and teams.owner_id = auth.uid()
+    )
+    -- Existing owner/admin can add members
+    or exists (
+      select 1 from public.team_members as my
+      where my.team_id = team_members.team_id
+      and my.user_id = auth.uid()
+      and my.role in ('owner', 'admin')
+    )
+  );
 
 create policy "Owner can update member roles"
   on public.team_members for update
