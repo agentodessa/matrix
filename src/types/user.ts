@@ -1,4 +1,4 @@
-export type Plan = "free" | "pro";
+export type Plan = "free" | "pro" | "pro_team";
 export type BillingCycle = "monthly" | "annual";
 export type SubscriptionStatus = "active" | "expired" | "cancelled";
 
@@ -16,9 +16,12 @@ export interface Subscription {
   startDate: string;
   expiresAt: string;
   status: SubscriptionStatus;
+  seatCount: number;
+  seatPrice: number;
 }
 
 export const PRICING = {
   monthly: 4.99,
-  annual: 39.99, // ~$3.33/mo — save 33%
+  annual: 39.99,
+  seat: 2.99,
 } as const;
