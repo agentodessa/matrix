@@ -1,9 +1,11 @@
 import { Platform } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useTasks } from "../../src/lib/store";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { WebSidebar } from "../../src/components/WebSidebar";
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   const { getTasksByQuadrant } = useTasks();
   const urgentCount = getTasksByQuadrant(1).filter(
     (t) => t.status === "active"
@@ -19,7 +21,7 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon
           sf={{ default: "scope", selected: "scope" }}
         />
-        <NativeTabs.Trigger.Label>Focus</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Focus")}</NativeTabs.Trigger.Label>
         {urgentCount > 0 && (
           <NativeTabs.Trigger.Badge>{String(urgentCount)}</NativeTabs.Trigger.Badge>
         )}
@@ -29,7 +31,7 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon
           sf={{ default: "list.bullet", selected: "list.bullet" }}
         />
-        <NativeTabs.Trigger.Label>Tasks</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Tasks")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="add">
@@ -37,21 +39,21 @@ export default function TabLayout() {
           sf={{ default: "plus.circle.fill", selected: "plus.circle.fill" }}
           selectedColor="#006d4a"
         />
-        <NativeTabs.Trigger.Label>Add</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Add")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="calendar">
         <NativeTabs.Trigger.Icon
           sf={{ default: "calendar", selected: "calendar" }}
         />
-        <NativeTabs.Trigger.Label>Calendar</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Calendar")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="system">
         <NativeTabs.Trigger.Icon
           sf={{ default: "gearshape", selected: "gearshape.fill" }}
         />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t("Settings")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

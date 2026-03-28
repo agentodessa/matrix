@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, Platform, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { Header } from "../../src/components/Header";
@@ -59,6 +60,7 @@ function hasTasksOnDate(tasks: Task[], date: Date) {
 /* ── Main ── */
 
 export default function CalendarScreen() {
+  const { t } = useTranslation();
   const { tasks, toggleTask } = useTasks();
   const { projects } = useProjects();
   const today = getToday();
@@ -108,14 +110,14 @@ export default function CalendarScreen() {
           </Pressable>
           <Pressable onPress={() => setView(view === "month" ? "year" : "month")} className="active:opacity-70">
             <Text className="font-display text-base font-bold text-heading" style={{ minWidth: 150, textAlign: "center" }}>
-              {view === "month" ? `${MONTH_NAMES[currentMonth]} ${currentYear}` : `${currentYear}`}
+              {view === "month" ? `${t(MONTH_NAMES[currentMonth])} ${currentYear}` : `${currentYear}`}
             </Text>
           </Pressable>
           <Pressable onPress={next} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
             <Text className="text-heading text-xs">›</Text>
           </Pressable>
           <Pressable onPress={goToday} className="bg-btn-surface rounded-md px-2.5 py-1 active:opacity-70">
-            <Text className="font-body text-[11px] font-bold text-heading">Today</Text>
+            <Text className="font-body text-[11px] font-bold text-heading">{t("Today")}</Text>
           </Pressable>
         </View>
       </View>
@@ -139,7 +141,7 @@ export default function CalendarScreen() {
                     : "font-body text-xs font-bold text-heading"
                 }
               >
-                All
+                {t("All")}
               </Text>
             </Pressable>
             {projects.map((p) => (
@@ -196,6 +198,7 @@ function MonthView({
   tasks: Task[]; selectedTasks: Task[]; toggleTask: (id: string) => void;
   refreshing: boolean; onRefresh: () => void;
 }) {
+  const { t } = useTranslation();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
   const isWeb = Platform.OS === "web";
@@ -227,7 +230,7 @@ function MonthView({
   const completedTasks = selectedTasks.filter((t) => t.status === "completed");
   const isSelectedToday =
     selectedDate.getFullYear() === today.year && selectedDate.getMonth() === today.month && selectedDate.getDate() === today.date;
-  const selectedLabel = isSelectedToday ? "Today" :
+  const selectedLabel = isSelectedToday ? t("Today") :
     selectedDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
 
   return (
@@ -321,7 +324,7 @@ function MonthView({
                 })}
                 {overflow > 0 && (
                   <Text style={{ fontSize: 8, color: "#888", paddingLeft: 3 }}>
-                    +{overflow} more
+                    +{overflow} {t("more")}
                   </Text>
                 )}
               </Pressable>
@@ -337,13 +340,13 @@ function MonthView({
                 {selectedLabel}
               </Text>
               <Text className="font-body text-[10px] text-meta">
-                {activeTasks.length} task{activeTasks.length !== 1 ? "s" : ""}
+                {activeTasks.length} {activeTasks.length !== 1 ? t("tasks") : t("task")}
               </Text>
             </View>
 
             {activeTasks.length === 0 && completedTasks.length === 0 ? (
               <View className="items-center py-6 gap-1">
-                <Text className="font-body text-sm text-meta">No tasks for this day</Text>
+                <Text className="font-body text-sm text-meta">{t("No tasks for this day")}</Text>
               </View>
             ) : (
               <View className="gap-2">
@@ -353,7 +356,7 @@ function MonthView({
                 {completedTasks.length > 0 && (
                   <View className="gap-2 pt-2">
                     <Text className="font-body text-[10px] font-bold text-meta tracking-[1px] uppercase">
-                      Done ({completedTasks.length})
+                      {t("Done")} ({completedTasks.length})
                     </Text>
                     {completedTasks.map((task) => (
                       <CalendarTaskRow key={task.id} task={task} onToggle={toggleTask} />
@@ -445,6 +448,7 @@ function MiniMonth({
   today: { year: number; month: number; date: number };
   tasks: Task[]; onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
   const isCurrent = year === today.year && month === today.month;
@@ -460,7 +464,7 @@ function MiniMonth({
     <Pressable style={{ width: "33.33%" }} className="p-2 active:opacity-70" onPress={onPress}>
       <View className="bg-bg-card rounded-xl p-3">
         <Text className={isCurrent ? "font-display text-sm font-bold text-heading pb-2" : "font-display text-sm font-bold text-meta pb-2"}>
-          {MONTH_SHORT[month]}
+          {t(MONTH_SHORT[month])}
         </Text>
         <View className="flex-row">
           {WEEKDAYS_SHORT.map((d, i) => (

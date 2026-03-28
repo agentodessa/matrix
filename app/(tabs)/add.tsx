@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, TextInput, Pressable, Keyboard, useColorScheme, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "../../src/lib/styled";
@@ -46,6 +47,7 @@ interface FormData {
 }
 
 export default function AddTaskScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { addTask } = useTasks();
   const { projects } = useProjects();
@@ -104,7 +106,7 @@ export default function AddTaskScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
-      <Header title="Create Task" />
+      <Header title={t("Create Task")} />
       <ScrollView
         contentContainerClassName="px-7 pt-6 pb-40 gap-6"
         showsVerticalScrollIndicator={false}
@@ -113,7 +115,7 @@ export default function AddTaskScreen() {
         {/* ── Title ── */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Title
+            {t("Title")}
           </Text>
           <Controller
             control={control}
@@ -122,7 +124,7 @@ export default function AddTaskScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 className="font-body text-lg font-bold text-heading border-b border-border pb-3"
-                placeholder="What needs to be done?"
+                placeholder={t("What needs to be done?")}
                 placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
@@ -136,7 +138,7 @@ export default function AddTaskScreen() {
         {/* ── Description ── */}
         <View className="gap-2">
           <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-            Details
+            {t("Details")}
           </Text>
           <Controller
             control={control}
@@ -144,7 +146,7 @@ export default function AddTaskScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 className="font-body text-base text-body border-b border-border pb-3"
-                placeholder="Context, links, notes..."
+                placeholder={t("Context, links, notes...")}
                 placeholderTextColor={placeholderColor}
                 value={value}
                 onChangeText={onChange}
@@ -164,7 +166,7 @@ export default function AddTaskScreen() {
           render={({ field: { onChange, value } }) => (
             <View className="gap-2">
               <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-                Deadline
+                {t("Deadline")}
               </Text>
               <Pressable
                 className="border-b border-border pb-3 active:opacity-70"
@@ -200,14 +202,14 @@ export default function AddTaskScreen() {
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
                 <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-                  Project
+                  {t("Project")}
                 </Text>
                 <Pressable
                   className="active:opacity-70"
                   onPress={() => router.push("/projects")}
                 >
                   <Text className="font-body text-xs font-bold text-slate">
-                    Manage
+                    {t("Manage")}
                   </Text>
                 </Pressable>
               </View>
@@ -217,7 +219,7 @@ export default function AddTaskScreen() {
                   onPress={() => router.push("/projects")}
                 >
                   <Text className="font-body text-sm text-meta">
-                    No projects yet — tap to create one
+                    {t("No projects yet — tap to create one")}
                   </Text>
                 </Pressable>
               ) : (
@@ -274,7 +276,7 @@ export default function AddTaskScreen() {
                       : "font-body text-[10px] font-bold text-meta tracking-widest uppercase"
                   }
                 >
-                  Urgency
+                  {t("Urgency")}
                 </Text>
                 <Text
                   className={
@@ -283,7 +285,7 @@ export default function AddTaskScreen() {
                       : "font-display text-lg font-extrabold text-heading"
                   }
                 >
-                  {value === "urgent" ? "Urgent" : "Routine"}
+                  {value === "urgent" ? t("Urgent") : t("Routine")}
                 </Text>
                 <Text
                   className={
@@ -292,7 +294,7 @@ export default function AddTaskScreen() {
                       : "font-body text-[10px] text-meta pt-1"
                   }
                 >
-                  Tap to change
+                  {t("Tap to change")}
                 </Text>
               </Pressable>
             )}
@@ -317,7 +319,7 @@ export default function AddTaskScreen() {
                       : "font-body text-[10px] font-bold text-meta tracking-widest uppercase"
                   }
                 >
-                  Importance
+                  {t("Importance")}
                 </Text>
                 <Text
                   className={
@@ -326,7 +328,7 @@ export default function AddTaskScreen() {
                       : "font-display text-lg font-extrabold text-heading"
                   }
                 >
-                  {value === "high" ? "High" : "Casual"}
+                  {value === "high" ? t("High") : t("Casual")}
                 </Text>
                 <Text
                   className={
@@ -335,7 +337,7 @@ export default function AddTaskScreen() {
                       : "font-body text-[10px] text-meta pt-1"
                   }
                 >
-                  Tap to change
+                  {t("Tap to change")}
                 </Text>
               </Pressable>
             )}
@@ -346,7 +348,7 @@ export default function AddTaskScreen() {
         <View className="flex-row items-center gap-3 px-1">
           <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
           <Text className="font-body text-sm text-meta">
-            → {quadrantInfo.title}
+            → {t(quadrantInfo.title)}
           </Text>
         </View>
 
@@ -367,7 +369,7 @@ export default function AddTaskScreen() {
                 : "font-body text-base font-bold text-meta"
             }
           >
-            + New Task
+            {t("+ New Task")}
           </Text>
         </Pressable>
       </ScrollView>

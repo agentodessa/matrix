@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
@@ -20,6 +21,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ];
 
 export default function TasksScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { tasks, getTasksByQuadrant, toggleTask } = useTasks();
   const { projects } = useProjects();
@@ -52,7 +54,7 @@ export default function TasksScreen() {
       <View className="px-7 pt-8 pb-4 flex-row items-end justify-between">
         <View className="gap-1">
           <Text className="font-display text-3xl font-extrabold text-heading tracking-tight">
-            Tasks
+            {t("Tasks")}
           </Text>
         </View>
         <Pressable
@@ -60,7 +62,7 @@ export default function TasksScreen() {
           onPress={() => router.push("/(tabs)/add")}
         >
           <Text className="font-body text-sm font-extrabold text-bg tracking-wide">
-            + New Task
+            {t("+ New Task")}
           </Text>
         </Pressable>
       </View>
@@ -88,7 +90,7 @@ export default function TasksScreen() {
                     : "font-body text-xs font-bold text-heading"
                 }
               >
-                All
+                {t("All")}
               </Text>
             </Pressable>
             {projects.map((p) => (
@@ -164,11 +166,10 @@ export default function TasksScreen() {
         {activeTasks.length === 0 && completedTasks.length === 0 && (
           <View className="items-center py-16 gap-3">
             <Text className="font-display text-lg font-bold text-heading">
-              All clear
+              {t("All clear")}
             </Text>
             <Text className="font-body text-sm text-meta text-center leading-5">
-              No tasks in this quadrant.{"\n"}That's either impressive or
-              suspicious.
+              {t("No tasks in this quadrant.")}{"\n"}{t("That's either impressive or suspicious.")}
             </Text>
           </View>
         )}
@@ -177,7 +178,7 @@ export default function TasksScreen() {
         {activeTasks.length > 0 && (
           <View className="gap-3">
             <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase pt-2">
-              Active ({activeTasks.length})
+              {t("Active")} ({activeTasks.length})
             </Text>
             {activeTasks.map((task) => (
               <TaskItem key={task.id} task={task} onToggle={toggleTask} />
@@ -189,7 +190,7 @@ export default function TasksScreen() {
         {completedTasks.length > 0 && (
           <View className="gap-3 pt-4">
             <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
-              Completed ({completedTasks.length})
+              {t("Completed")} ({completedTasks.length})
             </Text>
             {completedTasks.map((task) => (
               <TaskItem key={task.id} task={task} onToggle={toggleTask} />

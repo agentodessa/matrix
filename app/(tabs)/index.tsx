@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { SafeAreaView } from "../../src/lib/styled";
 import { useRouter } from "expo-router";
@@ -15,6 +16,7 @@ import { QUADRANTS, Quadrant, Task } from "../../src/types/task";
 type ViewMode = "focus" | "matrix";
 
 export default function FocusDashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { tasks, getTasksByQuadrant, toggleTask, updateTask } = useTasks();
   const { projects } = useProjects();
@@ -75,7 +77,7 @@ export default function FocusDashboard() {
                       : "font-body text-xs font-bold text-heading"
                   }
                 >
-                  All
+                  {t("All")}
                 </Text>
               </Pressable>
               {projects.map((p) => (
@@ -155,16 +157,17 @@ function FocusView({
   toggleTask: (id: string) => void;
   router: ReturnType<typeof useRouter>;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       {/* ── Urgent Tasks First ── */}
       <View className="px-7 pt-6 pb-4">
         <View className="flex-row items-baseline justify-between pb-4">
           <Text className="font-display text-2xl font-extrabold text-heading tracking-tight">
-            Urgent Queue
+            {t("Urgent Queue")}
           </Text>
           <Text className="font-body text-xs font-bold text-meta">
-            {q1Active.length} active
+            {q1Active.length} {t("active")}
           </Text>
         </View>
 
@@ -176,10 +179,10 @@ function FocusView({
           ) : (
             <View className="bg-bg-card rounded-lg py-10 items-center gap-2">
               <Text className="font-display text-base font-bold text-heading">
-                All clear
+                {t("All clear")}
               </Text>
               <Text className="font-body text-sm text-meta">
-                No urgent tasks right now.
+                {t("No urgent tasks right now.")}
               </Text>
             </View>
           )}
@@ -191,7 +194,7 @@ function FocusView({
             onPress={() => router.push("/quadrant/1")}
           >
             <Text className="font-body text-sm font-bold text-slate">
-              View all {q1Active.length} tasks →
+              {t("View all {{count}} tasks →", { count: q1Active.length })}
             </Text>
           </Pressable>
         )}
@@ -201,14 +204,14 @@ function FocusView({
       <View className="px-7 py-4 gap-3">
         <View className="flex-row gap-3">
           <MetricTile
-            label="Completion"
+            label={t("Completion")}
             value={`${completionRate}%`}
             progress={completionRate}
           />
           <MetricTile
-            label="Active"
+            label={t("Active")}
             value={`${totalActive}`}
-            description="all quadrants"
+            description={t("all quadrants")}
           />
         </View>
       </View>
@@ -216,7 +219,7 @@ function FocusView({
       {/* ── Quadrant Overview ── */}
       <View className="px-7 py-4">
         <Text className="font-body text-xs font-bold text-label uppercase tracking-widest pb-4">
-          Quadrants
+          {t("Quadrants")}
         </Text>
         <View className="flex-row flex-wrap gap-3">
           {([1, 2, 3, 4] as Quadrant[]).map((q) => {
@@ -235,7 +238,7 @@ function FocusView({
                   {info.title}
                 </Text>
                 <Text className="font-body text-xs text-meta">
-                  {count} active
+                  {count} {t("active")}
                 </Text>
               </Pressable>
             );
@@ -248,7 +251,7 @@ function FocusView({
         <View className="bg-bg-tile rounded-lg p-6 gap-3">
           <View className="flex-row items-center justify-between">
             <Text className="font-body text-xs font-bold text-label uppercase tracking-widest">
-              Progress
+              {t("Progress")}
             </Text>
             <Text className="font-body text-sm font-bold text-slate">
               {totalCompleted}/{filteredTasks.length}
