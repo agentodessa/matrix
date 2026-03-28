@@ -16,6 +16,7 @@ import {
   QUADRANTS,
 } from "@/types/task";
 import { useQuadrantT } from "@/lib/use-quadrant-t";
+import { useWorkspaceRole } from "@/lib/workspace-context";
 
 const getTomorrow = () => {
   const d = new Date();
@@ -51,6 +52,8 @@ interface FormData {
 export default function AddTaskScreen() {
   const { t } = useTranslation();
   const quadrantT = useQuadrantT();
+  const role = useWorkspaceRole();
+  const canManageProjects = role === "personal" || role === "owner" || role === "admin";
   const router = useRouter();
   const { addTask } = useTasks();
   const { projects } = useProjects();
@@ -209,24 +212,28 @@ export default function AddTaskScreen() {
                 <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase">
                   {t("Project")}
                 </Text>
-                <Pressable
-                  className="active:opacity-70"
-                  onPress={() => router.push("/projects")}
-                >
-                  <Text className="font-body text-xs font-bold text-slate">
-                    {t("Manage")}
-                  </Text>
-                </Pressable>
+                {canManageProjects && (
+                  <Pressable
+                    className="active:opacity-70"
+                    onPress={() => router.push("/projects")}
+                  >
+                    <Text className="font-body text-xs font-bold text-slate">
+                      {t("Manage")}
+                    </Text>
+                  </Pressable>
+                )}
               </View>
               {projects.length === 0 ? (
-                <Pressable
-                  className="border border-dashed border-border rounded-lg py-4 items-center active:opacity-70"
-                  onPress={() => router.push("/projects")}
-                >
-                  <Text className="font-body text-sm text-meta">
-                    {t("No projects yet — tap to create one")}
-                  </Text>
-                </Pressable>
+                canManageProjects ? (
+                  <Pressable
+                    className="border border-dashed border-border rounded-lg py-4 items-center active:opacity-70"
+                    onPress={() => router.push("/projects")}
+                  >
+                    <Text className="font-body text-sm text-meta">
+                      {t("No projects yet — tap to create one")}
+                    </Text>
+                  </Pressable>
+                ) : null
               ) : (
                 <ScrollView
                   horizontal
