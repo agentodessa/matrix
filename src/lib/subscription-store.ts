@@ -7,20 +7,23 @@ import { useAuth } from "@/lib/auth-store";
 /* ── Helpers ── */
 
 const getPlan = (sub: Subscription | null): Plan => {
-  if (sub && sub.plan === "pro" && sub.status === "active") {
-    if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) return "free";
-    return "pro";
-  }
+  if (!sub || sub.status !== "active") return "free";
+  if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) return "free";
+  if (sub.plan === "pro_team") return "pro_team";
+  if (sub.plan === "pro") return "pro";
   return "free";
 };
 
 const mapRow = (row: Record<string, unknown>): Subscription => {
+  const plan = row.plan as string;
   return {
-    plan: (row.plan as string) === "pro" ? "pro" : "free",
+    plan: plan === "pro_team" ? "pro_team" : plan === "pro" ? "pro" : "free",
     billingCycle: (row.billing_cycle as BillingCycle) ?? "monthly",
     startDate: (row.start_date as string) ?? "",
     expiresAt: (row.expires_at as string) ?? "",
     status: (row.status as Subscription["status"]) ?? "active",
+    seatCount: (row.seat_count as number) ?? 0,
+    seatPrice: (row.seat_price as number) ?? 2.99,
   };
 };
 
@@ -52,7 +55,7 @@ export const useSubscription = () => {
   const plan = getPlan(sub);
 
   const subscribeMutation = useMutation({
-    mutationFn: async ({ billingCycle, paymentMethod }: { billingCycle: BillingCycle; paymentMethod: PaymentMethod }) => {
+    mutationFn: async ({ billingCycle, paymentMethod, planType }: { billingCycle: BillingCycle; paymentMethod: PaymentMethod; planType: "pro" | "pro_team" }) => {
       if (!userId) throw new Error("Not authenticated");
 
       const amount = billingCycle === "monthly" ? PRICING.monthly : PRICING.annual;
@@ -68,7 +71,7 @@ export const useSubscription = () => {
         .from("subscriptions")
         .upsert({
           user_id: userId,
-          plan: "pro",
+          plan: planType,
           billing_cycle: billingCycle,
           status: "active",
           start_date: now.toISOString(),
@@ -79,7 +82,7 @@ export const useSubscription = () => {
       if (error) throw new Error(error.message);
 
       return {
-        plan: "pro" as const,
+        plan: planType,
         billingCycle,
         startDate: now.toISOString(),
         expiresAt: expiresAt.toISOString(),
@@ -113,11 +116,12 @@ export const useSubscription = () => {
   return {
     subscription: sub,
     plan,
-    isPro: plan === "pro",
+    isPro: plan === "pro" || plan === "pro_team",
+    isProTeam: plan === "pro_team",
 
-    subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod) => {
+    subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod, planType: "pro" | "pro_team" = "pro") => {
       try {
-        await subscribeMutation.mutateAsync({ billingCycle, paymentMethod });
+        await subscribeMutation.mutateAsync({ billingCycle, paymentMethod, planType });
         return { success: true, error: null };
       } catch (e) {
         return { success: false, error: e instanceof Error ? e.message : "Failed" };
@@ -132,7 +136,7 @@ export const useSubscription = () => {
       await qc.invalidateQueries({ queryKey: ["subscription"] });
       if (!userId) return { success: false };
       const fresh = await fetchSubscription(userId);
-      if (fresh && fresh.plan === "pro" && fresh.status === "active") {
+      if (fresh && (fresh.plan === "pro" || fresh.plan === "pro_team") && fresh.status === "active") {
         qc.setQueryData(["subscription", userId], fresh);
         return { success: true };
       }
