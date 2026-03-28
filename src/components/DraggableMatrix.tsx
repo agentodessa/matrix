@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { View, Text, Platform } from "react-native";
+import { useTranslation } from "react-i18next";
 import {
   Gesture,
   GestureDetector,
@@ -47,6 +48,7 @@ export function DraggableMatrix({
   onViewQuadrant,
   onDragStateChange,
 }: DraggableMatrixProps) {
+  const { t } = useTranslation();
   const quadrantLayouts = useRef<Record<number, LayoutRect>>({});
   const containerOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -173,13 +175,13 @@ export function DraggableMatrix({
           <View className="flex-row items-center gap-1.5">
             <View className="w-1.5 h-1.5 rounded-full bg-urgent" />
             <Text className="font-body text-[10px] font-bold text-urgent tracking-[1.5px] uppercase">
-              Urgent
+              {t("Urgent")}
             </Text>
           </View>
         </View>
         <View className="flex-1 items-center">
           <Text className="font-body text-[10px] font-bold text-meta tracking-[1.5px] uppercase">
-            Not Urgent
+            {t("Not Urgent")}
           </Text>
         </View>
       </View>
@@ -188,7 +190,7 @@ export function DraggableMatrix({
       <View className="flex-row items-center mb-1.5">
         <View className="bg-slate/20 rounded-full px-2 py-0.5 mr-2">
           <Text className="font-body text-[8px] font-bold text-slate tracking-[1px] uppercase">
-            Important
+            {t("Important")}
           </Text>
         </View>
         <View className="flex-1 h-px bg-border" />
@@ -202,7 +204,7 @@ export function DraggableMatrix({
       <View className="flex-row items-center mb-1.5">
         <View className="bg-meta/15 rounded-full px-2 py-0.5 mr-2">
           <Text className="font-body text-[8px] font-bold text-meta tracking-[1px] uppercase">
-            Less Important
+            {t("Less Important")}
           </Text>
         </View>
         <View className="flex-1 h-px bg-border" />
@@ -282,6 +284,7 @@ function DroppableQuadrant({
   endDrag,
   findQuadrant,
 }: DroppableQuadrantProps) {
+  const { t } = useTranslation();
   const info = QUADRANTS[quadrant];
   const active = tasks.filter((t) => t.status === "active");
   const completed = tasks.filter((t) => t.status === "completed");
@@ -334,7 +337,7 @@ function DroppableQuadrant({
           {/* Task list */}
           {active.length === 0 ? (
             <View className="flex-1 justify-center items-center py-4">
-              <Text className="font-body text-xs text-meta">No tasks</Text>
+              <Text className="font-body text-xs text-meta">{t("No tasks")}</Text>
             </View>
           ) : (
             <View className="gap-3.5">
@@ -357,7 +360,7 @@ function DroppableQuadrant({
               ))}
               {active.length > MAX_VISIBLE && (
                 <Text className="font-body text-[11px] text-meta">
-                  +{active.length - MAX_VISIBLE} more
+                  +{active.length - MAX_VISIBLE} {t("more")}
                 </Text>
               )}
             </View>
@@ -367,7 +370,7 @@ function DroppableQuadrant({
           {completed.length > 0 && (
             <View className="mt-auto pt-3 border-t border-border mt-3">
               <Text className="font-body text-[11px] text-meta">
-                {completed.length} completed
+                {completed.length} {t("completed")}
               </Text>
             </View>
           )}

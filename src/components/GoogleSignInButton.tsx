@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Text, Pressable, Alert, Platform } from "react-native";
+import { useTranslation } from "react-i18next";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { supabase } from "../lib/supabase";
@@ -28,6 +29,7 @@ if (Platform.OS === "web" && typeof window !== "undefined") {
 const nativeRedirectUrl = Linking.createURL("auth/callback");
 
 export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   // Web: listen for auth state changes after token extraction
@@ -60,7 +62,7 @@ export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
 
       if (error || !data.url) {
         setLoading(false);
-        Alert.alert("Google Sign-In Failed", error?.message ?? "Could not start sign-in");
+        Alert.alert(t("Google Sign-In Failed"), error?.message ?? t("Could not start sign-in"));
         return;
       }
 
@@ -92,12 +94,12 @@ export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
           });
 
           if (sessionError) {
-            Alert.alert("Sign-In Error", sessionError.message);
+            Alert.alert(t("Sign-In Error"), sessionError.message);
           } else {
             onSuccess?.();
           }
         } else if (hashParams.error_description) {
-          Alert.alert("Sign-In Error", decodeURIComponent(hashParams.error_description));
+          Alert.alert(t("Sign-In Error"), decodeURIComponent(hashParams.error_description));
         }
       } else if (result.type === "cancel" || result.type === "dismiss") {
         // User cancelled — do nothing
@@ -105,7 +107,7 @@ export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
     } catch (e: unknown) {
       setLoading(false);
       const message = e instanceof Error ? e.message : "Something went wrong";
-      Alert.alert("Google Sign-In Failed", message);
+      Alert.alert(t("Google Sign-In Failed"), message);
     }
   };
 
@@ -120,7 +122,7 @@ export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
       disabled={loading}
     >
       <Text className="font-body text-base font-bold text-heading">
-        {loading ? "Connecting..." : "Continue with Google"}
+        {loading ? t("Connecting...") : t("Continue with Google")}
       </Text>
     </Pressable>
   );

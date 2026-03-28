@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { Slot, useRouter, usePathname } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth-store";
 import { useSubscription } from "../lib/subscription-store";
 
@@ -10,19 +11,20 @@ interface NavItem {
   match: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { route: "/(tabs)", label: "Focus", icon: "◎", match: "index" },
-  { route: "/(tabs)/tasks", label: "Tasks", icon: "☰", match: "tasks" },
-  { route: "/(tabs)/add", label: "New Task", icon: "+", match: "add" },
-  { route: "/(tabs)/calendar", label: "Calendar", icon: "▦", match: "calendar" },
-  { route: "/(tabs)/system", label: "Settings", icon: "⚙", match: "system" },
-];
-
 export function WebSidebar({ urgentCount }: { urgentCount: number }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const { isPro } = useSubscription();
+
+  const navItems: NavItem[] = [
+    { route: "/(tabs)", label: t("Focus"), icon: "◎", match: "index" },
+    { route: "/(tabs)/tasks", label: t("Tasks"), icon: "☰", match: "tasks" },
+    { route: "/(tabs)/add", label: t("New Task"), icon: "+", match: "add" },
+    { route: "/(tabs)/calendar", label: t("Calendar"), icon: "▦", match: "calendar" },
+    { route: "/(tabs)/system", label: t("Settings"), icon: "⚙", match: "system" },
+  ];
 
   const isActive = (item: NavItem) => {
     if (item.match === "index") return pathname === "/" || pathname === "/(tabs)";
@@ -54,7 +56,7 @@ export function WebSidebar({ urgentCount }: { urgentCount: number }) {
 
           {/* Nav items */}
           <View style={{ gap: 2 }}>
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const active = isActive(item);
               return (
                 <Pressable
@@ -146,14 +148,14 @@ export function WebSidebar({ urgentCount }: { urgentCount: number }) {
           </View>
           <View style={{ flex: 1 }}>
             <Text className="font-body text-xs font-bold text-heading" numberOfLines={1}>
-              {isAuthenticated ? user?.displayName : "Guest"}
+              {isAuthenticated ? user?.displayName : t("Guest")}
             </Text>
             <Text className="font-body text-[10px] text-meta" numberOfLines={1}>
               {isAuthenticated
                 ? isPro
-                  ? "Pro Plan"
-                  : "Free Plan"
-                : "Tap to sign in"}
+                  ? t("Pro Plan")
+                  : t("Free Plan")
+                : t("Tap to sign in")}
             </Text>
           </View>
         </Pressable>

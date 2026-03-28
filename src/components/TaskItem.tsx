@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Task, getQuadrant, QUADRANTS } from "../types/task";
 
 interface TaskItemProps {
@@ -7,6 +8,7 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, onToggle }: TaskItemProps) {
+  const { t } = useTranslation();
   const quadrant = getQuadrant(task);
   const info = QUADRANTS[quadrant];
   const classes = info.classes;
@@ -63,7 +65,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
           className="rounded-full bg-btn-surface px-3 py-1.5"
         >
           <Text className="font-body text-xs font-semibold text-heading">
-            {isCompleted ? "Undo" : "Done"}
+            {isCompleted ? t("Undo") : t("Done")}
           </Text>
         </Pressable>
       </View>

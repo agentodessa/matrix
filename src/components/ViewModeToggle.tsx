@@ -1,7 +1,6 @@
 import { Platform, useColorScheme } from "react-native";
+import { useTranslation } from "react-i18next";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-
-const SEGMENTS = ["Focus", "Matrix"];
 
 interface ViewModeToggleProps {
   value: "focus" | "matrix";
@@ -9,12 +8,14 @@ interface ViewModeToggleProps {
 }
 
 function NativeToggle({ value, onChange }: ViewModeToggleProps) {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const segments = [t("Focus"), t("Matrix")];
 
   return (
     <SegmentedControl
-      values={SEGMENTS}
+      values={segments}
       selectedIndex={value === "focus" ? 0 : 1}
       onChange={(e) => {
         const idx = e.nativeEvent.selectedSegmentIndex;

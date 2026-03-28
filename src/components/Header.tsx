@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { View, Text, Pressable, Image } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth-store";
 import { useSyncStatus } from "../lib/use-online-status";
 import { SyncPill } from "./SyncPill";
@@ -27,8 +28,9 @@ function useGuestAvatar() {
   }, []);
 }
 
-export function Header({ title = "The Executive", showBack = false }: HeaderProps) {
+export function Header({ title, showBack = false }: HeaderProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
   const syncStatus = useSyncStatus();
   const guestAvatar = useGuestAvatar();
@@ -92,7 +94,7 @@ export function Header({ title = "The Executive", showBack = false }: HeaderProp
             </Pressable>
           )}
           <Text className="font-body text-2xl font-semibold tracking-tight text-heading">
-            {title}
+            {title ?? t("The Executive")}
           </Text>
         </View>
         <SyncPill status={syncStatus} />
