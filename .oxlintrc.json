@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "style": "warn",
+    "pedantic": "warn"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-max-depth": "off",
+    "react/jsx-props-no-spreading": "off",
+    "import/no-named-export": "off",
+    "import/prefer-default-export": "off",
+    "import/group-exports": "off",
+    "import/exports-last": "off",
+    "import/consistent-type-specifier-style": "off",
+    "import/first": "off",
+    "no-magic-numbers": "off",
+    "no-ternary": "off",
+    "no-nested-ternary": "off",
+    "id-length": "off",
+    "sort-keys": "off",
+    "sort-imports": "off",
+    "curly": "off",
+    "max-lines-per-function": "off",
+    "max-statements": "off",
+    "max-lines": "off",
+    "func-style": "off",
+    "arrow-body-style": "off",
+    "typescript/consistent-type-imports": "off"
+  },
+  "env": {
+    "builtin": true
+  },
+  "globals": {},
+  "ignorePatterns": ["dist/**", "ios/**", "android/**", "src-tauri/**", ".expo/**"]
+}
