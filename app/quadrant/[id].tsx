@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Header } from "../../src/components/Header";
-import { TaskItem } from "../../src/components/TaskItem";
-import { useTasks } from "../../src/lib/store";
-import { QUADRANTS, Quadrant } from "../../src/types/task";
+import { Header } from "@/components/Header";
+import { TaskItem } from "@/components/TaskItem";
+import { useTasks } from "@/lib/store";
+import { QUADRANTS, Quadrant } from "@/types/task";
 import { useTranslation } from "react-i18next";
-import { useQuadrantT } from "../../src/lib/use-quadrant-t";
+import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 export default function QuadrantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

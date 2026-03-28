@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { supabase } from "../../src/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 export default function AuthCallbackScreen() {
   const router = useRouter();

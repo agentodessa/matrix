@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Task, Quadrant, getQuadrant, TaskStatus } from "../types/task";
+import { Task, Quadrant, getQuadrant, TaskStatus } from "@/types/task";
 import { supabase } from "./supabase";
 import { useProStatus } from "./use-pro-status";
 

@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Task, getQuadrant, QUADRANTS } from "../types/task";
-import { useQuadrantT } from "../lib/use-quadrant-t";
+import { Task, getQuadrant, QUADRANTS } from "@/types/task";
+import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 interface TaskItemProps {
   task: Task;

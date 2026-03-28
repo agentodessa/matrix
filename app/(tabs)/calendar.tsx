@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, Platform, RefreshControl } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
-import { Header } from "../../src/components/Header";
-import { TaskItem } from "../../src/components/TaskItem";
-import { ProGate } from "../../src/components/ProGate";
-import { useTasks } from "../../src/lib/store";
-import { useProjects } from "../../src/lib/projects-store";
-import { usePullRefresh } from "../../src/lib/use-pull-refresh";
-import { Task, getQuadrant } from "../../src/types/task";
+import { SafeAreaView } from "@/lib/styled";
+import { Header } from "@/components/Header";
+import { TaskItem } from "@/components/TaskItem";
+import { ProGate } from "@/components/ProGate";
+import { useTasks } from "@/lib/store";
+import { useProjects } from "@/lib/projects-store";
+import { usePullRefresh } from "@/lib/use-pull-refresh";
+import { Task, getQuadrant } from "@/types/task";
 
 type CalendarView = "month" | "year";
 

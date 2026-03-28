@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, Keyboard, useColorScheme, Alert } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
-import { Header } from "../../src/components/Header";
-import { GoogleSignInButton } from "../../src/components/GoogleSignInButton";
-import { useAuth } from "../../src/lib/auth-store";
+import { Header } from "@/components/Header";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { useAuth } from "@/lib/auth-store";
 import { useTranslation } from "react-i18next";
 
 interface FormData {

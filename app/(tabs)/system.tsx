@@ -1,12 +1,12 @@
 import { ScrollView } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
-import { Header } from "../../src/components/Header";
-import { AccountSection } from "../../src/components/settings/AccountSection";
-import { SubscriptionSection } from "../../src/components/settings/SubscriptionSection";
-import { AppearanceSection } from "../../src/components/settings/AppearanceSection";
-import { OrganizationSection } from "../../src/components/settings/OrganizationSection";
-import { DataSection } from "../../src/components/settings/DataSection";
-import { AboutSection } from "../../src/components/settings/AboutSection";
+import { SafeAreaView } from "@/lib/styled";
+import { Header } from "@/components/Header";
+import { AccountSection } from "@/components/settings/AccountSection";
+import { SubscriptionSection } from "@/components/settings/SubscriptionSection";
+import { AppearanceSection } from "@/components/settings/AppearanceSection";
+import { OrganizationSection } from "@/components/settings/OrganizationSection";
+import { DataSection } from "@/components/settings/DataSection";
+import { AboutSection } from "@/components/settings/AboutSection";
 
 export default function SystemScreen() {
   return (

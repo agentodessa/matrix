@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useTasks } from "../../src/lib/store";
+import { useTasks } from "@/lib/store";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
-import { WebSidebar } from "../../src/components/WebSidebar";
+import { WebSidebar } from "@/components/WebSidebar";
 
 export default function TabLayout() {
   const { t } = useTranslation();

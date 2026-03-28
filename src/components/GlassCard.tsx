@@ -1,5 +1,5 @@
 import { View, type ViewProps } from "react-native";
-import { isGlassAvailable } from "../lib/glass";
+import { isGlassAvailable } from "@/lib/glass";
 
 interface GlassCardProps extends ViewProps {
   fallbackClassName?: string;

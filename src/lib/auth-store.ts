@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "./supabase";
-import { User } from "../types/user";
+import { User } from "@/types/user";
 
 const USER_CACHE_KEY = "@executive_cached_user";
 

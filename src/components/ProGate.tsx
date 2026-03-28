@@ -1,8 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useSubscription } from "../lib/subscription-store";
-import { Feature, isFeatureAvailable } from "../lib/features";
+import { useSubscription } from "@/lib/subscription-store";
+import { Feature, isFeatureAvailable } from "@/lib/features";
 
 interface ProGateProps {
   feature: Feature;

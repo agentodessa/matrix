@@ -1,8 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../lib/auth-store";
-import { useSubscription } from "../../lib/subscription-store";
+import { useAuth } from "@/lib/auth-store";
+import { useSubscription } from "@/lib/subscription-store";
 
 export const AccountSection = () => {
   const { t } = useTranslation();

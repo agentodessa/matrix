@@ -8,7 +8,7 @@ import Animated, {
   Easing,
   cancelAnimation,
 } from "react-native-reanimated";
-import { SyncStatus } from "../lib/use-online-status";
+import { SyncStatus } from "@/lib/use-online-status";
 
 const SpinningIcon = () => {
   const rotation = useSharedValue(0);

@@ -1,18 +1,21 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
+import { View, Text, ScrollView, Pressable, RefreshControl, ActivityIndicator } from "react-native";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
-import { Header } from "../../src/components/Header";
-import { TaskItem } from "../../src/components/TaskItem";
-import { MetricTile } from "../../src/components/MetricTile";
-import { DraggableMatrix } from "../../src/components/DraggableMatrix";
-import { useTasks } from "../../src/lib/store";
-import { useProjects } from "../../src/lib/projects-store";
-import { usePullRefresh } from "../../src/lib/use-pull-refresh";
-import { ViewModeToggle } from "../../src/components/ViewModeToggle";
-import { QUADRANTS, Quadrant, Task } from "../../src/types/task";
-import { useQuadrantT } from "../../src/lib/use-quadrant-t";
+import { Header } from "@/components/Header";
+import { TaskItem } from "@/components/TaskItem";
+import { MetricTile } from "@/components/MetricTile";
+import { useTasks } from "@/lib/store";
+
+const DraggableMatrix = lazy(() =>
+  import("@/components/DraggableMatrix").then((m) => ({ default: m.DraggableMatrix }))
+);
+import { useProjects } from "@/lib/projects-store";
+import { usePullRefresh } from "@/lib/use-pull-refresh";
+import { ViewModeToggle } from "@/components/ViewModeToggle";
+import { QUADRANTS, Quadrant, Task } from "@/types/task";
+import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 type ViewMode = "focus" | "matrix";
 
@@ -121,14 +124,16 @@ export default function FocusDashboard() {
             router={router}
           />
         ) : (
-          <DraggableMatrix
-            filterByProject={filterByProject}
-            getTasksByQuadrant={getTasksByQuadrant}
-            toggleTask={toggleTask}
-            updateTask={updateTask}
-            onViewQuadrant={(q) => router.push(`/quadrant/${q}`)}
-            onDragStateChange={handleDragStateChange}
-          />
+          <Suspense fallback={<ActivityIndicator className="py-20" />}>
+            <DraggableMatrix
+              filterByProject={filterByProject}
+              getTasksByQuadrant={getTasksByQuadrant}
+              toggleTask={toggleTask}
+              updateTask={updateTask}
+              onViewQuadrant={(q) => router.push(`/quadrant/${q}`)}
+              onDragStateChange={handleDragStateChange}
+            />
+          </Suspense>
         )}
       </ScrollView>
     </SafeAreaView>

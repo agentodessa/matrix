@@ -3,10 +3,10 @@ import { initReactI18next } from "react-i18next";
 import { getLocales } from "expo-localization";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import en from "../locales/en.json";
-import es from "../locales/es.json";
-import fr from "../locales/fr.json";
-import ru from "../locales/ru.json";
+import en from "@/locales/en.json";
+import es from "@/locales/es.json";
+import fr from "@/locales/fr.json";
+import ru from "@/locales/ru.json";
 
 const SUPPORTED_LANGS = ["en", "es", "fr", "ru"] as const;
 const LANG_STORAGE_KEY = "@executive_lang";

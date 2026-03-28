@@ -1,4 +1,4 @@
-import { Plan } from "../types/user";
+import { Plan } from "@/types/user";
 
 const PRO_FEATURES = {
   calendarFullView: true,

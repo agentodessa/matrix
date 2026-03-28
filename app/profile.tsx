@@ -1,11 +1,11 @@
 import { View, Text, Pressable, ScrollView, Image } from "react-native";
-import { SafeAreaView } from "../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
-import { Header } from "../src/components/Header";
-import { GoogleSignInButton } from "../src/components/GoogleSignInButton";
-import { useTasks } from "../src/lib/store";
-import { useAuth } from "../src/lib/auth-store";
-import { useSubscription } from "../src/lib/subscription-store";
+import { Header } from "@/components/Header";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { useTasks } from "@/lib/store";
+import { useAuth } from "@/lib/auth-store";
+import { useSubscription } from "@/lib/subscription-store";
 import { useTranslation } from "react-i18next";
 
 export default function ProfileScreen() {

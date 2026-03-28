@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { View, Text, Switch, Pressable, useColorScheme } from "react-native";
 import { useTranslation } from "react-i18next";
-import { saveTheme } from "../../lib/theme-store";
-import { setLanguage } from "../../lib/i18n";
+import { saveTheme } from "@/lib/theme-store";
+import { setLanguage } from "@/lib/i18n";
 
 export const AppearanceSection = () => {
   const { t, i18n } = useTranslation();

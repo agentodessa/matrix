@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "./supabase";
-import { Plan, BillingCycle, Subscription, PRICING } from "../types/user";
-import { processPayment, PaymentMethod } from "./mock-payment";
-import { useAuth } from "./auth-store";
+import { Plan, BillingCycle, Subscription, PRICING } from "@/types/user";
+import { processPayment, PaymentMethod } from "@/lib/mock-payment";
+import { useAuth } from "@/lib/auth-store";
 
 /* ── Helpers ── */
 

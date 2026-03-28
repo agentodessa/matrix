@@ -3,7 +3,7 @@ import { Text, Pressable, Alert, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 // Complete any pending auth session on web
 if (Platform.OS === "web") {

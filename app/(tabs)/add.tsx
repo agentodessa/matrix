@@ -1,20 +1,21 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, TextInput, Pressable, Keyboard, useColorScheme, Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { SafeAreaView } from "../../src/lib/styled";
+
+const DateTimePicker = lazy(() => import("@react-native-community/datetimepicker"));
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
-import { Header } from "../../src/components/Header";
-import { useTasks } from "../../src/lib/store";
-import { useProjects } from "../../src/lib/projects-store";
+import { Header } from "@/components/Header";
+import { useTasks } from "@/lib/store";
+import { useProjects } from "@/lib/projects-store";
 import {
   Urgency,
   Importance,
   getQuadrant,
   QUADRANTS,
-} from "../../src/types/task";
-import { useQuadrantT } from "../../src/lib/use-quadrant-t";
+} from "@/types/task";
+import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 const getTomorrow = () => {
   const d = new Date();
@@ -180,17 +181,19 @@ export default function AddTaskScreen() {
               </Pressable>
 
               {(showPicker || Platform.OS === "ios") && (
-                <DateTimePicker
-                  value={value}
-                  mode="datetime"
-                  display={Platform.OS === "ios" ? "compact" : "default"}
-                  minimumDate={new Date()}
-                  onChange={(_, selected) => {
-                    setShowPicker(false);
-                    if (selected) onChange(selected);
-                  }}
-                  themeVariant={colorScheme === "dark" ? "dark" : "light"}
-                />
+                <Suspense>
+                  <DateTimePicker
+                    value={value}
+                    mode="datetime"
+                    display={Platform.OS === "ios" ? "compact" : "default"}
+                    minimumDate={new Date()}
+                    onChange={(_, selected) => {
+                      setShowPicker(false);
+                      if (selected) onChange(selected);
+                    }}
+                    themeVariant={colorScheme === "dark" ? "dark" : "light"}
+                  />
+                </Suspense>
               )}
             </View>
           )}

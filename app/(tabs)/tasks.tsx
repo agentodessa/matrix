@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { SafeAreaView } from "../../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
-import { Header } from "../../src/components/Header";
-import { TaskItem } from "../../src/components/TaskItem";
-import { useTasks } from "../../src/lib/store";
-import { useProjects } from "../../src/lib/projects-store";
-import { usePullRefresh } from "../../src/lib/use-pull-refresh";
-import { QUADRANTS, Quadrant } from "../../src/types/task";
+import { Header } from "@/components/Header";
+import { TaskItem } from "@/components/TaskItem";
+import { useTasks } from "@/lib/store";
+import { useProjects } from "@/lib/projects-store";
+import { usePullRefresh } from "@/lib/use-pull-refresh";
+import { QUADRANTS, Quadrant } from "@/types/task";
 
 type FilterKey = "all" | "1" | "2" | "3" | "4";
 

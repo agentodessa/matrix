@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, useColorScheme, Alert } from "react-native";
-import { SafeAreaView } from "../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
-import { Header } from "../src/components/Header";
-import { useProjects } from "../src/lib/projects-store";
-import { useTasks } from "../src/lib/store";
-import { useSubscription } from "../src/lib/subscription-store";
-import { canCreateProject, FREE_PROJECT_LIMIT } from "../src/lib/features";
+import { Header } from "@/components/Header";
+import { useProjects } from "@/lib/projects-store";
+import { useTasks } from "@/lib/store";
+import { useSubscription } from "@/lib/subscription-store";
+import { canCreateProject, FREE_PROJECT_LIMIT } from "@/lib/features";
 import { useTranslation } from "react-i18next";
 
 export default function ProjectsScreen() {

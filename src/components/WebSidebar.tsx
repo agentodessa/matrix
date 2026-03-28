@@ -1,8 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import { Slot, useRouter, usePathname } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../lib/auth-store";
-import { useSubscription } from "../lib/subscription-store";
+import { useAuth } from "@/lib/auth-store";
+import { useSubscription } from "@/lib/subscription-store";
 
 interface NavItem {
   route: string;

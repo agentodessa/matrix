@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert } from "react-native";
-import { SafeAreaView } from "../src/lib/styled";
+import { SafeAreaView } from "@/lib/styled";
 import { useRouter } from "expo-router";
-import { Header } from "../src/components/Header";
-import { useSubscription } from "../src/lib/subscription-store";
-import { useAuth } from "../src/lib/auth-store";
-import { BillingCycle, PRICING } from "../src/types/user";
-import { PaymentMethod } from "../src/lib/mock-payment";
+import { Header } from "@/components/Header";
+import { useSubscription } from "@/lib/subscription-store";
+import { useAuth } from "@/lib/auth-store";
+import { BillingCycle, PRICING } from "@/types/user";
+import { PaymentMethod } from "@/lib/mock-payment";
 import { useTranslation } from "react-i18next";
 
 export default function PaywallScreen() {

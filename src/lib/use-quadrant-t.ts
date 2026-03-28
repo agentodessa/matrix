@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { Quadrant } from "../types/task";
+import type { Quadrant } from "@/types/task";
 
 interface QuadrantText {
   title: string;

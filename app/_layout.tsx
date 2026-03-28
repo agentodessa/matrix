@@ -1,12 +1,12 @@
-import "../src/lib/i18n";
+import "@/lib/i18n";
 import "../global.css";
 import { ActivityIndicator, View, useColorScheme } from "react-native";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useThemePersistence } from "../src/lib/theme-store";
-import { lightTheme, darkTheme } from "../src/lib/theme";
-import { QueryProvider } from "../src/lib/query-client";
-import { useRealtimeSync } from "../src/lib/realtime-sync";
+import { useThemePersistence } from "@/lib/theme-store";
+import { lightTheme, darkTheme } from "@/lib/theme";
+import { QueryProvider } from "@/lib/query-client";
+import { useRealtimeSync } from "@/lib/realtime-sync";
 
 const AppContent = () => {
   const themeLoaded = useThemePersistence();

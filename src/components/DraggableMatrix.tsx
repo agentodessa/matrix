@@ -19,8 +19,8 @@ import {
   QUADRANTS,
   getQuadrant,
   quadrantToProperties,
-} from "../types/task";
-import { useQuadrantT } from "../lib/use-quadrant-t";
+} from "@/types/task";
+import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 interface LayoutRect {
   x: number;
