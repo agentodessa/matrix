@@ -12,9 +12,10 @@ import { useTranslation } from "react-i18next";
 export default function PaywallScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { isPro, subscribe } = useSubscription();
+  const { isPro, isProTeam, subscription, subscribe } = useSubscription();
   const { isAuthenticated } = useAuth();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("annual");
+  const [selectedPlan, setSelectedPlan] = useState<"pro" | "pro_team">("pro");
   const [loading, setLoading] = useState(false);
 
   const FEATURES_FREE = [
@@ -29,6 +30,13 @@ export default function PaywallScreen() {
     t("Full calendar view"),
     t("Cloud sync across devices"),
     t("Priority support"),
+  ];
+
+  const FEATURES_TEAM = [
+    t("Everything in Pro"),
+    t("Team workspaces"),
+    t("Shared task boards"),
+    t("Team calendar"),
   ];
 
   const price = billingCycle === "monthly" ? PRICING.monthly : PRICING.annual;
@@ -48,7 +56,7 @@ export default function PaywallScreen() {
     }
 
     setLoading(true);
-    const result = await subscribe(billingCycle, method);
+    const result = await subscribe(billingCycle, method, selectedPlan);
     setLoading(false);
 
     if (result.success) {
@@ -60,7 +68,36 @@ export default function PaywallScreen() {
     }
   };
 
-  if (isPro) {
+  if (isProTeam) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
+        <Header title={t("Pro Team")} showBack />
+        <View className="flex-1 items-center justify-center px-8 gap-4">
+          <Text style={{ fontSize: 48 }}>🚀</Text>
+          <Text className="font-display text-2xl font-bold text-heading">
+            {t("You're on Pro Team!")}
+          </Text>
+          <Text className="font-display text-base font-bold text-meta">
+            {t("Pro Team")}
+          </Text>
+          <Text className="font-body text-sm text-meta">
+            {t("{{count}} team members", { count: subscription?.seatCount ?? 0 })}
+          </Text>
+          <Text className="font-body text-sm text-meta text-center leading-5">
+            {t("You have full access to all features including team workspaces.")}
+          </Text>
+          <Pressable
+            className="bg-btn-surface rounded-xl px-6 py-3 active:opacity-70 border border-border mt-4"
+            onPress={() => router.back()}
+          >
+            <Text className="font-body text-sm font-bold text-heading">{t("Done")}</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isPro && !isProTeam) {
     return (
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <Header title={t("Pro Plan")} showBack />
@@ -72,8 +109,32 @@ export default function PaywallScreen() {
           <Text className="font-body text-sm text-meta text-center leading-5">
             {t("You have access to all features.")}{"\n"}{t("Thank you for your support.")}
           </Text>
+          <View className="w-full gap-3 mt-4">
+            <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+              {t("Upgrade to Pro Team")}
+            </Text>
+            <View className="bg-bg-card rounded-xl p-5 gap-3">
+              <Text className="font-body text-sm font-bold text-heading">
+                {t("Collaborate with your team")}
+              </Text>
+              <Text className="font-body text-sm text-body leading-5">
+                {t("Get team workspaces, shared task boards, and team calendar.")}
+              </Text>
+              <Text className="font-body text-xs text-meta">
+                +{t("${{price}} per seat/mo", { price: PRICING.seat.toFixed(2) })}
+              </Text>
+              <Pressable
+                className="bg-success rounded-lg py-3 items-center active:opacity-80"
+                onPress={() => router.push("/paywall")}
+              >
+                <Text className="font-body text-sm font-bold text-bg">
+                  {t("Upgrade to Pro Team")}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
           <Pressable
-            className="bg-btn-surface rounded-xl px-6 py-3 active:opacity-70 border border-border mt-4"
+            className="bg-btn-surface rounded-xl px-6 py-3 active:opacity-70 border border-border"
             onPress={() => router.back()}
           >
             <Text className="font-body text-sm font-bold text-heading">{t("Done")}</Text>
@@ -158,6 +219,11 @@ export default function PaywallScreen() {
               {t("Just ${{amount}}/month", { amount: monthlyEquiv })}
             </Text>
           )}
+          {selectedPlan === "pro_team" && (
+            <Text className="font-body text-xs text-meta">
+              +{t("${{price}} per seat/mo", { price: PRICING.seat.toFixed(2) })}
+            </Text>
+          )}
         </View>
 
         {/* Plan comparison */}
@@ -188,6 +254,36 @@ export default function PaywallScreen() {
               </View>
             ))}
           </View>
+        </View>
+
+        {/* Pro Team */}
+        <View className="bg-bg-card rounded-xl p-4 gap-3 border-2 border-success mt-3">
+          <View className="flex-row items-center gap-2">
+            <Text className="font-display text-sm font-bold text-heading">{t("Pro Team")}</Text>
+          </View>
+          {FEATURES_TEAM.map((f) => (
+            <View key={f} className="flex-row items-start gap-2">
+              <Text className="font-body text-xs text-success">✓</Text>
+              <Text className="font-body text-xs text-body flex-1">{f}</Text>
+            </View>
+          ))}
+          <Text className="font-body text-xs text-meta">+${PRICING.seat.toFixed(2)}/{t("per seat/mo")}</Text>
+        </View>
+
+        {/* Plan toggle */}
+        <View className="flex-row bg-btn-surface rounded-xl p-1">
+          <Pressable
+            className={selectedPlan === "pro" ? "flex-1 rounded-lg bg-bg py-3 items-center" : "flex-1 rounded-lg py-3 items-center active:opacity-70"}
+            onPress={() => setSelectedPlan("pro")}
+          >
+            <Text className={selectedPlan === "pro" ? "font-body text-sm font-bold text-heading" : "font-body text-sm font-bold text-meta"}>{t("Pro")}</Text>
+          </Pressable>
+          <Pressable
+            className={selectedPlan === "pro_team" ? "flex-1 rounded-lg bg-bg py-3 items-center" : "flex-1 rounded-lg py-3 items-center active:opacity-70"}
+            onPress={() => setSelectedPlan("pro_team")}
+          >
+            <Text className={selectedPlan === "pro_team" ? "font-body text-sm font-bold text-heading" : "font-body text-sm font-bold text-meta"}>{t("Pro Team")}</Text>
+          </Pressable>
         </View>
 
         {/* Payment buttons */}
