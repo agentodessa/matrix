@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { Header } from "@/components/Header";
 import { useTeams, usePendingInvites, useTeamMutations } from "@/lib/teams-store";
 import { useAuth } from "@/lib/auth-store";
+import { useSubscription } from "@/lib/subscription-store";
 import { useTranslation } from "react-i18next";
 
 export default function TeamScreen() {
@@ -13,6 +14,7 @@ export default function TeamScreen() {
   const colorScheme = useColorScheme();
   const placeholderColor = colorScheme === "dark" ? "rgba(229,226,225,0.4)" : "#717c82";
   const { user, isAuthenticated } = useAuth();
+  const { isProTeam } = useSubscription();
   const { teams } = useTeams();
   const { invites: pendingInvites } = usePendingInvites();
   const { createTeam, acceptInvite, declineInvite } = useTeamMutations();
@@ -117,42 +119,60 @@ export default function TeamScreen() {
           </View>
         )}
 
-        {/* ── Create Team ── */}
-        <View className="gap-2">
-          <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
-            {t("Create Team")}
-          </Text>
-          <View className="flex-row items-center gap-3">
-            <TextInput
-              className="flex-1 font-body text-lg font-bold text-heading border-b border-border pb-3"
-              placeholder={t("Team name...")}
-              placeholderTextColor={placeholderColor}
-              value={newName}
-              onChangeText={setNewName}
-              returnKeyType="done"
-              onSubmitEditing={handleCreate}
-            />
-            <Pressable
-              className={
-                trimmed
-                  ? "bg-success rounded-full px-5 py-2.5 active:opacity-80"
-                  : "bg-btn-surface rounded-full px-5 py-2.5 opacity-50"
-              }
-              onPress={handleCreate}
-              disabled={!trimmed || createTeam.isPending}
-            >
-              <Text
+        {/* ── New Team ── */}
+        {isProTeam ? (
+          <View className="gap-2">
+            <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+              {t("New Team")}
+            </Text>
+            <View className="flex-row items-center gap-3">
+              <TextInput
+                className="flex-1 font-body text-lg font-bold text-heading border-b border-border pb-3"
+                placeholder={t("Team name...")}
+                placeholderTextColor={placeholderColor}
+                value={newName}
+                onChangeText={setNewName}
+                returnKeyType="done"
+                onSubmitEditing={handleCreate}
+              />
+              <Pressable
                 className={
                   trimmed
-                    ? "font-body text-sm font-bold text-bg"
-                    : "font-body text-sm font-bold text-meta"
+                    ? "bg-success rounded-full px-5 py-2.5 active:opacity-80"
+                    : "bg-btn-surface rounded-full px-5 py-2.5 opacity-50"
                 }
+                onPress={handleCreate}
+                disabled={!trimmed || createTeam.isPending}
               >
-                {t("Create")}
-              </Text>
-            </Pressable>
+                <Text
+                  className={
+                    trimmed
+                      ? "font-body text-sm font-bold text-bg"
+                      : "font-body text-sm font-bold text-meta"
+                  }
+                >
+                  {t("Create")}
+                </Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
+        ) : (
+          <View className="gap-3">
+            <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
+              {t("New Team")}
+            </Text>
+            <View className="bg-bg-card rounded-lg p-5 gap-3">
+              <Text className="font-body text-sm font-bold text-heading">{t("Pro Team required")}</Text>
+              <Text className="font-body text-sm text-body">{t("Upgrade to Pro Team to create and manage teams.")}</Text>
+              <Pressable
+                className="bg-success rounded-lg py-3 items-center active:opacity-80"
+                onPress={() => router.push("/paywall")}
+              >
+                <Text className="font-body text-sm font-bold text-bg">{t("Upgrade to Pro Team")}</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
 
         {/* ── Your Teams ── */}
         <View className="gap-2">
