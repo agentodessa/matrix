@@ -4,7 +4,7 @@ import { useAuth } from "./auth-store";
 import type { Team, TeamMember, TeamInvite } from "@/types/team";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /* ── Helper ── */
 
@@ -278,20 +278,23 @@ export const useTeamMutations = () => {
 
 export const usePendingJoin = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const router = useRouter();
   const { joinByCode } = useTeamMutations();
+  const joinRef = useRef(joinByCode);
+  joinRef.current = joinByCode;
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     AsyncStorage.getItem("@executive_pending_join").then((code) => {
       if (!code) return;
       AsyncStorage.removeItem("@executive_pending_join");
-      joinByCode.mutate(code, {
+      joinRef.current.mutate(code, {
         onSuccess: (team) => {
           router.replace(`/team/${team.id}`);
         },
       });
     });
-  }, [user]);
+  }, [userId]);
 };

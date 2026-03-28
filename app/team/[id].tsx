@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, useColorScheme, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, useColorScheme, Alert, Share } from "react-native";
 import { SafeAreaView } from "@/lib/styled";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Header } from "@/components/Header";
@@ -46,7 +46,7 @@ export default function TeamDetailScreen() {
   const handleCopyLink = () => {
     if (!team) return;
     const link = `eisenhower-reminder:///team/join?code=${team.invite_code}`;
-    Alert.alert(t("Invite Link"), link);
+    Share.share({ message: link });
   };
 
   const handleCancelInvite = (inviteId: string) => {
