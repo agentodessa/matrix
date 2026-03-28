@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useThemePersistence } from "@/lib/theme-store";
 import { lightTheme, darkTheme } from "@/lib/theme";
 import { QueryProvider } from "@/lib/query-client";
+import { WorkspaceProvider } from "@/lib/workspace-context";
 import { useRealtimeSync } from "@/lib/realtime-sync";
 import { usePendingJoin } from "@/lib/teams-store";
 
@@ -43,7 +44,9 @@ const AppContent = () => {
 export default function RootLayout() {
   return (
     <QueryProvider>
-      <AppContent />
+      <WorkspaceProvider>
+        <AppContent />
+      </WorkspaceProvider>
     </QueryProvider>
   );
 }

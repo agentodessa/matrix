@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-store";
 import { useSyncStatus } from "@/lib/use-online-status";
 import { SyncPill } from "@/components/SyncPill";
+import { WorkspacePill } from "@/components/WorkspacePill";
 
 interface HeaderProps {
   title?: string;
@@ -97,7 +98,10 @@ export const Header = ({ title, showBack = false }: HeaderProps) => {
             {title ?? t("The Executive")}
           </Text>
         </View>
-        <SyncPill status={syncStatus} />
+        <View className="flex-row items-center gap-2">
+          <WorkspacePill />
+          <SyncPill status={syncStatus} />
+        </View>
       </View>
     </View>
   );
