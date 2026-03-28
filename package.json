@@ -13,7 +13,8 @@
     "i18n:extract": "i18next-cli extract",
     "lint": "oxlint --type-aware",
     "fmt": "oxfmt .",
-    "fmt:check": "oxfmt --check ."
+    "fmt:check": "oxfmt --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -72,6 +73,12 @@
     "typescript": "~5.9.2"
   },
   "private": true,
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "oxfmt",
+      "oxlint --type-aware"
+    ]
+  },
   "overrides": {
     "lightningcss": "1.30.1"
   }
