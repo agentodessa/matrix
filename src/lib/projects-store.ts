@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "./supabase";
 import { useProStatus } from "./use-pro-status";
+import { useWorkspace } from "@/lib/workspace-context";
 
 const STORAGE_KEY = "@executive_projects";
 
@@ -21,11 +22,11 @@ async function saveLocal(projects: string[]) {
 
 /* ── Supabase helpers ── */
 
-async function fetchRemoteProjects(userId: string): Promise<string[]> {
+async function fetchRemoteProjects(workspaceId: string): Promise<string[]> {
   const { data, error } = await supabase
     .from("projects")
     .select("name")
-    .eq("user_id", userId)
+    .eq("workspace_id", workspaceId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []).map((r) => r.name as string);
@@ -71,44 +72,44 @@ const useLocalProjects = () => {
 
 /* ── Cloud store ── */
 
-const useCloudProjects = (userId: string) => {
+const useCloudProjects = (workspaceId: string, userId: string) => {
   const qc = useQueryClient();
 
   const { data: projects = [] } = useQuery<string[]>({
-    queryKey: ["projects", userId],
-    queryFn: () => fetchRemoteProjects(userId),
-    enabled: userId !== "__none__",
+    queryKey: ["projects", workspaceId],
+    queryFn: () => fetchRemoteProjects(workspaceId),
+    enabled: workspaceId !== "__none__",
     staleTime: 1000 * 30,
   });
 
   const addMutation = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from("projects").insert({ user_id: userId, name });
+      const { error } = await supabase.from("projects").insert({ workspace_id: workspaceId, created_by: userId, name });
       if (error) throw error;
     },
     onMutate: async (name) => {
-      await qc.cancelQueries({ queryKey: ["projects", userId] });
-      const prev = qc.getQueryData<string[]>(["projects", userId]);
-      qc.setQueryData<string[]>(["projects", userId], (old = []) => [...old, name]);
+      await qc.cancelQueries({ queryKey: ["projects", workspaceId] });
+      const prev = qc.getQueryData<string[]>(["projects", workspaceId]);
+      qc.setQueryData<string[]>(["projects", workspaceId], (old = []) => [...old, name]);
       return { prev };
     },
-    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["projects", userId] }),
+    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["projects", workspaceId] }),
   });
 
   const removeMutation = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from("projects").delete().eq("user_id", userId).eq("name", name);
+      const { error } = await supabase.from("projects").delete().eq("workspace_id", workspaceId).eq("name", name);
       if (error) throw error;
     },
     onMutate: async (name) => {
-      await qc.cancelQueries({ queryKey: ["projects", userId] });
-      const prev = qc.getQueryData<string[]>(["projects", userId]);
-      qc.setQueryData<string[]>(["projects", userId], (old = []) => old.filter((p) => p !== name));
+      await qc.cancelQueries({ queryKey: ["projects", workspaceId] });
+      const prev = qc.getQueryData<string[]>(["projects", workspaceId]);
+      qc.setQueryData<string[]>(["projects", workspaceId], (old = []) => old.filter((p) => p !== name));
       return { prev };
     },
-    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", userId], ctx.prev); },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["projects", userId] }),
+    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev); },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["projects", workspaceId] }),
   });
 
   return {
@@ -119,7 +120,7 @@ const useCloudProjects = (userId: string) => {
       addMutation.mutate(trimmed);
     },
     removeProject: (name: string) => removeMutation.mutate(name),
-    reload: async () => { await qc.invalidateQueries({ queryKey: ["projects", userId] }); },
+    reload: async () => { await qc.invalidateQueries({ queryKey: ["projects", workspaceId] }); },
   };
 };
 
@@ -127,7 +128,8 @@ const useCloudProjects = (userId: string) => {
 
 export const useProjects = () => {
   const { userId, isPro } = useProStatus();
+  const { workspaceId } = useWorkspace();
   const local = useLocalProjects();
-  const cloud = useCloudProjects(isPro && userId ? userId : "__none__");
+  const cloud = useCloudProjects(isPro && workspaceId ? workspaceId : "__none__", userId ?? "");
   return isPro && userId ? cloud : local;
 };
