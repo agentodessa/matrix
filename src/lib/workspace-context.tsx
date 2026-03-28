@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/lib/auth-store";
-import { useTeams } from "@/lib/teams-store";
+import { useTeams, useTeamMembers } from "@/lib/teams-store";
 import { supabase } from "@/lib/supabase";
 import type { Workspace } from "@/types/workspace";
 
@@ -11,6 +11,7 @@ interface WorkspaceContextValue {
   workspaceType: "personal" | "team";
   workspaces: { id: string; name: string; type: "personal" | "team" }[];
   setWorkspace: (id: string) => void;
+  workspaceRole: "personal" | "owner" | "admin" | "member";
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue>({
@@ -19,11 +20,13 @@ const WorkspaceContext = createContext<WorkspaceContextValue>({
   workspaceType: "personal",
   workspaces: [],
   setWorkspace: () => {},
+  workspaceRole: "personal",
 });
 
 const STORAGE_KEY = "@executive_workspace";
 
 export const useWorkspace = () => useContext(WorkspaceContext);
+export const useWorkspaceRole = () => useContext(WorkspaceContext).workspaceRole;
 
 export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -32,26 +35,29 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   const [teamWorkspaces, setTeamWorkspaces] = useState<Workspace[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  const userId = user?.id;
+  const teamIds = teams.map((t) => t.id).join(",");
+
   useEffect(() => {
-    if (!user) { setPersonalWs(null); setTeamWorkspaces([]); return; }
+    if (!userId) { setPersonalWs(null); setTeamWorkspaces([]); return; }
     const load = async () => {
       const { data } = await supabase
-        .from("workspaces").select("*").eq("type", "personal").eq("owner_id", user.id).single();
+        .from("workspaces").select("*").eq("type", "personal").eq("owner_id", userId).single();
       if (data) setPersonalWs(data as Workspace);
     };
     load();
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
-    if (teams.length === 0) { setTeamWorkspaces([]); return; }
+    if (!teamIds) { setTeamWorkspaces([]); return; }
     const load = async () => {
-      const teamIds = teams.map((t) => t.id);
+      const ids = teamIds.split(",");
       const { data } = await supabase
-        .from("workspaces").select("*").eq("type", "team").in("team_id", teamIds);
+        .from("workspaces").select("*").eq("type", "team").in("team_id", ids);
       if (data) setTeamWorkspaces(data as Workspace[]);
     };
     load();
-  }, [teams]);
+  }, [teamIds]);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((saved) => { if (saved) setActiveId(saved); });
@@ -69,6 +75,14 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
 
   const active = allWorkspaces.find((w) => w.id === activeId) ?? allWorkspaces[0] ?? null;
 
+  const activeTeamId = teamWorkspaces.find((tw) => tw.id === active?.id)?.team_id ?? null;
+  const { members } = useTeamMembers(active?.type === "team" ? activeTeamId : null);
+  const myRole = useMemo(() => {
+    if (!active || active.type === "personal") return "personal" as const;
+    const me = members.find((m) => m.user_id === userId);
+    return (me?.role ?? "member") as "owner" | "admin" | "member";
+  }, [active, members, userId]);
+
   const setWorkspace = (id: string) => {
     setActiveId(id);
     AsyncStorage.setItem(STORAGE_KEY, id);
@@ -80,6 +94,7 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     workspaceType: active?.type ?? "personal",
     workspaces: allWorkspaces,
     setWorkspace,
+    workspaceRole: myRole,
   };
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
