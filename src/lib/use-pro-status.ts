@@ -16,13 +16,15 @@ let resolved = false;
 let resolvePromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
-const notify = () => { listeners.forEach((l) => l()); };
+const notify = () => {
+  listeners.forEach((l) => l());
+};
 
 async function persistProStatus() {
   try {
     await AsyncStorage.setItem(
       PRO_CACHE_KEY,
-      JSON.stringify({ userId: cachedUserId, isPro: cachedIsPro })
+      JSON.stringify({ userId: cachedUserId, isPro: cachedIsPro }),
     );
   } catch {}
 }
@@ -42,7 +44,9 @@ async function restoreProStatus(): Promise<boolean> {
 
 async function refresh() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       cachedUserId = null;
       cachedIsPro = false;
@@ -95,7 +99,9 @@ export const useProStatus = (): { userId: string | null; isPro: boolean } => {
     if (!resolved && resolvePromise) {
       resolvePromise.then(() => listener());
     }
-    return () => { listeners.delete(listener); };
+    return () => {
+      listeners.delete(listener);
+    };
   }, []);
 
   // Team workspaces always have Pro features (owner pays for Pro Team)

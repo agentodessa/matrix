@@ -83,9 +83,5 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
     return () => sub.remove();
   }, []);
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };

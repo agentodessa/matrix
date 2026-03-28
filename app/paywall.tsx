@@ -44,14 +44,10 @@ export default function PaywallScreen() {
 
   const handleSubscribe = async (method: PaymentMethod) => {
     if (!isAuthenticated) {
-      Alert.alert(
-        t("Account Required"),
-        t("Create an account first to subscribe to Pro."),
-        [
-          { text: t("Cancel"), style: "cancel" },
-          { text: t("Sign Up"), onPress: () => router.push("/auth/sign-up") },
-        ]
-      );
+      Alert.alert(t("Account Required"), t("Create an account first to subscribe to Pro."), [
+        { text: t("Cancel"), style: "cancel" },
+        { text: t("Sign Up"), onPress: () => router.push("/auth/sign-up") },
+      ]);
       return;
     }
 
@@ -77,9 +73,7 @@ export default function PaywallScreen() {
           <Text className="font-display text-2xl font-bold text-heading">
             {t("You're on Pro Team!")}
           </Text>
-          <Text className="font-display text-base font-bold text-meta">
-            {t("Pro Team")}
-          </Text>
+          <Text className="font-display text-base font-bold text-meta">{t("Pro Team")}</Text>
           <Text className="font-body text-sm text-meta">
             {t("{{count}} team members", { count: subscription?.seatCount ?? 0 })}
           </Text>
@@ -107,7 +101,9 @@ export default function PaywallScreen() {
             {t("You're on Pro!")}
           </Text>
           <Text className="font-body text-sm text-meta text-center leading-5">
-            {t("You have access to all features.")}{"\n"}{t("Thank you for your support.")}
+            {t("You have access to all features.")}
+            {"\n"}
+            {t("Thank you for your support.")}
           </Text>
           <View className="w-full gap-3 mt-4">
             <Text className="font-body text-[10px] font-bold text-label tracking-[2px] uppercase ml-1">
@@ -153,11 +149,11 @@ export default function PaywallScreen() {
       >
         {/* Hero */}
         <View className="items-center gap-2 pt-2">
-          <Text className="font-display text-2xl font-bold text-heading">
-            {t("Unlock Pro")}
-          </Text>
+          <Text className="font-display text-2xl font-bold text-heading">{t("Unlock Pro")}</Text>
           <Text className="font-body text-sm text-meta text-center leading-5">
-            {t("Get the full experience with calendar view,")}{"\n"}{t("cloud sync, and more.")}
+            {t("Get the full experience with calendar view,")}
+            {"\n"}
+            {t("cloud sync, and more.")}
           </Text>
         </View>
 
@@ -198,9 +194,7 @@ export default function PaywallScreen() {
             >
               {t("Annual")}
             </Text>
-            <Text className="font-body text-[10px] font-bold text-success">
-              {t("Save 33%")}
-            </Text>
+            <Text className="font-body text-[10px] font-bold text-success">{t("Save 33%")}</Text>
           </Pressable>
         </View>
 
@@ -244,7 +238,9 @@ export default function PaywallScreen() {
             <View className="flex-row items-center gap-2">
               <Text className="font-display text-sm font-bold text-heading">{t("Pro")}</Text>
               <View className="bg-success/15 rounded-full px-2 py-0.5">
-                <Text className="font-body text-[10px] font-bold text-success uppercase">{t("Best")}</Text>
+                <Text className="font-body text-[10px] font-bold text-success uppercase">
+                  {t("Best")}
+                </Text>
               </View>
             </View>
             {FEATURES_PRO.map((f) => (
@@ -267,22 +263,48 @@ export default function PaywallScreen() {
               <Text className="font-body text-xs text-body flex-1">{f}</Text>
             </View>
           ))}
-          <Text className="font-body text-xs text-meta">+${PRICING.seat.toFixed(2)}/{t("per seat/mo")}</Text>
+          <Text className="font-body text-xs text-meta">
+            +${PRICING.seat.toFixed(2)}/{t("per seat/mo")}
+          </Text>
         </View>
 
         {/* Plan toggle */}
         <View className="flex-row bg-btn-surface rounded-xl p-1">
           <Pressable
-            className={selectedPlan === "pro" ? "flex-1 rounded-lg bg-bg py-3 items-center" : "flex-1 rounded-lg py-3 items-center active:opacity-70"}
+            className={
+              selectedPlan === "pro"
+                ? "flex-1 rounded-lg bg-bg py-3 items-center"
+                : "flex-1 rounded-lg py-3 items-center active:opacity-70"
+            }
             onPress={() => setSelectedPlan("pro")}
           >
-            <Text className={selectedPlan === "pro" ? "font-body text-sm font-bold text-heading" : "font-body text-sm font-bold text-meta"}>{t("Pro")}</Text>
+            <Text
+              className={
+                selectedPlan === "pro"
+                  ? "font-body text-sm font-bold text-heading"
+                  : "font-body text-sm font-bold text-meta"
+              }
+            >
+              {t("Pro")}
+            </Text>
           </Pressable>
           <Pressable
-            className={selectedPlan === "pro_team" ? "flex-1 rounded-lg bg-bg py-3 items-center" : "flex-1 rounded-lg py-3 items-center active:opacity-70"}
+            className={
+              selectedPlan === "pro_team"
+                ? "flex-1 rounded-lg bg-bg py-3 items-center"
+                : "flex-1 rounded-lg py-3 items-center active:opacity-70"
+            }
             onPress={() => setSelectedPlan("pro_team")}
           >
-            <Text className={selectedPlan === "pro_team" ? "font-body text-sm font-bold text-heading" : "font-body text-sm font-bold text-meta"}>{t("Pro Team")}</Text>
+            <Text
+              className={
+                selectedPlan === "pro_team"
+                  ? "font-body text-sm font-bold text-heading"
+                  : "font-body text-sm font-bold text-meta"
+              }
+            >
+              {t("Pro Team")}
+            </Text>
           </Pressable>
         </View>
 
@@ -310,15 +332,14 @@ export default function PaywallScreen() {
             onPress={() => handleSubscribe("stripe")}
             disabled={loading}
           >
-            <Text className="font-body text-base font-bold text-heading">
-              {t("Pay with Card")}
-            </Text>
+            <Text className="font-body text-base font-bold text-heading">{t("Pay with Card")}</Text>
           </Pressable>
         </View>
 
         {/* Terms */}
         <Text className="font-body text-[10px] text-meta text-center leading-4">
-          {t("Payment will be charged at confirmation. Subscription auto-renews unless")}{"\n"}
+          {t("Payment will be charged at confirmation. Subscription auto-renews unless")}
+          {"\n"}
           {t("cancelled at least 24 hours before the end of the current period.")}
         </Text>
       </ScrollView>

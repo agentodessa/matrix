@@ -4,69 +4,171 @@
 <div class="cards">
   <!-- Option A: Animated Sliding Pill -->
   <div class="card" data-choice="sliding-pill" onclick="toggleSelect(this)">
-    <div class="card-image" style="padding:24px;background:#1a1f22">
+    <div class="card-image" style="padding: 24px; background: #1a1f22">
       <!-- Mockup of sliding pill -->
-      <div style="background:#2a3036;border-radius:12px;padding:4px;display:flex;position:relative;width:260px;margin:0 auto">
-        <div style="position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);background:#3a4248;border-radius:9px;transition:transform 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>
-        <div style="flex:1;text-align:center;padding:10px 0;z-index:1">
-          <span style="color:#e0e4e6;font-weight:700;font-size:13px;font-family:system-ui">Focus</span>
+      <div
+        style="
+          background: #2a3036;
+          border-radius: 12px;
+          padding: 4px;
+          display: flex;
+          position: relative;
+          width: 260px;
+          margin: 0 auto;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: #3a4248;
+            border-radius: 9px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          "
+        ></div>
+        <div style="flex: 1; text-align: center; padding: 10px 0; z-index: 1">
+          <span style="color: #e0e4e6; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Focus</span
+          >
         </div>
-        <div style="flex:1;text-align:center;padding:10px 0;z-index:1">
-          <span style="color:#737686;font-weight:700;font-size:13px;font-family:system-ui">Matrix</span>
+        <div style="flex: 1; text-align: center; padding: 10px 0; z-index: 1">
+          <span style="color: #737686; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Matrix</span
+          >
         </div>
       </div>
-      <p style="color:#737686;font-size:11px;text-align:center;margin-top:12px;font-family:system-ui">Animated pill slides left ↔ right on tap</p>
+      <p
+        style="
+          color: #737686;
+          font-size: 11px;
+          text-align: center;
+          margin-top: 12px;
+          font-family: system-ui;
+        "
+      >
+        Animated pill slides left ↔ right on tap
+      </p>
     </div>
     <div class="card-body">
       <h3>A — Sliding Pill</h3>
-      <p>A background pill animates smoothly between tabs using Reanimated shared value. Classic iOS segmented control feel with spring physics. Subtle shadow on the pill adds depth.</p>
+      <p>
+        A background pill animates smoothly between tabs using Reanimated shared value. Classic iOS
+        segmented control feel with spring physics. Subtle shadow on the pill adds depth.
+      </p>
     </div>
   </div>
 
   <!-- Option B: Underline with Fade -->
   <div class="card" data-choice="underline" onclick="toggleSelect(this)">
-    <div class="card-image" style="padding:24px;background:#1a1f22">
+    <div class="card-image" style="padding: 24px; background: #1a1f22">
       <!-- Mockup of underline style -->
-      <div style="display:flex;width:260px;margin:0 auto;position:relative">
-        <div style="flex:1;text-align:center;padding:10px 0">
-          <span style="color:#e0e4e6;font-weight:700;font-size:13px;font-family:system-ui">Focus</span>
-          <div style="height:2px;background:#ac0b18;border-radius:1px;margin-top:8px"></div>
+      <div style="display: flex; width: 260px; margin: 0 auto; position: relative">
+        <div style="flex: 1; text-align: center; padding: 10px 0">
+          <span style="color: #e0e4e6; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Focus</span
+          >
+          <div style="height: 2px; background: #ac0b18; border-radius: 1px; margin-top: 8px"></div>
         </div>
-        <div style="flex:1;text-align:center;padding:10px 0">
-          <span style="color:#737686;font-weight:700;font-size:13px;font-family:system-ui">Matrix</span>
-          <div style="height:2px;background:transparent;margin-top:8px"></div>
+        <div style="flex: 1; text-align: center; padding: 10px 0">
+          <span style="color: #737686; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Matrix</span
+          >
+          <div style="height: 2px; background: transparent; margin-top: 8px"></div>
         </div>
       </div>
-      <p style="color:#737686;font-size:11px;text-align:center;margin-top:12px;font-family:system-ui">Accent underline slides to selected tab</p>
+      <p
+        style="
+          color: #737686;
+          font-size: 11px;
+          text-align: center;
+          margin-top: 12px;
+          font-family: system-ui;
+        "
+      >
+        Accent underline slides to selected tab
+      </p>
     </div>
     <div class="card-body">
       <h3>B — Animated Underline</h3>
-      <p>Minimal, editorial feel. A 2px accent bar (Executive Red) slides underneath the active label. Text cross-fades between active/inactive colors. No background container — just typography and the bar. Matches the "Architectural Dossier" aesthetic.</p>
+      <p>
+        Minimal, editorial feel. A 2px accent bar (Executive Red) slides underneath the active
+        label. Text cross-fades between active/inactive colors. No background container — just
+        typography and the bar. Matches the "Architectural Dossier" aesthetic.
+      </p>
     </div>
   </div>
 
   <!-- Option C: Glass Morphism Toggle -->
   <div class="card" data-choice="glass-morph" onclick="toggleSelect(this)">
-    <div class="card-image" style="padding:24px;background:#1a1f22">
+    <div class="card-image" style="padding: 24px; background: #1a1f22">
       <!-- Mockup of glass toggle -->
-      <div style="background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border-radius:14px;padding:4px;display:flex;position:relative;width:260px;margin:0 auto;border:1px solid rgba(255,255,255,0.08)">
-        <div style="position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);background:rgba(255,255,255,0.1);border-radius:10px;border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 16px rgba(0,0,0,0.2)"></div>
-        <div style="flex:1;text-align:center;padding:10px 0;z-index:1">
-          <span style="color:#e0e4e6;font-weight:700;font-size:13px;font-family:system-ui">Focus</span>
+      <div
+        style="
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(20px);
+          border-radius: 14px;
+          padding: 4px;
+          display: flex;
+          position: relative;
+          width: 260px;
+          margin: 0 auto;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+          "
+        ></div>
+        <div style="flex: 1; text-align: center; padding: 10px 0; z-index: 1">
+          <span style="color: #e0e4e6; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Focus</span
+          >
         </div>
-        <div style="flex:1;text-align:center;padding:10px 0;z-index:1">
-          <span style="color:#737686;font-weight:700;font-size:13px;font-family:system-ui">Matrix</span>
+        <div style="flex: 1; text-align: center; padding: 10px 0; z-index: 1">
+          <span style="color: #737686; font-weight: 700; font-size: 13px; font-family: system-ui"
+            >Matrix</span
+          >
         </div>
       </div>
-      <p style="color:#737686;font-size:11px;text-align:center;margin-top:12px;font-family:system-ui">Frosted glass pill with animated slide</p>
+      <p
+        style="
+          color: #737686;
+          font-size: 11px;
+          text-align: center;
+          margin-top: 12px;
+          font-family: system-ui;
+        "
+      >
+        Frosted glass pill with animated slide
+      </p>
     </div>
     <div class="card-body">
       <h3>C — Glass Morph Pill</h3>
-      <p>Leverages the existing GlassView on iOS 26+. The sliding pill has a frosted glass effect with subtle border glow. Falls back to a semi-transparent pill on older versions. Premium, tactile feel that matches the liquid glass tab bar.</p>
+      <p>
+        Leverages the existing GlassView on iOS 26+. The sliding pill has a frosted glass effect
+        with subtle border glow. Falls back to a semi-transparent pill on older versions. Premium,
+        tactile feel that matches the liquid glass tab bar.
+      </p>
     </div>
   </div>
 </div>
 
-<div class="section" style="margin-top:16px">
-  <p class="subtitle"><strong>All options include:</strong> Reanimated spring animation, text color cross-fade, and haptic feedback on tap (iOS).</p>
+<div class="section" style="margin-top: 16px">
+  <p class="subtitle">
+    <strong>All options include:</strong> Reanimated spring animation, text color cross-fade, and
+    haptic feedback on tap (iOS).
+  </p>
 </div>

@@ -29,7 +29,9 @@ export const useRealtimeSync = () => {
     let mounted = true;
 
     async function setup() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session || !mounted) return;
 
       const userId = session.user.id;
@@ -38,19 +40,31 @@ export const useRealtimeSync = () => {
       if (!teamChannel) {
         teamChannel = supabase
           .channel(`teams-${userId}`)
-          .on("postgres_changes", {
-            event: "*", schema: "public", table: "team_members",
-            filter: `user_id=eq.${userId}`,
-          }, () => {
-            queryClient.invalidateQueries({ queryKey: ["teams"] });
-            queryClient.invalidateQueries({ queryKey: ["team_members"] });
-          })
-          .on("postgres_changes", {
-            event: "*", schema: "public", table: "team_invites",
-          }, () => {
-            queryClient.invalidateQueries({ queryKey: ["team_invites"] });
-            queryClient.invalidateQueries({ queryKey: ["pending_invites"] });
-          })
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "team_members",
+              filter: `user_id=eq.${userId}`,
+            },
+            () => {
+              queryClient.invalidateQueries({ queryKey: ["teams"] });
+              queryClient.invalidateQueries({ queryKey: ["team_members"] });
+            },
+          )
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "team_invites",
+            },
+            () => {
+              queryClient.invalidateQueries({ queryKey: ["team_invites"] });
+              queryClient.invalidateQueries({ queryKey: ["pending_invites"] });
+            },
+          )
           .subscribe();
       }
 
@@ -75,20 +89,34 @@ export const useRealtimeSync = () => {
 
       channel = supabase
         .channel(`sync-${userId}-${workspaceId}`)
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "tasks",
-          filter: `workspace_id=eq.${workspaceId}`,
-        }, () => invalidateAll(workspaceId))
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "projects",
-          filter: `workspace_id=eq.${workspaceId}`,
-        }, () => invalidateAll(workspaceId))
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "tasks",
+            filter: `workspace_id=eq.${workspaceId}`,
+          },
+          () => invalidateAll(workspaceId),
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "projects",
+            filter: `workspace_id=eq.${workspaceId}`,
+          },
+          () => invalidateAll(workspaceId),
+        )
         .subscribe();
     }
 
     setup();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") {
         didSetup.current = false;
         setup();
@@ -119,7 +147,9 @@ export const useRealtimeSync = () => {
     if (subscribedWorkspaceId === workspaceId) return;
 
     async function resubscribe() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const userId = session.user.id;
@@ -142,14 +172,26 @@ export const useRealtimeSync = () => {
 
       channel = supabase
         .channel(`sync-${userId}-${workspaceId}`)
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "tasks",
-          filter: `workspace_id=eq.${workspaceId}`,
-        }, () => invalidateAll(workspaceId))
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "projects",
-          filter: `workspace_id=eq.${workspaceId}`,
-        }, () => invalidateAll(workspaceId))
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "tasks",
+            filter: `workspace_id=eq.${workspaceId}`,
+          },
+          () => invalidateAll(workspaceId),
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "projects",
+            filter: `workspace_id=eq.${workspaceId}`,
+          },
+          () => invalidateAll(workspaceId),
+        )
         .subscribe();
     }
 

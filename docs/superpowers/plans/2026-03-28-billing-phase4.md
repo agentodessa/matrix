@@ -12,22 +12,23 @@
 
 ## File Structure
 
-| Action | Path | Purpose |
-|--------|------|---------|
-| Create | `supabase/migrations/009_pro_team_billing.sql` | Add seat columns + auto-update trigger |
-| Modify | `src/types/user.ts` | Add `"pro_team"` plan, seat pricing |
-| Modify | `src/lib/features.ts` | Three-tier feature gating + `teamWorkspace` feature |
-| Modify | `src/lib/subscription-store.ts` | Pro Team subscribe flow with seat count |
-| Modify | `src/lib/workspace-context.tsx` | Add `useWorkspaceProStatus()` for workspace-level Pro |
-| Modify | `app/paywall.tsx` | Three-tier plan display with seat pricing |
-| Modify | `src/components/settings/SubscriptionSection.tsx` | Show Pro Team info with seats |
-| Modify | `app/team.tsx` | Gate team creation behind Pro Team plan |
+| Action | Path                                              | Purpose                                               |
+| ------ | ------------------------------------------------- | ----------------------------------------------------- |
+| Create | `supabase/migrations/009_pro_team_billing.sql`    | Add seat columns + auto-update trigger                |
+| Modify | `src/types/user.ts`                               | Add `"pro_team"` plan, seat pricing                   |
+| Modify | `src/lib/features.ts`                             | Three-tier feature gating + `teamWorkspace` feature   |
+| Modify | `src/lib/subscription-store.ts`                   | Pro Team subscribe flow with seat count               |
+| Modify | `src/lib/workspace-context.tsx`                   | Add `useWorkspaceProStatus()` for workspace-level Pro |
+| Modify | `app/paywall.tsx`                                 | Three-tier plan display with seat pricing             |
+| Modify | `src/components/settings/SubscriptionSection.tsx` | Show Pro Team info with seats                         |
+| Modify | `app/team.tsx`                                    | Gate team creation behind Pro Team plan               |
 
 ---
 
 ### Task 1: Database migration — seat columns and trigger
 
 **Files:**
+
 - Create: `supabase/migrations/009_pro_team_billing.sql`
 
 - [ ] **Step 1: Create migration**
@@ -87,6 +88,7 @@ git commit -m "feat: add seat_count/seat_price columns and auto-update trigger"
 ### Task 2: Update types and pricing
 
 **Files:**
+
 - Modify: `src/types/user.ts`
 
 - [ ] **Step 1: Update Plan type and PRICING**
@@ -98,6 +100,7 @@ export type Plan = "free" | "pro" | "pro_team";
 ```
 
 Update PRICING:
+
 ```typescript
 export const PRICING = {
   monthly: 4.99,
@@ -107,6 +110,7 @@ export const PRICING = {
 ```
 
 Add seat fields to `Subscription` interface:
+
 ```typescript
 export interface Subscription {
   plan: Plan;
@@ -131,6 +135,7 @@ git commit -m "feat: add pro_team plan type with seat pricing"
 ### Task 3: Update feature gating
 
 **Files:**
+
 - Modify: `src/lib/features.ts`
 
 - [ ] **Step 1: Add three-tier gating**
@@ -179,6 +184,7 @@ git commit -m "feat: add three-tier feature gating with teamWorkspace feature"
 ### Task 4: Update subscription store
 
 **Files:**
+
 - Modify: `src/lib/subscription-store.ts`
 
 - [ ] **Step 1: Update store for Pro Team**
@@ -186,6 +192,7 @@ git commit -m "feat: add three-tier feature gating with teamWorkspace feature"
 Read the file. Make these changes:
 
 **`getPlan`**: Handle `"pro_team"`:
+
 ```typescript
 const getPlan = (sub: Subscription | null): Plan => {
   if (!sub || sub.status !== "active") return "free";
@@ -197,6 +204,7 @@ const getPlan = (sub: Subscription | null): Plan => {
 ```
 
 **`mapRow`**: Handle `"pro_team"` and seat fields:
+
 ```typescript
 const mapRow = (row: Record<string, unknown>): Subscription => {
   const plan = row.plan as string;
@@ -213,6 +221,7 @@ const mapRow = (row: Record<string, unknown>): Subscription => {
 ```
 
 **`subscribeMutation`**: Add `planType` parameter, calculate total with seats:
+
 ```typescript
 mutationFn: async ({ billingCycle, paymentMethod, planType }: { billingCycle: BillingCycle; paymentMethod: PaymentMethod; planType: "pro" | "pro_team" }) => {
   if (!userId) throw new Error("Not authenticated");
@@ -246,6 +255,7 @@ mutationFn: async ({ billingCycle, paymentMethod, planType }: { billingCycle: Bi
 ```
 
 Update the `subscribe` function signature:
+
 ```typescript
 subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod, planType: "pro" | "pro_team" = "pro") => {
   try {
@@ -258,12 +268,14 @@ subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod, plan
 ```
 
 Update `isPro` to include pro_team:
+
 ```typescript
 isPro: plan === "pro" || plan === "pro_team",
 isProTeam: plan === "pro_team",
 ```
 
 Update `restorePurchase` to check for both plans:
+
 ```typescript
 if (fresh && (fresh.plan === "pro" || fresh.plan === "pro_team") && fresh.status === "active") {
 ```
@@ -280,11 +292,13 @@ git commit -m "feat: update subscription store for Pro Team plan with seat suppo
 ### Task 5: Add workspace-level Pro status
 
 **Files:**
+
 - Modify: `src/lib/workspace-context.tsx`
 
 - [ ] **Step 1: Add useWorkspaceProStatus hook**
 
 Read the file. This hook determines if the active workspace has Pro features:
+
 - Personal workspace: check user's own subscription
 - Team workspace: always has Pro features (owner pays for Pro Team)
 
@@ -308,6 +322,7 @@ Update `src/lib/use-pro-status.ts` instead — read it first and add workspace a
 Read `src/lib/use-pro-status.ts`. If the active workspace is `"team"`, treat as Pro regardless of the user's personal plan.
 
 Import `useWorkspace` and check:
+
 ```typescript
 const { workspaceType } = useWorkspace();
 // Team workspaces always have Pro features
@@ -328,6 +343,7 @@ git commit -m "feat: team workspaces bypass Pro gate for members"
 ### Task 6: Update paywall with three-tier display
 
 **Files:**
+
 - Modify: `app/paywall.tsx`
 
 - [ ] **Step 1: Rebuild paywall with three plans**
@@ -337,6 +353,7 @@ Read the current file. Major changes:
 1. Add `isProTeam` from `useSubscription()`
 2. Add `selectedPlan` state: `"pro" | "pro_team"`
 3. Add Pro Team features list:
+
 ```typescript
 const FEATURES_TEAM = [
   t("Everything in Pro"),
@@ -347,10 +364,11 @@ const FEATURES_TEAM = [
 ```
 
 4. Add seat pricing display when Pro Team is selected:
+
 ```typescript
 const seatCount = sub?.seatCount ?? 0;
 const seatTotal = seatCount * PRICING.seat;
-const totalMonthly = (selectedPlan === "pro_team" ? PRICING.monthly + seatTotal : price);
+const totalMonthly = selectedPlan === "pro_team" ? PRICING.monthly + seatTotal : price;
 ```
 
 5. Show three plan cards: Free, Pro, Pro Team (Pro Team has seat pricing line)
@@ -359,6 +377,7 @@ const totalMonthly = (selectedPlan === "pro_team" ? PRICING.monthly + seatTotal 
 7. If already on Pro Team, show current plan with seat count
 
 8. Update `handleSubscribe` to pass `selectedPlan`:
+
 ```typescript
 const result = await subscribe(billingCycle, method, selectedPlan);
 ```
@@ -366,6 +385,7 @@ const result = await subscribe(billingCycle, method, selectedPlan);
 9. Add downgrade flow: Pro Team → Pro with confirmation warning about team access loss
 
 The paywall is complex — provide the full updated JSX in the implementation. Key sections:
+
 - isPro && !isProTeam view: show upgrade to Pro Team option
 - isProTeam view: show current plan with seat info
 - Default view: three-tier comparison with plan selector
@@ -382,6 +402,7 @@ git commit -m "feat: rebuild paywall with three-tier Pro Team display"
 ### Task 7: Update SubscriptionSection
 
 **Files:**
+
 - Modify: `src/components/settings/SubscriptionSection.tsx`
 
 - [ ] **Step 1: Show Pro Team info**
@@ -396,6 +417,7 @@ import { PRICING } from "@/types/user";
 Get `isProTeam` and `subscription` from `useSubscription()`.
 
 Show:
+
 - Free: "Upgrade to Pro" (existing)
 - Pro: "Pro Plan" subtitle + "Upgrade to Pro Team" as secondary text
 - Pro Team: "Pro Team" subtitle with seat count: "N seats × $2.99/mo"
@@ -425,16 +447,19 @@ git commit -m "feat: show Pro Team plan info with seat count in Settings"
 ### Task 8: Gate team creation behind Pro Team
 
 **Files:**
+
 - Modify: `app/team.tsx`
 
 - [ ] **Step 1: Add Pro Team gating to team creation**
 
 Read the current file. Add:
+
 ```typescript
 import { useSubscription } from "@/lib/subscription-store";
 ```
 
 Inside `TeamScreen`:
+
 ```typescript
 const { isProTeam } = useSubscription();
 ```
@@ -477,6 +502,7 @@ git commit -m "feat: gate team creation behind Pro Team plan"
 ### Task 9: Extract translations and verify build
 
 **Files:**
+
 - Modify: `src/locales/{en,es,fr,ru}.json`
 
 - [ ] **Step 1: Run extraction**
@@ -488,6 +514,7 @@ npm run i18n:extract
 - [ ] **Step 2: Fill empty translations**
 
 New keys to translate:
+
 - "Pro Team"
 - "Everything in Pro"
 - "Team workspaces"

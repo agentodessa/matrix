@@ -43,42 +43,42 @@
   --color-accent-text: #ffffff;
   --color-accent-soft: #ffb3ac;
 
-  --font-display: 'Manrope', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg: #0b0f10;
-  --color-bg-card: #141a1c;
-  --color-bg-tile: #1c2326;
-  --color-bg-dark: #050708;
-  --color-bg-elevated: #232b2e;
-  --color-heading: #e0e4e6;
-  --color-body: #a9b4b9;
-  --color-label: #8a96a3;
-  --color-meta: #6b777d;
-  --color-slate: #8e98b0;
-  --color-slate-soft: rgba(142, 152, 176, 0.15);
-  --color-slate-track: #2a3439;
-  --color-slate-light: #3d465c;
-  --color-slate-btn: #717c82;
-  --color-urgent: #ffb3ac;
-  --color-urgent-soft: rgba(255, 179, 172, 0.1);
-  --color-strategic: #7bd0ff;
-  --color-strategic-soft: rgba(123, 208, 255, 0.1);
-  --color-success: #4ade80;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-subtle: rgba(255, 255, 255, 0.04);
-  --color-btn-surface: #232b2e;
-  --color-header-bg: #0e1214;
-  --color-avatar-bg: #2a3439;
-  --color-q-do: #ffb3ac;
-  --color-q-schedule: #8e98b0;
-  --color-q-delegate: #7bd0ff;
-  --color-q-eliminate: #6b777d;
-  --color-accent: #ffb3ac;
-  --color-accent-text: #0b0f10;
-  --color-accent-soft: #ffb3ac;
+    --color-bg-card: #141a1c;
+    --color-bg-tile: #1c2326;
+    --color-bg-dark: #050708;
+    --color-bg-elevated: #232b2e;
+    --color-heading: #e0e4e6;
+    --color-body: #a9b4b9;
+    --color-label: #8a96a3;
+    --color-meta: #6b777d;
+    --color-slate: #8e98b0;
+    --color-slate-soft: rgba(142, 152, 176, 0.15);
+    --color-slate-track: #2a3439;
+    --color-slate-light: #3d465c;
+    --color-slate-btn: #717c82;
+    --color-urgent: #ffb3ac;
+    --color-urgent-soft: rgba(255, 179, 172, 0.1);
+    --color-strategic: #7bd0ff;
+    --color-strategic-soft: rgba(123, 208, 255, 0.1);
+    --color-success: #4ade80;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-subtle: rgba(255, 255, 255, 0.04);
+    --color-btn-surface: #232b2e;
+    --color-header-bg: #0e1214;
+    --color-avatar-bg: #2a3439;
+    --color-q-do: #ffb3ac;
+    --color-q-schedule: #8e98b0;
+    --color-q-delegate: #7bd0ff;
+    --color-q-eliminate: #6b777d;
+    --color-accent: #ffb3ac;
+    --color-accent-text: #0b0f10;
+    --color-accent-soft: #ffb3ac;
   }
 }

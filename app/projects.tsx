@@ -27,20 +27,21 @@ export default function ProjectsScreen() {
     tasks.filter((t) => t.project === project && t.status === "active").length;
 
   const trimmed = newName.trim();
-  const isDuplicate = trimmed.length > 0 && projects.some(
-    (p) => p.toLowerCase() === trimmed.toLowerCase()
-  );
+  const isDuplicate =
+    trimmed.length > 0 && projects.some((p) => p.toLowerCase() === trimmed.toLowerCase());
 
   const handleAdd = () => {
     if (!trimmed || isDuplicate) return;
     if (atLimit) {
       Alert.alert(
         t("Project Limit"),
-        t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", { count: FREE_PROJECT_LIMIT }),
+        t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", {
+          count: FREE_PROJECT_LIMIT,
+        }),
         [
           { text: t("Cancel"), style: "cancel" },
           { text: t("Upgrade"), onPress: () => router.push("/paywall") },
-        ]
+        ],
       );
       return;
     }
@@ -52,7 +53,10 @@ export default function ProjectsScreen() {
     const count = taskCountFor(name);
     const message =
       count > 0
-        ? t('"{{name}}" has {{count}} active task. Tasks won\'t be deleted, but they\'ll lose their project label.', { name, count })
+        ? t(
+            "\"{{name}}\" has {{count}} active task. Tasks won't be deleted, but they'll lose their project label.",
+            { name, count },
+          )
         : t('Delete "{{name}}"?', { name });
 
     Alert.alert(t("Remove Project"), message, [
@@ -94,7 +98,9 @@ export default function ProjectsScreen() {
                   </Text>
                 </View>
                 <Text className="font-body text-xs text-meta leading-4">
-                  {t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", { count: FREE_PROJECT_LIMIT })}
+                  {t("Free plan allows {{count}} projects. Upgrade to Pro for unlimited.", {
+                    count: FREE_PROJECT_LIMIT,
+                  })}
                 </Text>
                 <View className="bg-success/15 self-start rounded-full px-3 py-1 mt-1">
                   <Text className="font-body text-xs font-bold text-success">
@@ -144,7 +150,9 @@ export default function ProjectsScreen() {
           </View>
         ) : (
           <View className="bg-bg-card rounded-lg py-6 items-center">
-            <Text className="font-body text-sm text-meta">{t("Only admins can manage projects")}</Text>
+            <Text className="font-body text-sm text-meta">
+              {t("Only admins can manage projects")}
+            </Text>
           </View>
         )}
 

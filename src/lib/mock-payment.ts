@@ -10,7 +10,7 @@ interface PaymentResult {
 
 export async function processPayment(
   amount: number,
-  method: PaymentMethod
+  method: PaymentMethod,
 ): Promise<PaymentResult> {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1500));

@@ -30,10 +30,7 @@ export default function ProfileScreen() {
           {isAuthenticated ? (
             <>
               {user?.avatarUrl ? (
-                <Image
-                  source={{ uri: user.avatarUrl }}
-                  className="w-24 h-24 rounded-full"
-                />
+                <Image source={{ uri: user.avatarUrl }} className="w-24 h-24 rounded-full" />
               ) : (
                 <View className="w-24 h-24 rounded-full bg-success/15 items-center justify-center">
                   <Text style={{ fontSize: 40 }}>
@@ -85,9 +82,7 @@ export default function ProfileScreen() {
         {/* Stats */}
         <View className="flex-row gap-3">
           <View className="flex-1 bg-bg-card rounded-xl p-4 items-center gap-1">
-            <Text className="font-display text-2xl font-extrabold text-heading">
-              {totalActive}
-            </Text>
+            <Text className="font-display text-2xl font-extrabold text-heading">{totalActive}</Text>
             <Text className="font-body text-[10px] font-bold text-meta tracking-widest uppercase">
               {t("Active")}
             </Text>
@@ -140,9 +135,7 @@ export default function ProfileScreen() {
                 router.back();
               }}
             >
-              <Text className="font-body text-base font-bold text-urgent">
-                {t("Sign Out")}
-              </Text>
+              <Text className="font-body text-base font-bold text-urgent">{t("Sign Out")}</Text>
             </Pressable>
           </View>
         ) : (
@@ -160,9 +153,7 @@ export default function ProfileScreen() {
               className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border"
               onPress={() => router.push("/auth/sign-in")}
             >
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Sign In")}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Sign In")}</Text>
             </Pressable>
           </View>
         )}

@@ -89,10 +89,7 @@ export default function TeamScreen() {
               {t("Pending Invites")}
             </Text>
             {pendingInvites.map((invite) => (
-              <View
-                key={invite.id}
-                className="bg-bg-card rounded-xl px-5 py-4 gap-3"
-              >
+              <View key={invite.id} className="bg-bg-card rounded-xl px-5 py-4 gap-3">
                 <Text className="font-display text-base font-bold text-heading">
                   {invite.team_name}
                 </Text>
@@ -101,17 +98,13 @@ export default function TeamScreen() {
                     className="flex-1 bg-success rounded-lg py-2.5 items-center active:opacity-80"
                     onPress={() => handleAccept(invite.id, invite.team_id)}
                   >
-                    <Text className="font-body text-sm font-bold text-bg">
-                      {t("Accept")}
-                    </Text>
+                    <Text className="font-body text-sm font-bold text-bg">{t("Accept")}</Text>
                   </Pressable>
                   <Pressable
                     className="flex-1 bg-btn-surface rounded-lg py-2.5 items-center active:opacity-70"
                     onPress={() => handleDecline(invite.id)}
                   >
-                    <Text className="font-body text-sm font-bold text-meta">
-                      {t("Decline")}
-                    </Text>
+                    <Text className="font-body text-sm font-bold text-meta">{t("Decline")}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -162,13 +155,19 @@ export default function TeamScreen() {
               {t("New Team")}
             </Text>
             <View className="bg-bg-card rounded-lg p-5 gap-3">
-              <Text className="font-body text-sm font-bold text-heading">{t("Pro Team required")}</Text>
-              <Text className="font-body text-sm text-body">{t("Upgrade to Pro Team to create and manage teams.")}</Text>
+              <Text className="font-body text-sm font-bold text-heading">
+                {t("Pro Team required")}
+              </Text>
+              <Text className="font-body text-sm text-body">
+                {t("Upgrade to Pro Team to create and manage teams.")}
+              </Text>
               <Pressable
                 className="bg-success rounded-lg py-3 items-center active:opacity-80"
                 onPress={() => router.push("/paywall")}
               >
-                <Text className="font-body text-sm font-bold text-bg">{t("Upgrade to Pro Team")}</Text>
+                <Text className="font-body text-sm font-bold text-bg">
+                  {t("Upgrade to Pro Team")}
+                </Text>
               </Pressable>
             </View>
           </View>

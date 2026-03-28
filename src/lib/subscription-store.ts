@@ -55,7 +55,15 @@ export const useSubscription = () => {
   const plan = getPlan(sub);
 
   const subscribeMutation = useMutation({
-    mutationFn: async ({ billingCycle, paymentMethod, planType }: { billingCycle: BillingCycle; paymentMethod: PaymentMethod; planType: "pro" | "pro_team" }) => {
+    mutationFn: async ({
+      billingCycle,
+      paymentMethod,
+      planType,
+    }: {
+      billingCycle: BillingCycle;
+      paymentMethod: PaymentMethod;
+      planType: "pro" | "pro_team";
+    }) => {
       if (!userId) throw new Error("Not authenticated");
 
       const amount = billingCycle === "monthly" ? PRICING.monthly : PRICING.annual;
@@ -67,9 +75,8 @@ export const useSubscription = () => {
       if (billingCycle === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
       else expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
-      const { error } = await supabase
-        .from("subscriptions")
-        .upsert({
+      const { error } = await supabase.from("subscriptions").upsert(
+        {
           user_id: userId,
           plan: planType,
           billing_cycle: billingCycle,
@@ -77,7 +84,9 @@ export const useSubscription = () => {
           start_date: now.toISOString(),
           expires_at: expiresAt.toISOString(),
           stripe_subscription_id: result.transactionId,
-        }, { onConflict: "user_id" });
+        },
+        { onConflict: "user_id" },
+      );
 
       if (error) throw new Error(error.message);
 
@@ -108,7 +117,7 @@ export const useSubscription = () => {
     },
     onSuccess: () => {
       qc.setQueryData<Subscription | null>(["subscription", userId], (old) =>
-        old ? { ...old, status: "cancelled" } : null
+        old ? { ...old, status: "cancelled" } : null,
       );
     },
   });
@@ -119,7 +128,11 @@ export const useSubscription = () => {
     isPro: plan === "pro" || plan === "pro_team",
     isProTeam: plan === "pro_team",
 
-    subscribe: async (billingCycle: BillingCycle, paymentMethod: PaymentMethod, planType: "pro" | "pro_team" = "pro") => {
+    subscribe: async (
+      billingCycle: BillingCycle,
+      paymentMethod: PaymentMethod,
+      planType: "pro" | "pro_team" = "pro",
+    ) => {
       try {
         await subscribeMutation.mutateAsync({ billingCycle, paymentMethod, planType });
         return { success: true, error: null };
@@ -129,14 +142,20 @@ export const useSubscription = () => {
     },
 
     cancelSubscription: async () => {
-      try { await cancelMutation.mutateAsync(); } catch {}
+      try {
+        await cancelMutation.mutateAsync();
+      } catch {}
     },
 
     restorePurchase: async () => {
       await qc.invalidateQueries({ queryKey: ["subscription"] });
       if (!userId) return { success: false };
       const fresh = await fetchSubscription(userId);
-      if (fresh && (fresh.plan === "pro" || fresh.plan === "pro_team") && fresh.status === "active") {
+      if (
+        fresh &&
+        (fresh.plan === "pro" || fresh.plan === "pro_team") &&
+        fresh.status === "active"
+      ) {
         qc.setQueryData(["subscription", userId], fresh);
         return { success: true };
       }

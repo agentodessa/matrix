@@ -12,19 +12,20 @@
 
 ## File Structure
 
-| Action | Path | Purpose |
-|--------|------|---------|
-| Create | `supabase/migrations/008_permissions.sql` | RLS helper + updated policies |
-| Modify | `src/lib/workspace-context.tsx` | Add `useWorkspaceRole()` hook |
-| Modify | `src/components/TaskItem.tsx` | Add delete button, gate by role |
-| Modify | `app/projects.tsx` | Gate create/delete by role |
-| Modify | `app/(tabs)/add.tsx` | Gate project manage link by role |
+| Action | Path                                      | Purpose                          |
+| ------ | ----------------------------------------- | -------------------------------- |
+| Create | `supabase/migrations/008_permissions.sql` | RLS helper + updated policies    |
+| Modify | `src/lib/workspace-context.tsx`           | Add `useWorkspaceRole()` hook    |
+| Modify | `src/components/TaskItem.tsx`             | Add delete button, gate by role  |
+| Modify | `app/projects.tsx`                        | Gate create/delete by role       |
+| Modify | `app/(tabs)/add.tsx`                      | Gate project manage link by role |
 
 ---
 
 ### Task 1: Database migration — permissions RLS
 
 **Files:**
+
 - Create: `supabase/migrations/008_permissions.sql`
 
 - [ ] **Step 1: Create the migration file**
@@ -95,6 +96,7 @@ git commit -m "feat: add role-based RLS policies for tasks and projects"
 ### Task 2: Add `useWorkspaceRole` hook
 
 **Files:**
+
 - Modify: `src/lib/workspace-context.tsx`
 
 - [ ] **Step 1: Add the hook**
@@ -125,6 +127,7 @@ interface WorkspaceContextValue {
 ```
 
 Update the default context:
+
 ```typescript
 workspaceRole: "personal",
 ```
@@ -142,11 +145,13 @@ const myRole = useMemo(() => {
 ```
 
 Add to the value object:
+
 ```typescript
 workspaceRole: myRole,
 ```
 
 Also export a convenience hook:
+
 ```typescript
 export const useWorkspaceRole = () => useContext(WorkspaceContext).workspaceRole;
 ```
@@ -163,17 +168,20 @@ git commit -m "feat: add workspaceRole to context and useWorkspaceRole hook"
 ### Task 3: Gate task deletion in TaskItem
 
 **Files:**
+
 - Modify: `src/components/TaskItem.tsx`
 
 - [ ] **Step 1: Add delete button with role gating**
 
 Read the current file. Add these imports:
+
 ```typescript
 import { useWorkspaceRole } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-store";
 ```
 
 Add a new prop for delete:
+
 ```typescript
 interface TaskItemProps {
   task: Task;
@@ -183,10 +191,12 @@ interface TaskItemProps {
 ```
 
 Inside the component:
+
 ```typescript
 const role = useWorkspaceRole();
 const { user } = useAuth();
-const canDelete = role === "personal" || role === "owner" || role === "admin" || task.created_by === user?.id;
+const canDelete =
+  role === "personal" || role === "owner" || role === "admin" || task.created_by === user?.id;
 ```
 
 In the bottom row (the `View` with `flex-row items-center justify-between`), add a delete button BEFORE the Done/Undo button, only when `canDelete && onDelete`:
@@ -198,15 +208,10 @@ In the bottom row (the `View` with `flex-row items-center justify-between`), add
       onPress={() => onDelete(task.id)}
       className="rounded-full bg-btn-surface px-3 py-1.5"
     >
-      <Text className="font-body text-xs font-semibold text-urgent">
-        {t("Delete")}
-      </Text>
+      <Text className="font-body text-xs font-semibold text-urgent">{t("Delete")}</Text>
     </Pressable>
   )}
-  <Pressable
-    onPress={() => onToggle(task.id)}
-    className="rounded-full bg-btn-surface px-3 py-1.5"
-  >
+  <Pressable onPress={() => onToggle(task.id)} className="rounded-full bg-btn-surface px-3 py-1.5">
     <Text className="font-body text-xs font-semibold text-heading">
       {isCompleted ? t("Undo") : t("Done")}
     </Text>
@@ -230,22 +235,26 @@ git commit -m "feat: add role-gated delete button to TaskItem"
 ### Task 4: Gate project management by role
 
 **Files:**
+
 - Modify: `app/projects.tsx`
 
 - [ ] **Step 1: Add role check to projects screen**
 
 Read the current file. Add import:
+
 ```typescript
 import { useWorkspaceRole } from "@/lib/workspace-context";
 ```
 
 Inside `ProjectsScreen`, add:
+
 ```typescript
 const role = useWorkspaceRole();
 const canManageProjects = role === "personal" || role === "owner" || role === "admin";
 ```
 
 Wrap the "New Project" creation section in a conditional:
+
 ```tsx
 {canManageProjects ? (
   // existing create section (atLimit check + input + create button)
@@ -257,17 +266,18 @@ Wrap the "New Project" creation section in a conditional:
 ```
 
 For the project list, conditionally show the "Remove" button:
+
 ```tsx
-{canManageProjects && (
-  <Pressable
-    className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70"
-    onPress={() => handleDelete(project)}
-  >
-    <Text className="font-body text-xs font-semibold text-urgent">
-      {t("Remove")}
-    </Text>
-  </Pressable>
-)}
+{
+  canManageProjects && (
+    <Pressable
+      className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70"
+      onPress={() => handleDelete(project)}
+    >
+      <Text className="font-body text-xs font-semibold text-urgent">{t("Remove")}</Text>
+    </Pressable>
+  );
+}
 ```
 
 - [ ] **Step 2: Commit**
@@ -282,36 +292,38 @@ git commit -m "feat: gate project create/delete by workspace role"
 ### Task 5: Gate project manage link in Add Task screen
 
 **Files:**
+
 - Modify: `app/(tabs)/add.tsx`
 
 - [ ] **Step 1: Hide manage link for members**
 
 Read the current file. Add import:
+
 ```typescript
 import { useWorkspaceRole } from "@/lib/workspace-context";
 ```
 
 Inside `AddTaskScreen`, add:
+
 ```typescript
 const role = useWorkspaceRole();
 const canManageProjects = role === "personal" || role === "owner" || role === "admin";
 ```
 
 In the Project section, wrap the "Manage" link in a conditional:
+
 ```tsx
-{canManageProjects && (
-  <Pressable
-    className="active:opacity-70"
-    onPress={() => router.push("/projects")}
-  >
-    <Text className="font-body text-xs font-bold text-slate">
-      {t("Manage")}
-    </Text>
-  </Pressable>
-)}
+{
+  canManageProjects && (
+    <Pressable className="active:opacity-70" onPress={() => router.push("/projects")}>
+      <Text className="font-body text-xs font-bold text-slate">{t("Manage")}</Text>
+    </Pressable>
+  );
+}
 ```
 
 Also wrap the "No projects yet — tap to create one" empty state:
+
 ```tsx
 {projects.length === 0 ? (
   canManageProjects ? (
@@ -341,6 +353,7 @@ git commit -m "feat: hide project management for members in Add Task screen"
 ### Task 6: Extract translations and verify build
 
 **Files:**
+
 - Modify: `src/locales/{en,es,fr,ru}.json`
 
 - [ ] **Step 1: Run extraction**

@@ -14,11 +14,15 @@ async function loadLocal(): Promise<Task[]> {
   try {
     const json = await AsyncStorage.getItem(STORAGE_KEY);
     return json ? JSON.parse(json) : [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 async function saveLocal(tasks: Task[]) {
-  try { await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch {}
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  } catch {}
 }
 
 /* ── Supabase helpers ── */
@@ -76,7 +80,9 @@ const toRemoteRow = (task: Task, workspaceId: string, createdBy: string) => {
 let localTasks: Task[] = [];
 let localInit = false;
 const localListeners = new Set<() => void>();
-const notifyLocal = () => { localListeners.forEach((l) => l()); };
+const notifyLocal = () => {
+  localListeners.forEach((l) => l());
+};
 
 const useLocalTasks = () => {
   const [, update] = useState(0);
@@ -88,35 +94,59 @@ const useLocalTasks = () => {
     localListeners.add(listener);
     if (!localInit) {
       localInit = true;
-      loadLocal().then((t) => { localTasks = t; notifyLocal(); });
+      loadLocal().then((t) => {
+        localTasks = t;
+        notifyLocal();
+      });
     }
-    return () => { if (ref.current) localListeners.delete(ref.current); };
+    return () => {
+      if (ref.current) localListeners.delete(ref.current);
+    };
   }, []);
 
   return {
     tasks: localTasks,
     addTask: (task: Omit<Task, "id" | "created_at" | "status">) => {
-      const newTask: Task = { ...task, id: Date.now().toString(), status: "active", created_at: new Date().toISOString() };
+      const newTask: Task = {
+        ...task,
+        id: Date.now().toString(),
+        status: "active",
+        created_at: new Date().toISOString(),
+      };
       localTasks = [newTask, ...localTasks];
-      saveLocal(localTasks); notifyLocal();
+      saveLocal(localTasks);
+      notifyLocal();
     },
     toggleTask: (id: string) => {
-      localTasks = localTasks.map((t) => t.id === id ? {
-        ...t,
-        status: (t.status === "active" ? "completed" : "active") as TaskStatus,
-        completed_at: t.status === "active" ? new Date().toISOString() : undefined,
-      } : t);
-      saveLocal(localTasks); notifyLocal();
+      localTasks = localTasks.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status: (t.status === "active" ? "completed" : "active") as TaskStatus,
+              completed_at: t.status === "active" ? new Date().toISOString() : undefined,
+            }
+          : t,
+      );
+      saveLocal(localTasks);
+      notifyLocal();
     },
-    updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance" | "project">>) => {
-      localTasks = localTasks.map((t) => t.id === id ? { ...t, ...updates } : t);
-      saveLocal(localTasks); notifyLocal();
+    updateTask: (
+      id: string,
+      updates: Partial<Pick<Task, "urgency" | "importance" | "project">>,
+    ) => {
+      localTasks = localTasks.map((t) => (t.id === id ? { ...t, ...updates } : t));
+      saveLocal(localTasks);
+      notifyLocal();
     },
     deleteTask: (id: string) => {
       localTasks = localTasks.filter((t) => t.id !== id);
-      saveLocal(localTasks); notifyLocal();
+      saveLocal(localTasks);
+      notifyLocal();
     },
-    reload: async () => { localTasks = await loadLocal(); notifyLocal(); },
+    reload: async () => {
+      localTasks = await loadLocal();
+      notifyLocal();
+    },
   };
 };
 
@@ -134,19 +164,33 @@ const useCloudTasks = (workspaceId: string, userId: string) => {
 
   const addMutation = useMutation({
     mutationFn: async (task: Omit<Task, "id" | "created_at" | "status">) => {
-      const newTask: Task = { ...task, id: Date.now().toString(), status: "active", created_at: new Date().toISOString() };
-      const { error } = await supabase.from("tasks").insert(toRemoteRow(newTask, workspaceId, userId));
+      const newTask: Task = {
+        ...task,
+        id: Date.now().toString(),
+        status: "active",
+        created_at: new Date().toISOString(),
+      };
+      const { error } = await supabase
+        .from("tasks")
+        .insert(toRemoteRow(newTask, workspaceId, userId));
       if (error) throw error;
       return newTask;
     },
     onMutate: async (task) => {
       await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
       const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
-      const optimistic: Task = { ...task, id: `temp-${Date.now()}`, status: "active", created_at: new Date().toISOString() };
+      const optimistic: Task = {
+        ...task,
+        id: `temp-${Date.now()}`,
+        status: "active",
+        created_at: new Date().toISOString(),
+      };
       qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => [optimistic, ...old]);
       return { prev };
     },
-    onError: (_e, _t, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onError: (_e, _t, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
@@ -155,43 +199,74 @@ const useCloudTasks = (workspaceId: string, userId: string) => {
       const task = tasks.find((t) => t.id === id);
       if (!task) return;
       const newStatus = task.status === "active" ? "completed" : "active";
-      const { error } = await supabase.from("tasks")
-        .update({ status: newStatus, completed_at: newStatus === "completed" ? new Date().toISOString() : null })
-        .eq("id", id).eq("workspace_id", workspaceId);
+      const { error } = await supabase
+        .from("tasks")
+        .update({
+          status: newStatus,
+          completed_at: newStatus === "completed" ? new Date().toISOString() : null,
+        })
+        .eq("id", id)
+        .eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async (id) => {
       await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
       const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
       qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) =>
-        old.map((t) => t.id === id ? {
-          ...t, status: (t.status === "active" ? "completed" : "active") as TaskStatus,
-          completed_at: t.status === "active" ? new Date().toISOString() : undefined,
-        } : t));
+        old.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                status: (t.status === "active" ? "completed" : "active") as TaskStatus,
+                completed_at: t.status === "active" ? new Date().toISOString() : undefined,
+              }
+            : t,
+        ),
+      );
       return { prev };
     },
-    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onError: (_e, _i, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pick<Task, "urgency" | "importance" | "project">> }) => {
-      const { error } = await supabase.from("tasks").update(updates).eq("id", id).eq("workspace_id", workspaceId);
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Pick<Task, "urgency" | "importance" | "project">>;
+    }) => {
+      const { error } = await supabase
+        .from("tasks")
+        .update(updates)
+        .eq("id", id)
+        .eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async ({ id, updates }) => {
       await qc.cancelQueries({ queryKey: ["tasks", workspaceId] });
       const prev = qc.getQueryData<Task[]>(["tasks", workspaceId]);
-      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => old.map((t) => t.id === id ? { ...t, ...updates } : t));
+      qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) =>
+        old.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+      );
       return { prev };
     },
-    onError: (_e, _v, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("tasks").delete().eq("id", id).eq("workspace_id", workspaceId);
+      const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", id)
+        .eq("workspace_id", workspaceId);
       if (error) throw error;
     },
     onMutate: async (id) => {
@@ -200,7 +275,9 @@ const useCloudTasks = (workspaceId: string, userId: string) => {
       qc.setQueryData<Task[]>(["tasks", workspaceId], (old = []) => old.filter((t) => t.id !== id));
       return { prev };
     },
-    onError: (_e, _i, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev); },
+    onError: (_e, _i, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["tasks", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }),
   });
 
@@ -208,9 +285,12 @@ const useCloudTasks = (workspaceId: string, userId: string) => {
     tasks,
     addTask: (task: Omit<Task, "id" | "created_at" | "status">) => addMutation.mutate(task),
     toggleTask: (id: string) => toggleMutation.mutate(id),
-    updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance" | "project">>) => updateMutation.mutate({ id, updates }),
+    updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance" | "project">>) =>
+      updateMutation.mutate({ id, updates }),
     deleteTask: (id: string) => deleteMutation.mutate(id),
-    reload: async () => { await qc.invalidateQueries({ queryKey: ["tasks", workspaceId] }); },
+    reload: async () => {
+      await qc.invalidateQueries({ queryKey: ["tasks", workspaceId] });
+    },
   };
 };
 

@@ -21,7 +21,6 @@ const NativeToggle = ({ value, onChange }: ViewModeToggleProps) => {
         const idx = e.nativeEvent.selectedSegmentIndex;
         onChange(idx === 0 ? "focus" : "matrix");
       }}
-
       fontStyle={{
         fontSize: 13,
         fontWeight: "600",

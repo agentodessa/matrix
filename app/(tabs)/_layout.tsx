@@ -7,9 +7,7 @@ import { WebSidebar } from "@/components/WebSidebar";
 export default function TabLayout() {
   const { t } = useTranslation();
   const { getTasksByQuadrant } = useTasks();
-  const urgentCount = getTasksByQuadrant(1).filter(
-    (t) => t.status === "active"
-  ).length;
+  const urgentCount = getTasksByQuadrant(1).filter((t) => t.status === "active").length;
 
   if (Platform.OS === "web") {
     return <WebSidebar urgentCount={urgentCount} />;
@@ -18,9 +16,7 @@ export default function TabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "scope", selected: "scope" }}
-        />
+        <NativeTabs.Trigger.Icon sf={{ default: "scope", selected: "scope" }} />
         <NativeTabs.Trigger.Label>{t("Focus")}</NativeTabs.Trigger.Label>
         {urgentCount > 0 && (
           <NativeTabs.Trigger.Badge>{String(urgentCount)}</NativeTabs.Trigger.Badge>
@@ -28,9 +24,7 @@ export default function TabLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="tasks">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "list.bullet", selected: "list.bullet" }}
-        />
+        <NativeTabs.Trigger.Icon sf={{ default: "list.bullet", selected: "list.bullet" }} />
         <NativeTabs.Trigger.Label>{t("Tasks")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
@@ -43,16 +37,12 @@ export default function TabLayout() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="calendar">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "calendar", selected: "calendar" }}
-        />
+        <NativeTabs.Trigger.Icon sf={{ default: "calendar", selected: "calendar" }} />
         <NativeTabs.Trigger.Label>{t("Calendar")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="system">
-        <NativeTabs.Trigger.Icon
-          sf={{ default: "gearshape", selected: "gearshape.fill" }}
-        />
+        <NativeTabs.Trigger.Icon sf={{ default: "gearshape", selected: "gearshape.fill" }} />
         <NativeTabs.Trigger.Label>{t("Settings")}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>

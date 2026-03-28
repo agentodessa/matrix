@@ -12,24 +12,25 @@
 
 ## File Structure
 
-| Action | Path | Purpose |
-|--------|------|---------|
+| Action | Path                                            | Purpose                                        |
+| ------ | ----------------------------------------------- | ---------------------------------------------- |
 | Create | `supabase/migrations/007_create_workspaces.sql` | Workspaces table, triggers, migration, new RLS |
-| Create | `src/lib/workspace-context.tsx` | WorkspaceProvider + useWorkspace hook |
-| Create | `src/components/WorkspacePill.tsx` | Header workspace switcher pill |
-| Modify | `src/types/task.ts` | Add workspace_id, created_by to Task interface |
-| Modify | `src/lib/store.ts` | Filter by workspace_id instead of user_id |
-| Modify | `src/lib/projects-store.ts` | Filter by workspace_id instead of user_id |
-| Modify | `src/lib/teams-store.ts` | Create workspace when creating team |
-| Modify | `src/lib/realtime-sync.ts` | Subscribe by workspace_id |
-| Modify | `src/components/Header.tsx` | Add WorkspacePill |
-| Modify | `app/_layout.tsx` | Wrap with WorkspaceProvider |
+| Create | `src/lib/workspace-context.tsx`                 | WorkspaceProvider + useWorkspace hook          |
+| Create | `src/components/WorkspacePill.tsx`              | Header workspace switcher pill                 |
+| Modify | `src/types/task.ts`                             | Add workspace_id, created_by to Task interface |
+| Modify | `src/lib/store.ts`                              | Filter by workspace_id instead of user_id      |
+| Modify | `src/lib/projects-store.ts`                     | Filter by workspace_id instead of user_id      |
+| Modify | `src/lib/teams-store.ts`                        | Create workspace when creating team            |
+| Modify | `src/lib/realtime-sync.ts`                      | Subscribe by workspace_id                      |
+| Modify | `src/components/Header.tsx`                     | Add WorkspacePill                              |
+| Modify | `app/_layout.tsx`                               | Wrap with WorkspaceProvider                    |
 
 ---
 
 ### Task 1: Database migration — workspaces table, data migration, new RLS
 
 **Files:**
+
 - Create: `supabase/migrations/007_create_workspaces.sql`
 
 - [ ] **Step 1: Create the migration file**
@@ -203,6 +204,7 @@ git commit -m "feat: add workspaces table, migrate tasks/projects from user_id t
 ### Task 2: Update Task type and add Workspace type
 
 **Files:**
+
 - Modify: `src/types/task.ts`
 
 - [ ] **Step 1: Update the Task interface**
@@ -246,6 +248,7 @@ git commit -m "feat: add workspace_id and created_by to Task type, add Workspace
 ### Task 3: Create WorkspaceProvider context
 
 **Files:**
+
 - Create: `src/lib/workspace-context.tsx`
 
 - [ ] **Step 1: Create the workspace context**
@@ -359,11 +362,7 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     setWorkspace,
   };
 
-  return (
-    <WorkspaceContext.Provider value={value}>
-      {children}
-    </WorkspaceContext.Provider>
-  );
+  return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 };
 ```
 
@@ -379,6 +378,7 @@ git commit -m "feat: add WorkspaceProvider context with workspace switching"
 ### Task 4: Create WorkspacePill component
 
 **Files:**
+
 - Create: `src/components/WorkspacePill.tsx`
 
 - [ ] **Step 1: Create the pill component**
@@ -406,9 +406,10 @@ export const WorkspacePill = () => {
     Alert.alert(t("Switch Workspace"), undefined, buttons);
   };
 
-  const displayName = workspaces.find((w) => w.id === workspaceId)?.type === "personal"
-    ? t("Personal")
-    : workspaceName;
+  const displayName =
+    workspaces.find((w) => w.id === workspaceId)?.type === "personal"
+      ? t("Personal")
+      : workspaceName;
 
   return (
     <Pressable
@@ -435,6 +436,7 @@ git commit -m "feat: add WorkspacePill component for workspace switching"
 ### Task 5: Wire WorkspaceProvider and WorkspacePill into the app
 
 **Files:**
+
 - Modify: `app/_layout.tsx`
 - Modify: `src/components/Header.tsx`
 
@@ -489,6 +491,7 @@ git commit -m "feat: wire WorkspaceProvider and WorkspacePill into app layout an
 ### Task 6: Update task store to use workspace_id
 
 **Files:**
+
 - Modify: `src/lib/store.ts`
 
 - [ ] **Step 1: Update remote helpers**
@@ -498,6 +501,7 @@ Read the current file first. Then make these changes:
 **`fetchRemoteTasks`**: Change parameter from `userId: string` to `workspaceId: string`. Change query from `.eq("user_id", userId)` to `.eq("workspace_id", workspaceId)`.
 
 **`mapRemoteTask`**: Add `workspace_id` and `created_by` mapping:
+
 ```typescript
 workspace_id: (r.workspace_id as string) ?? undefined,
 created_by: (r.created_by as string) ?? undefined,
@@ -506,6 +510,7 @@ created_by: (r.created_by as string) ?? undefined,
 **`toRemoteRow`**: Change parameter from `(task: Task, userId: string)` to `(task: Task, workspaceId: string, createdBy: string)`. Replace `user_id: userId` with `workspace_id: workspaceId, created_by: createdBy`.
 
 **`useCloudTasks`**: Change parameter from `userId: string` to `workspaceId: string, userId: string`. Update:
+
 - Query key from `["tasks", userId]` to `["tasks", workspaceId]`
 - `fetchRemoteTasks(workspaceId)` instead of `fetchRemoteTasks(userId)`
 - `toRemoteRow(newTask, workspaceId, userId)` instead of `toRemoteRow(newTask, userId)`
@@ -513,6 +518,7 @@ created_by: (r.created_by as string) ?? undefined,
 - All `queryKey: ["tasks", userId]` to `queryKey: ["tasks", workspaceId]`
 
 **`useTasks`**: Import `useWorkspace` from `@/lib/workspace-context`. Get `workspaceId` from it. Pass `workspaceId` to `useCloudTasks`:
+
 ```typescript
 const { workspaceId } = useWorkspace();
 const cloud = useCloudTasks(isPro && workspaceId ? workspaceId : "__none__", userId ?? "");
@@ -530,6 +536,7 @@ git commit -m "feat: update task store to filter by workspace_id"
 ### Task 7: Update projects store to use workspace_id
 
 **Files:**
+
 - Modify: `src/lib/projects-store.ts`
 
 - [ ] **Step 1: Update remote helpers and hooks**
@@ -539,12 +546,14 @@ Same pattern as Task 6:
 **`fetchRemoteProjects`**: Change parameter to `workspaceId: string`. Change `.eq("user_id", userId)` to `.eq("workspace_id", workspaceId)`.
 
 **`useCloudProjects`**: Change parameter to `workspaceId: string, userId: string`. Update:
+
 - Query key from `["projects", userId]` to `["projects", workspaceId]`
 - Insert mutation: `{ workspace_id: workspaceId, created_by: userId, name }` instead of `{ user_id: userId, name }`
 - Delete mutation: `.eq("workspace_id", workspaceId)` instead of `.eq("user_id", userId)`
 - All query key references
 
 **`useProjects`**: Import `useWorkspace`. Get `workspaceId`. Pass to `useCloudProjects`:
+
 ```typescript
 const { workspaceId } = useWorkspace();
 const cloud = useCloudProjects(isPro && workspaceId ? workspaceId : "__none__", userId ?? "");
@@ -562,6 +571,7 @@ git commit -m "feat: update projects store to filter by workspace_id"
 ### Task 8: Create team workspace on team creation
 
 **Files:**
+
 - Modify: `src/lib/teams-store.ts`
 
 - [ ] **Step 1: Update createTeam mutation**
@@ -579,6 +589,7 @@ if (wsErr) throw wsErr;
 Add this after the `team_members` insert, before the `return team` line.
 
 Also invalidate workspaces queries in `onSuccess`:
+
 ```typescript
 qc.invalidateQueries({ queryKey: ["teams"] });
 ```
@@ -595,6 +606,7 @@ git commit -m "feat: create team workspace when creating a team"
 ### Task 9: Update realtime sync for workspace-based subscriptions
 
 **Files:**
+
 - Modify: `src/lib/realtime-sync.ts`
 
 - [ ] **Step 1: Update task/project channel to filter by workspace_id**
@@ -608,6 +620,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 ```
 
 Inside `useRealtimeSync`, get the workspace ID:
+
 ```typescript
 const { workspaceId } = useWorkspace();
 ```
@@ -617,6 +630,7 @@ Change the tasks/projects channel filters from `user_id=eq.${userId}` to `worksp
 Re-subscribe when `workspaceId` changes — add it to the dependency array or handle re-setup.
 
 For the invalidation function, change query keys from `["tasks", userId]` to use `workspaceId`:
+
 ```typescript
 queryClient.invalidateQueries({ queryKey: ["tasks", workspaceId] });
 queryClient.invalidateQueries({ queryKey: ["projects", workspaceId] });
@@ -634,6 +648,7 @@ git commit -m "feat: update realtime sync to subscribe by workspace_id"
 ### Task 10: Extract translations and fill locale files
 
 **Files:**
+
 - Modify: `src/locales/en.json`, `es.json`, `fr.json`, `ru.json`
 
 - [ ] **Step 1: Run extraction**
@@ -674,6 +689,7 @@ npx expo start --clear
 ```
 
 Verify:
+
 - App loads with personal workspace active
 - WorkspacePill appears in header when user has teams
 - Tapping pill shows workspace list

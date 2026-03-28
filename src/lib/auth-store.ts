@@ -32,7 +32,11 @@ async function restoreCachedUser(): Promise<User | null> {
   }
 }
 
-const mapSupabaseUser = (supaUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }): User => {
+const mapSupabaseUser = (supaUser: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+}): User => {
   return {
     id: supaUser.id,
     email: supaUser.email ?? "",
@@ -60,23 +64,28 @@ export const useAuth = () => {
 
     if (!initialized) {
       initialized = true;
-      supabase.auth.getSession().then(({ data }) => {
-        if (data.session?.user) {
-          globalUser = mapSupabaseUser(data.session.user);
-          persistUser(globalUser);
-        }
-        notify();
-      }).catch(async () => {
-        // Offline — restore cached user so app doesn't appear logged out
-        const cached = await restoreCachedUser();
-        if (cached) {
-          globalUser = cached;
-        }
-        notify();
-      });
+      supabase.auth
+        .getSession()
+        .then(({ data }) => {
+          if (data.session?.user) {
+            globalUser = mapSupabaseUser(data.session.user);
+            persistUser(globalUser);
+          }
+          notify();
+        })
+        .catch(async () => {
+          // Offline — restore cached user so app doesn't appear logged out
+          const cached = await restoreCachedUser();
+          if (cached) {
+            globalUser = cached;
+          }
+          notify();
+        });
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         globalUser = mapSupabaseUser(session.user);
         persistUser(globalUser);
@@ -112,7 +121,10 @@ export const useAuth = () => {
 
       // Supabase returns a user with empty identities if the email already exists
       if (data.user && data.user.identities && data.user.identities.length === 0) {
-        return { success: false, error: "An account with this email already exists. Please sign in instead." };
+        return {
+          success: false,
+          error: "An account with this email already exists. Please sign in instead.",
+        };
       }
 
       if (data.user) {

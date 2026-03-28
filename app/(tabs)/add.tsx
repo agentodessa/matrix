@@ -1,6 +1,15 @@
 import { useCallback, useState, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, ScrollView, TextInput, Pressable, Keyboard, useColorScheme, Platform } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  Pressable,
+  Keyboard,
+  useColorScheme,
+  Platform,
+} from "react-native";
 
 const DateTimePicker = lazy(() => import("@react-native-community/datetimepicker"));
 import { SafeAreaView } from "@/lib/styled";
@@ -9,12 +18,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Header } from "@/components/Header";
 import { useTasks } from "@/lib/store";
 import { useProjects } from "@/lib/projects-store";
-import {
-  Urgency,
-  Importance,
-  getQuadrant,
-  QUADRANTS,
-} from "@/types/task";
+import { Urgency, Importance, getQuadrant, QUADRANTS } from "@/types/task";
 import { useQuadrantT } from "@/lib/use-quadrant-t";
 import { useWorkspaceRole } from "@/lib/workspace-context";
 
@@ -107,7 +111,7 @@ export default function AddTaskScreen() {
       reset();
       router.navigate("/(tabs)");
     },
-    [addTask, reset, router]
+    [addTask, reset, router],
   );
 
   return (
@@ -213,13 +217,8 @@ export default function AddTaskScreen() {
                   {t("Project")}
                 </Text>
                 {canManageProjects && (
-                  <Pressable
-                    className="active:opacity-70"
-                    onPress={() => router.push("/projects")}
-                  >
-                    <Text className="font-body text-xs font-bold text-slate">
-                      {t("Manage")}
-                    </Text>
+                  <Pressable className="active:opacity-70" onPress={() => router.push("/projects")}>
+                    <Text className="font-body text-xs font-bold text-slate">{t("Manage")}</Text>
                   </Pressable>
                 )}
               </View>
@@ -359,9 +358,7 @@ export default function AddTaskScreen() {
         {/* ── Quadrant Preview ── */}
         <View className="flex-row items-center gap-3 px-1">
           <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
-          <Text className="font-body text-sm text-meta">
-            → {quadrantT(quadrant).title}
-          </Text>
+          <Text className="font-body text-sm text-meta">→ {quadrantT(quadrant).title}</Text>
         </View>
 
         {/* ── Save ── */}

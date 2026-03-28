@@ -14,9 +14,7 @@ export const AboutSection = () => {
           <Text className="font-display text-base font-extrabold text-heading tracking-tight">
             {t("The Executive")}
           </Text>
-          <Text className="font-body text-[10px] font-bold text-meta">
-            v1.0.0
-          </Text>
+          <Text className="font-body text-[10px] font-bold text-meta">v1.0.0</Text>
         </View>
         <Text className="font-body text-xs text-meta pt-1">
           {t("Eisenhower Matrix task manager for iOS and macOS")}

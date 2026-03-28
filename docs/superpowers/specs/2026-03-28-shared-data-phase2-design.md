@@ -5,6 +5,7 @@
 Introduce a `workspaces` abstraction so tasks and projects are owned by workspaces, not users directly. Every user gets a personal workspace; every team gets one workspace. A header-mounted workspace switcher lets users flip context. All screens (matrix, tasks, calendar, add) filter by the active workspace.
 
 **Phased Roadmap:**
+
 1. Phase 1 — Teams & Membership (done)
 2. **Phase 2 — Shared Data Layer** (this spec)
 3. Phase 3 — Permissions (role-based access control on operations)
@@ -22,15 +23,16 @@ Introduce a `workspaces` abstraction so tasks and projects are owned by workspac
 
 ### New `workspaces` table
 
-| Column | Type | Constraints |
-|--------|------|-------------|
-| `id` | UUID | PK, default `gen_random_uuid()` |
-| `type` | TEXT | NOT NULL, CHECK `type IN ('personal', 'team')` |
-| `owner_id` | UUID | FK → `auth.users`, nullable (set for personal, null for team) |
-| `team_id` | UUID | FK → `teams`, nullable, UNIQUE (set for team, null for personal) |
-| `created_at` | TIMESTAMPTZ | DEFAULT `now()` |
+| Column       | Type        | Constraints                                                      |
+| ------------ | ----------- | ---------------------------------------------------------------- |
+| `id`         | UUID        | PK, default `gen_random_uuid()`                                  |
+| `type`       | TEXT        | NOT NULL, CHECK `type IN ('personal', 'team')`                   |
+| `owner_id`   | UUID        | FK → `auth.users`, nullable (set for personal, null for team)    |
+| `team_id`    | UUID        | FK → `teams`, nullable, UNIQUE (set for team, null for personal) |
+| `created_at` | TIMESTAMPTZ | DEFAULT `now()`                                                  |
 
 Constraints:
+
 - Personal workspaces: `owner_id IS NOT NULL AND team_id IS NULL`
 - Team workspaces: `team_id IS NOT NULL AND owner_id IS NULL`
 - Each user has exactly one personal workspace (UNIQUE on `owner_id` where `type = 'personal'`)
@@ -38,21 +40,21 @@ Constraints:
 
 ### Modified `tasks` table
 
-| Change | Column | Type | Notes |
-|--------|--------|------|-------|
-| Add | `workspace_id` | UUID | FK → workspaces, NOT NULL (after migration) |
-| Add | `created_by` | UUID | FK → auth.users, NOT NULL (after migration) |
-| Drop | `user_id` | — | Replaced by workspace_id + created_by |
+| Change | Column         | Type | Notes                                       |
+| ------ | -------------- | ---- | ------------------------------------------- |
+| Add    | `workspace_id` | UUID | FK → workspaces, NOT NULL (after migration) |
+| Add    | `created_by`   | UUID | FK → auth.users, NOT NULL (after migration) |
+| Drop   | `user_id`      | —    | Replaced by workspace_id + created_by       |
 
 Primary key changes from `(id, user_id)` to `(id, workspace_id)`.
 
 ### Modified `projects` table
 
-| Change | Column | Type | Notes |
-|--------|--------|------|-------|
-| Add | `workspace_id` | UUID | FK → workspaces, NOT NULL (after migration) |
-| Add | `created_by` | UUID | FK → auth.users, NOT NULL (after migration) |
-| Drop | `user_id` | — | Replaced by workspace_id + created_by |
+| Change | Column         | Type | Notes                                       |
+| ------ | -------------- | ---- | ------------------------------------------- |
+| Add    | `workspace_id` | UUID | FK → workspaces, NOT NULL (after migration) |
+| Add    | `created_by`   | UUID | FK → auth.users, NOT NULL (after migration) |
+| Drop   | `user_id`      | —    | Replaced by workspace_id + created_by       |
 
 Unique constraint changes from `(user_id, name)` to `(workspace_id, name)`.
 
@@ -96,18 +98,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 ### `workspaces`
+
 - **SELECT**: `is_workspace_member(id)`
 - **INSERT**: via trigger only (no client inserts)
 - **UPDATE**: never
 - **DELETE**: never
 
 ### `tasks` (new policies)
+
 - **SELECT**: `is_workspace_member(workspace_id)`
 - **INSERT**: `is_workspace_member(workspace_id) AND created_by = auth.uid()`
 - **UPDATE**: `is_workspace_member(workspace_id)`
 - **DELETE**: `is_workspace_member(workspace_id)`
 
 ### `projects` (new policies)
+
 - **SELECT**: `is_workspace_member(workspace_id)`
 - **INSERT**: `is_workspace_member(workspace_id) AND created_by = auth.uid()`
 - **DELETE**: `is_workspace_member(workspace_id)`
@@ -115,6 +120,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## Auto-Create Triggers
 
 ### Personal workspace (new users)
+
 ```sql
 CREATE TRIGGER on_auth_user_created_workspace
   AFTER INSERT ON auth.users
@@ -122,11 +128,13 @@ CREATE TRIGGER on_auth_user_created_workspace
 ```
 
 ### Team workspace (when team is created)
+
 Add to `teams-store.ts` `createTeam` mutation: after inserting the team, insert a workspace with `type='team'` and `team_id`.
 
 ## Workspace Switcher UI
 
 ### Component: `WorkspacePill` (new, in `@/components/WorkspacePill.tsx`)
+
 - Positioned in the Header, right side, before SyncPill
 - Shows abbreviated workspace name (truncated to ~12 chars)
 - Personal workspace shows "Personal"
@@ -134,12 +142,14 @@ Add to `teams-store.ts` `createTeam` mutation: after inserting the team, insert 
 - Tapping opens a bottom sheet / modal with the full list
 
 ### Workspace Picker (bottom sheet or modal)
+
 - "Personal" row (always first, with a user icon)
 - Team rows (with team icon/initial)
 - Active workspace highlighted
 - Tapping a row switches workspace and dismisses
 
 ### State: `WorkspaceProvider` (new, in `@/lib/workspace-context.tsx`)
+
 - React Context providing `{ workspaceId, workspaceName, workspaceType, setWorkspace }`
 - Wraps the app in root layout
 - Active workspace persisted to AsyncStorage (`@executive_workspace`)
@@ -149,18 +159,22 @@ Add to `teams-store.ts` `createTeam` mutation: after inserting the team, insert 
 ## Store Layer Changes
 
 ### `@/lib/store.ts` — useTasks()
+
 - Cloud queries filter by `.eq("workspace_id", workspaceId)` instead of `.eq("user_id", userId)`
 - `addTask()` sets `workspace_id` from current workspace context and `created_by` from auth user
 - Local (free) mode: filter AsyncStorage tasks by `workspace_id` (personal workspace only — free users don't have teams)
 
 ### `@/lib/projects-store.ts` — useProjects()
+
 - Same pattern: filter by `workspace_id`
 - `addProject()` sets `workspace_id` and `created_by`
 
 ### `@/lib/teams-store.ts` — createTeam()
+
 - After creating team + owner membership, also create a workspace with `type='team'` and `team_id`
 
 ### `@/lib/realtime-sync.ts`
+
 - Tasks/projects channel filters by `workspace_id` of the active workspace instead of `user_id`
 - Re-subscribe when active workspace changes
 

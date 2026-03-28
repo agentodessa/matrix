@@ -15,23 +15,14 @@ export const GlassCard = ({
   if (isGlassAvailable()) {
     const { GlassView } = require("expo-glass-effect");
     return (
-      <GlassView
-        glassEffectStyle="regular"
-        className={className}
-        style={style}
-        {...props}
-      >
+      <GlassView glassEffectStyle="regular" className={className} style={style} {...props}>
         {children}
       </GlassView>
     );
   }
 
   return (
-    <View
-      className={`${fallbackClassName} ${className ?? ""}`.trim()}
-      style={style}
-      {...props}
-    >
+    <View className={`${fallbackClassName} ${className ?? ""}`.trim()} style={style} {...props}>
       {children}
     </View>
   );

@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, useColorScheme, Alert, Share } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  useColorScheme,
+  Alert,
+  Share,
+} from "react-native";
 import { SafeAreaView } from "@/lib/styled";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Header } from "@/components/Header";
@@ -19,7 +28,8 @@ export default function TeamDetailScreen() {
   const { teams } = useTeams();
   const { members } = useTeamMembers(id ?? null);
   const { invites: pendingInvites } = useTeamInvites(id ?? null);
-  const { inviteByEmail, removeMember, updateRole, leaveTeam, deleteTeam, declineInvite } = useTeamMutations();
+  const { inviteByEmail, removeMember, updateRole, leaveTeam, deleteTeam, declineInvite } =
+    useTeamMutations();
 
   const [inviteEmail, setInviteEmail] = useState("");
 
@@ -39,7 +49,7 @@ export default function TeamDetailScreen() {
         onError: (err: any) => {
           Alert.alert(t("Error"), err?.message ?? t("Failed to send invite."));
         },
-      }
+      },
     );
   };
 
@@ -59,27 +69,23 @@ export default function TeamDetailScreen() {
 
   const handleRemoveMember = (userId: string, displayName: string) => {
     if (!id) return;
-    Alert.alert(
-      t("Remove Member"),
-      t("Remove {{name}} from this team?", { name: displayName }),
-      [
-        { text: t("Cancel"), style: "cancel" },
-        {
-          text: t("Remove"),
-          style: "destructive",
-          onPress: () => {
-            removeMember.mutate(
-              { teamId: id, userId },
-              {
-                onError: (err: any) => {
-                  Alert.alert(t("Error"), err?.message ?? t("Failed to remove member."));
-                },
-              }
-            );
-          },
+    Alert.alert(t("Remove Member"), t("Remove {{name}} from this team?", { name: displayName }), [
+      { text: t("Cancel"), style: "cancel" },
+      {
+        text: t("Remove"),
+        style: "destructive",
+        onPress: () => {
+          removeMember.mutate(
+            { teamId: id, userId },
+            {
+              onError: (err: any) => {
+                Alert.alert(t("Error"), err?.message ?? t("Failed to remove member."));
+              },
+            },
+          );
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleToggleRole = (userId: string, currentRole: TeamRole) => {
@@ -91,31 +97,27 @@ export default function TeamDetailScreen() {
         onError: (err: any) => {
           Alert.alert(t("Error"), err?.message ?? t("Failed to update role."));
         },
-      }
+      },
     );
   };
 
   const handleLeave = () => {
     if (!id) return;
-    Alert.alert(
-      t("Leave Team"),
-      t("Are you sure you want to leave this team?"),
-      [
-        { text: t("Cancel"), style: "cancel" },
-        {
-          text: t("Leave"),
-          style: "destructive",
-          onPress: () => {
-            leaveTeam.mutate(id, {
-              onSuccess: () => router.back(),
-              onError: (err: any) => {
-                Alert.alert(t("Error"), err?.message ?? t("Failed to leave team."));
-              },
-            });
-          },
+    Alert.alert(t("Leave Team"), t("Are you sure you want to leave this team?"), [
+      { text: t("Cancel"), style: "cancel" },
+      {
+        text: t("Leave"),
+        style: "destructive",
+        onPress: () => {
+          leaveTeam.mutate(id, {
+            onSuccess: () => router.back(),
+            onError: (err: any) => {
+              Alert.alert(t("Error"), err?.message ?? t("Failed to leave team."));
+            },
+          });
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleDelete = () => {
@@ -137,7 +139,7 @@ export default function TeamDetailScreen() {
             });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -146,9 +148,7 @@ export default function TeamDetailScreen() {
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <Header title={t("Team")} showBack />
         <View className="flex-1 items-center justify-center px-7">
-          <Text className="font-body text-sm text-meta text-center">
-            {t("Team not found.")}
-          </Text>
+          <Text className="font-body text-sm text-meta text-center">{t("Team not found.")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -251,10 +251,7 @@ export default function TeamDetailScreen() {
             const memberIsOwner = member.role === "owner";
 
             return (
-              <View
-                key={member.id}
-                className="bg-bg-card rounded-lg px-5 py-4 gap-3"
-              >
+              <View key={member.id} className="bg-bg-card rounded-lg px-5 py-4 gap-3">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 gap-0.5">
                     <Text className="font-display text-base font-bold text-heading">
@@ -271,8 +268,8 @@ export default function TeamDetailScreen() {
                       memberIsOwner
                         ? "bg-q2/15 rounded-full px-3 py-1"
                         : member.role === "admin"
-                        ? "bg-success/15 rounded-full px-3 py-1"
-                        : "bg-btn-surface rounded-full px-3 py-1"
+                          ? "bg-success/15 rounded-full px-3 py-1"
+                          : "bg-btn-surface rounded-full px-3 py-1"
                     }
                   >
                     <Text
@@ -280,8 +277,8 @@ export default function TeamDetailScreen() {
                         memberIsOwner
                           ? "font-body text-[10px] font-bold text-q2 uppercase tracking-wide"
                           : member.role === "admin"
-                          ? "font-body text-[10px] font-bold text-success uppercase tracking-wide"
-                          : "font-body text-[10px] font-bold text-meta uppercase tracking-wide"
+                            ? "font-body text-[10px] font-bold text-success uppercase tracking-wide"
+                            : "font-body text-[10px] font-bold text-meta uppercase tracking-wide"
                       }
                     >
                       {member.role}
@@ -326,9 +323,7 @@ export default function TeamDetailScreen() {
               className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70"
               onPress={handleLeave}
             >
-              <Text className="font-body text-base font-bold text-urgent">
-                {t("Leave Team")}
-              </Text>
+              <Text className="font-body text-base font-bold text-urgent">{t("Leave Team")}</Text>
             </Pressable>
           )}
           {isOwner && (
@@ -336,9 +331,7 @@ export default function TeamDetailScreen() {
               className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70"
               onPress={handleDelete}
             >
-              <Text className="font-body text-base font-bold text-urgent">
-                {t("Delete Team")}
-              </Text>
+              <Text className="font-body text-base font-bold text-urgent">{t("Delete Team")}</Text>
             </Pressable>
           )}
         </View>

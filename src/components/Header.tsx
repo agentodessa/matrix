@@ -12,8 +12,14 @@ interface HeaderProps {
 }
 
 const AVATAR_COLORS = [
-  "#ac0b18", "#0051d5", "#874200", "#6d28d9",
-  "#0d9488", "#c026d3", "#ea580c", "#059669",
+  "#ac0b18",
+  "#0051d5",
+  "#874200",
+  "#6d28d9",
+  "#0d9488",
+  "#c026d3",
+  "#ea580c",
+  "#059669",
 ];
 
 const AVATAR_EMOJIS = ["🦊", "🐼", "🦉", "🐸", "🦋", "🐙", "🦄", "🐯"];
@@ -49,18 +55,10 @@ export const Header = ({ title, showBack = false }: HeaderProps) => {
       return <Text style={{ fontSize: 20 }}>{guestAvatar.emoji}</Text>;
     }
     if (user?.avatarUrl) {
-      return (
-        <Image
-          source={{ uri: user.avatarUrl }}
-          className="w-10 h-10 rounded-full"
-        />
-      );
+      return <Image source={{ uri: user.avatarUrl }} className="w-10 h-10 rounded-full" />;
     }
     return (
-      <Text
-        className="font-display font-bold"
-        style={{ fontSize: 18, color: userColor }}
-      >
+      <Text className="font-display font-bold" style={{ fontSize: 18, color: userColor }}>
         {userInitial}
       </Text>
     );
@@ -77,10 +75,7 @@ export const Header = ({ title, showBack = false }: HeaderProps) => {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-3">
           {showBack ? (
-            <Pressable
-              onPress={() => router.push("/(tabs)")}
-              className="p-1 active:opacity-70"
-            >
+            <Pressable onPress={() => router.push("/(tabs)")} className="p-1 active:opacity-70">
               <Text className="font-body text-base text-heading">←</Text>
             </Pressable>
           ) : (

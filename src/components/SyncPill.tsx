@@ -14,10 +14,7 @@ const SpinningIcon = () => {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 1000, easing: Easing.linear }),
-      -1,
-    );
+    rotation.value = withRepeat(withTiming(360, { duration: 1000, easing: Easing.linear }), -1);
     return () => cancelAnimation(rotation);
   }, []);
 

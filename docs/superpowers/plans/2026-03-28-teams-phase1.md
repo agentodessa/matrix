@@ -12,22 +12,23 @@
 
 ## File Structure
 
-| Action | Path | Purpose |
-|--------|------|---------|
-| Create | `supabase/migrations/006_create_teams.sql` | Teams, team_members, team_invites tables + RLS + realtime |
-| Create | `src/types/team.ts` | Team, TeamMember, TeamInvite types + Role type |
-| Create | `src/lib/teams-store.ts` | Hooks + mutations for team CRUD, invites, membership |
-| Create | `app/team.tsx` | Team list screen (my teams + pending invites) |
-| Create | `app/team/[id].tsx` | Team detail screen (members, invites, management) |
-| Create | `app/team/join.tsx` | Deep link handler for invite codes |
-| Modify | `src/components/settings/OrganizationSection.tsx` | Add "Team" row below Projects |
-| Modify | `src/lib/realtime-sync.ts` | Add team_members + team_invites subscriptions |
+| Action | Path                                              | Purpose                                                   |
+| ------ | ------------------------------------------------- | --------------------------------------------------------- |
+| Create | `supabase/migrations/006_create_teams.sql`        | Teams, team_members, team_invites tables + RLS + realtime |
+| Create | `src/types/team.ts`                               | Team, TeamMember, TeamInvite types + Role type            |
+| Create | `src/lib/teams-store.ts`                          | Hooks + mutations for team CRUD, invites, membership      |
+| Create | `app/team.tsx`                                    | Team list screen (my teams + pending invites)             |
+| Create | `app/team/[id].tsx`                               | Team detail screen (members, invites, management)         |
+| Create | `app/team/join.tsx`                               | Deep link handler for invite codes                        |
+| Modify | `src/components/settings/OrganizationSection.tsx` | Add "Team" row below Projects                             |
+| Modify | `src/lib/realtime-sync.ts`                        | Add team_members + team_invites subscriptions             |
 
 ---
 
 ### Task 1: Database migration — teams, team_members, team_invites
 
 **Files:**
+
 - Create: `supabase/migrations/006_create_teams.sql`
 
 - [ ] **Step 1: Create the migration file**
@@ -191,6 +192,7 @@ git commit -m "feat: add teams, team_members, team_invites tables with RLS"
 ### Task 2: TypeScript types for teams
 
 **Files:**
+
 - Create: `src/types/team.ts`
 
 - [ ] **Step 1: Create types file**
@@ -243,6 +245,7 @@ git commit -m "feat: add Team, TeamMember, TeamInvite types"
 ### Task 3: Teams store — hooks and mutations
 
 **Files:**
+
 - Create: `src/lib/teams-store.ts`
 
 - [ ] **Step 1: Create the store file with all hooks and mutations**
@@ -291,12 +294,9 @@ export const useTeamMembers = (teamId: string | null) => {
 
       // Fetch user profiles for display
       const userIds = (data ?? []).map((m) => m.user_id);
-      const { data: profiles } = await supabase.auth.admin
+      const { data: profiles } = (await supabase.auth.admin)
         ? { data: [] }
-        : await supabase
-            .from("team_members")
-            .select("user_id")
-            .in("user_id", userIds);
+        : await supabase.from("team_members").select("user_id").in("user_id", userIds);
 
       // We can't query auth.users directly from client — use the members' own profile data
       // For Phase 1, member display names come from a separate RPC or are deferred
@@ -466,7 +466,15 @@ export const useTeamMutations = () => {
   });
 
   const updateRole = useMutation({
-    mutationFn: async ({ teamId, userId, role }: { teamId: string; userId: string; role: TeamRole }) => {
+    mutationFn: async ({
+      teamId,
+      userId,
+      role,
+    }: {
+      teamId: string;
+      userId: string;
+      role: TeamRole;
+    }) => {
       const { error } = await supabase
         .from("team_members")
         .update({ role })
@@ -496,10 +504,7 @@ export const useTeamMutations = () => {
 
   const deleteTeam = useMutation({
     mutationFn: async (teamId: string) => {
-      const { error } = await supabase
-        .from("teams")
-        .delete()
-        .eq("id", teamId);
+      const { error } = await supabase.from("teams").delete().eq("id", teamId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -533,6 +538,7 @@ git commit -m "feat: add teams store with hooks and mutations"
 ### Task 4: Add team realtime subscriptions
 
 **Files:**
+
 - Modify: `src/lib/realtime-sync.ts`
 
 - [ ] **Step 1: Add team-related invalidations to the realtime channel**
@@ -560,23 +566,35 @@ Also remove the Pro-only guard so team realtime works for all authenticated user
 Actually, for Phase 1 simplicity: keep the existing Pro guard for tasks/projects but add a **separate channel** for teams that all authenticated users get. After the existing `channel` setup block, add:
 
 ```typescript
-      // Team realtime — all authenticated users
-      const teamChannel = supabase
-        .channel(`teams-${userId}`)
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "team_members",
-          filter: `user_id=eq.${userId}`,
-        }, () => {
-          queryClient.invalidateQueries({ queryKey: ["teams"] });
-          queryClient.invalidateQueries({ queryKey: ["team_members"] });
-        })
-        .on("postgres_changes", {
-          event: "*", schema: "public", table: "team_invites",
-        }, () => {
-          queryClient.invalidateQueries({ queryKey: ["team_invites"] });
-          queryClient.invalidateQueries({ queryKey: ["pending_invites"] });
-        })
-        .subscribe();
+// Team realtime — all authenticated users
+const teamChannel = supabase
+  .channel(`teams-${userId}`)
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "team_members",
+      filter: `user_id=eq.${userId}`,
+    },
+    () => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["team_members"] });
+    },
+  )
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "team_invites",
+    },
+    () => {
+      queryClient.invalidateQueries({ queryKey: ["team_invites"] });
+      queryClient.invalidateQueries({ queryKey: ["pending_invites"] });
+    },
+  )
+  .subscribe();
 ```
 
 Store a separate module-level `teamChannel` variable and clean it up on sign-out, following the same pattern as the existing `channel`.
@@ -593,11 +611,13 @@ git commit -m "feat: add team realtime subscriptions for all authenticated users
 ### Task 5: Team list screen
 
 **Files:**
+
 - Create: `app/team.tsx`
 
 - [ ] **Step 1: Create the team list screen**
 
 This screen shows:
+
 - Pending invites (if any) — cards with team name + accept/decline buttons
 - My teams list — tapping navigates to team detail
 - "Create Team" button (text input + create CTA)
@@ -637,9 +657,16 @@ export default function TeamScreen() {
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <Header title={t("Team")} showBack />
         <View className="flex-1 items-center justify-center px-8 gap-4">
-          <Text className="font-display text-xl font-bold text-heading">{t("Sign in required")}</Text>
-          <Text className="font-body text-sm text-meta text-center">{t("Create an account to start a team.")}</Text>
-          <Pressable className="bg-success rounded-xl px-6 py-3 active:opacity-80" onPress={() => router.push("/auth/sign-up")}>
+          <Text className="font-display text-xl font-bold text-heading">
+            {t("Sign in required")}
+          </Text>
+          <Text className="font-body text-sm text-meta text-center">
+            {t("Create an account to start a team.")}
+          </Text>
+          <Pressable
+            className="bg-success rounded-xl px-6 py-3 active:opacity-80"
+            onPress={() => router.push("/auth/sign-up")}
+          >
             <Text className="font-body text-sm font-bold text-bg">{t("Create Account")}</Text>
           </Pressable>
         </View>
@@ -650,7 +677,10 @@ export default function TeamScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <Header title={t("Team")} showBack />
-      <ScrollView contentContainerClassName="px-7 pt-6 pb-40 gap-6" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="px-7 pt-6 pb-40 gap-6"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Pending Invites */}
         {pendingInvites.length > 0 && (
           <View className="gap-3">
@@ -659,7 +689,9 @@ export default function TeamScreen() {
             </Text>
             {pendingInvites.map((inv) => (
               <View key={inv.id} className="bg-bg-card rounded-lg px-5 py-4 gap-3">
-                <Text className="font-display text-base font-bold text-heading">{inv.team_name}</Text>
+                <Text className="font-display text-base font-bold text-heading">
+                  {inv.team_name}
+                </Text>
                 <View className="flex-row gap-3">
                   <Pressable
                     className="flex-1 bg-success rounded-lg py-3 items-center active:opacity-80"
@@ -723,8 +755,12 @@ export default function TeamScreen() {
           </Text>
           {teams.length === 0 ? (
             <View className="bg-bg-card rounded-lg py-10 items-center gap-2">
-              <Text className="font-display text-base font-bold text-heading">{t("No teams yet")}</Text>
-              <Text className="font-body text-sm text-meta">{t("Create a team or accept an invite.")}</Text>
+              <Text className="font-display text-base font-bold text-heading">
+                {t("No teams yet")}
+              </Text>
+              <Text className="font-body text-sm text-meta">
+                {t("Create a team or accept an invite.")}
+              </Text>
             </View>
           ) : (
             <View className="gap-2">
@@ -758,6 +794,7 @@ git commit -m "feat: add Team list screen with create and pending invites"
 ### Task 6: Team detail screen
 
 **Files:**
+
 - Create: `app/team/[id].tsx`
 
 - [ ] **Step 1: Create the team detail screen**
@@ -800,10 +837,13 @@ export default function TeamDetailScreen() {
   const handleInvite = () => {
     const email = inviteEmail.trim().toLowerCase();
     if (!email) return;
-    inviteByEmail.mutate({ teamId: team.id, email }, {
-      onSuccess: () => setInviteEmail(""),
-      onError: (err) => Alert.alert(t("Error"), err.message),
-    });
+    inviteByEmail.mutate(
+      { teamId: team.id, email },
+      {
+        onSuccess: () => setInviteEmail(""),
+        onError: (err) => Alert.alert(t("Error"), err.message),
+      },
+    );
   };
 
   const handleCopyLink = () => {
@@ -813,9 +853,13 @@ export default function TeamDetailScreen() {
   };
 
   const handleRemove = (userId: string, name: string) => {
-    Alert.alert(t("Remove Member"), t('Remove {{name}} from the team?', { name }), [
+    Alert.alert(t("Remove Member"), t("Remove {{name}} from the team?", { name }), [
       { text: t("Cancel"), style: "cancel" },
-      { text: t("Remove"), style: "destructive", onPress: () => removeMember.mutate({ teamId: team.id, userId }) },
+      {
+        text: t("Remove"),
+        style: "destructive",
+        onPress: () => removeMember.mutate({ teamId: team.id, userId }),
+      },
     ]);
   };
 
@@ -827,25 +871,40 @@ export default function TeamDetailScreen() {
   const handleLeave = () => {
     Alert.alert(t("Leave Team"), t('Leave "{{name}}"?', { name: team.name }), [
       { text: t("Cancel"), style: "cancel" },
-      { text: t("Leave"), style: "destructive", onPress: () => {
-        leaveTeam.mutate(team.id, { onSuccess: () => router.back() });
-      }},
+      {
+        text: t("Leave"),
+        style: "destructive",
+        onPress: () => {
+          leaveTeam.mutate(team.id, { onSuccess: () => router.back() });
+        },
+      },
     ]);
   };
 
   const handleDelete = () => {
-    Alert.alert(t("Delete Team"), t('Permanently delete "{{name}}" and remove all members?', { name: team.name }), [
-      { text: t("Cancel"), style: "cancel" },
-      { text: t("Delete"), style: "destructive", onPress: () => {
-        deleteTeam.mutate(team.id, { onSuccess: () => router.back() });
-      }},
-    ]);
+    Alert.alert(
+      t("Delete Team"),
+      t('Permanently delete "{{name}}" and remove all members?', { name: team.name }),
+      [
+        { text: t("Cancel"), style: "cancel" },
+        {
+          text: t("Delete"),
+          style: "destructive",
+          onPress: () => {
+            deleteTeam.mutate(team.id, { onSuccess: () => router.back() });
+          },
+        },
+      ],
+    );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <Header title={team.name} showBack />
-      <ScrollView contentContainerClassName="px-7 pt-6 pb-40 gap-6" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="px-7 pt-6 pb-40 gap-6"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Invite Section (owner/admin only) */}
         {canManage && (
           <View className="gap-3">
@@ -865,17 +924,32 @@ export default function TeamDetailScreen() {
                 onSubmitEditing={handleInvite}
               />
               <Pressable
-                className={inviteEmail.trim() ? "bg-success rounded-full px-4 py-2 active:opacity-80" : "bg-btn-surface rounded-full px-4 py-2 opacity-50"}
+                className={
+                  inviteEmail.trim()
+                    ? "bg-success rounded-full px-4 py-2 active:opacity-80"
+                    : "bg-btn-surface rounded-full px-4 py-2 opacity-50"
+                }
                 onPress={handleInvite}
                 disabled={!inviteEmail.trim()}
               >
-                <Text className={inviteEmail.trim() ? "font-body text-sm font-bold text-bg" : "font-body text-sm font-bold text-meta"}>
+                <Text
+                  className={
+                    inviteEmail.trim()
+                      ? "font-body text-sm font-bold text-bg"
+                      : "font-body text-sm font-bold text-meta"
+                  }
+                >
                   {t("Send")}
                 </Text>
               </Pressable>
             </View>
-            <Pressable className="bg-btn-surface rounded-lg py-3 items-center active:opacity-70 border border-border" onPress={handleCopyLink}>
-              <Text className="font-body text-sm font-bold text-heading">{t("Copy Invite Link")}</Text>
+            <Pressable
+              className="bg-btn-surface rounded-lg py-3 items-center active:opacity-70 border border-border"
+              onPress={handleCopyLink}
+            >
+              <Text className="font-body text-sm font-bold text-heading">
+                {t("Copy Invite Link")}
+              </Text>
             </Pressable>
 
             {/* Pending Invites */}
@@ -885,7 +959,10 @@ export default function TeamDetailScreen() {
                   {t("Pending")} ({invites.length})
                 </Text>
                 {invites.map((inv) => (
-                  <View key={inv.id} className="flex-row items-center justify-between bg-bg-card rounded-lg px-4 py-3">
+                  <View
+                    key={inv.id}
+                    className="flex-row items-center justify-between bg-bg-card rounded-lg px-4 py-3"
+                  >
                     <Text className="font-body text-sm text-body">{inv.email}</Text>
                     <Text className="font-body text-[10px] text-meta">{t("Pending")}</Text>
                   </View>
@@ -904,7 +981,10 @@ export default function TeamDetailScreen() {
             const isSelf = member.user_id === user.id;
             const memberIsOwner = member.role === "owner";
             return (
-              <View key={member.id} className="flex-row items-center justify-between bg-bg-card rounded-lg px-5 py-4">
+              <View
+                key={member.id}
+                className="flex-row items-center justify-between bg-bg-card rounded-lg px-5 py-4"
+              >
                 <View className="flex-1 gap-0.5">
                   <Text className="font-display text-base font-bold text-heading">
                     {isSelf ? t("You") : member.user_id.slice(0, 8)}
@@ -913,15 +993,23 @@ export default function TeamDetailScreen() {
                 </View>
                 <View className="flex-row gap-2">
                   {isOwner && !memberIsOwner && !isSelf && (
-                    <Pressable className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70" onPress={() => handleRoleChange(member.user_id, member.role)}>
+                    <Pressable
+                      className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70"
+                      onPress={() => handleRoleChange(member.user_id, member.role)}
+                    >
                       <Text className="font-body text-xs font-semibold text-heading">
                         {member.role === "admin" ? t("Demote") : t("Promote")}
                       </Text>
                     </Pressable>
                   )}
                   {canManage && !memberIsOwner && !isSelf && (
-                    <Pressable className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70" onPress={() => handleRemove(member.user_id, member.user_id.slice(0, 8))}>
-                      <Text className="font-body text-xs font-semibold text-urgent">{t("Remove")}</Text>
+                    <Pressable
+                      className="rounded-full bg-btn-surface px-3 py-1.5 active:opacity-70"
+                      onPress={() => handleRemove(member.user_id, member.user_id.slice(0, 8))}
+                    >
+                      <Text className="font-body text-xs font-semibold text-urgent">
+                        {t("Remove")}
+                      </Text>
                     </Pressable>
                   )}
                 </View>
@@ -933,12 +1021,18 @@ export default function TeamDetailScreen() {
         {/* Actions */}
         <View className="gap-3 pt-4">
           {!isOwner && (
-            <Pressable className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border" onPress={handleLeave}>
+            <Pressable
+              className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border"
+              onPress={handleLeave}
+            >
               <Text className="font-body text-base font-bold text-urgent">{t("Leave Team")}</Text>
             </Pressable>
           )}
           {isOwner && (
-            <Pressable className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border" onPress={handleDelete}>
+            <Pressable
+              className="bg-btn-surface rounded-xl py-4 items-center active:opacity-70 border border-border"
+              onPress={handleDelete}
+            >
               <Text className="font-body text-base font-bold text-urgent">{t("Delete Team")}</Text>
             </Pressable>
           )}
@@ -961,6 +1055,7 @@ git commit -m "feat: add Team detail screen with members, invites, and managemen
 ### Task 7: Deep link join handler
 
 **Files:**
+
 - Create: `app/team/join.tsx`
 
 - [ ] **Step 1: Create the join screen**
@@ -995,11 +1090,7 @@ export default function JoinTeamScreen() {
 
     const lookup = async () => {
       // Look up team by invite code (this works even before joining due to public read on invite_code)
-      const { data } = await supabase
-        .from("teams")
-        .select("name")
-        .eq("invite_code", code)
-        .single();
+      const { data } = await supabase.from("teams").select("name").eq("invite_code", code).single();
       setTeamName(data?.name ?? null);
       setLoading(false);
     };
@@ -1038,8 +1129,12 @@ export default function JoinTeamScreen() {
       <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
         <Header title={t("Join Team")} showBack />
         <View className="flex-1 items-center justify-center px-8 gap-4">
-          <Text className="font-display text-xl font-bold text-heading">{t("Invalid invite link")}</Text>
-          <Text className="font-body text-sm text-meta text-center">{t("This link may have expired or is incorrect.")}</Text>
+          <Text className="font-display text-xl font-bold text-heading">
+            {t("Invalid invite link")}
+          </Text>
+          <Text className="font-body text-sm text-meta text-center">
+            {t("This link may have expired or is incorrect.")}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -1050,9 +1145,16 @@ export default function JoinTeamScreen() {
       <Header title={t("Join Team")} showBack />
       <View className="flex-1 items-center justify-center px-8 gap-6">
         <Text className="font-display text-2xl font-bold text-heading">{teamName}</Text>
-        <Text className="font-body text-sm text-meta text-center">{t("You've been invited to join this team.")}</Text>
-        <Pressable className="bg-success rounded-xl px-8 py-4 active:opacity-80" onPress={handleJoin}>
-          <Text className="font-body text-base font-extrabold text-bg tracking-wide">{t("Join Team")}</Text>
+        <Text className="font-body text-sm text-meta text-center">
+          {t("You've been invited to join this team.")}
+        </Text>
+        <Pressable
+          className="bg-success rounded-xl px-8 py-4 active:opacity-80"
+          onPress={handleJoin}
+        >
+          <Text className="font-body text-base font-extrabold text-bg tracking-wide">
+            {t("Join Team")}
+          </Text>
         </Pressable>
       </View>
     </SafeAreaView>
@@ -1098,6 +1200,7 @@ git commit -m "feat: add deep link join handler with pending join flow"
 ### Task 8: Settings integration — OrganizationSection
 
 **Files:**
+
 - Modify: `src/components/settings/OrganizationSection.tsx`
 
 - [ ] **Step 1: Add Team row below Projects**
@@ -1123,15 +1226,10 @@ export const OrganizationSection = () => {
         {t("Organization")}
       </Text>
       <View className="bg-bg-card rounded-lg overflow-hidden">
-        <Pressable
-          className="active:opacity-70"
-          onPress={() => router.push("/projects")}
-        >
+        <Pressable className="active:opacity-70" onPress={() => router.push("/projects")}>
           <View className="flex-row items-center justify-between px-5 py-4">
             <View className="flex-1 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Projects")}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Projects")}</Text>
               <Text className="font-body text-sm text-body">
                 {t("Create and manage your projects")}
               </Text>
@@ -1139,15 +1237,10 @@ export const OrganizationSection = () => {
             <Text className="text-meta text-base">→</Text>
           </View>
         </Pressable>
-        <Pressable
-          className="active:opacity-70"
-          onPress={() => router.push("/team")}
-        >
+        <Pressable className="active:opacity-70" onPress={() => router.push("/team")}>
           <View className="flex-row items-center justify-between px-5 py-4">
             <View className="flex-1 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Team")}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Team")}</Text>
               <Text className="font-body text-sm text-body">
                 {isAuthenticated
                   ? teams.length > 0
@@ -1157,9 +1250,7 @@ export const OrganizationSection = () => {
               </Text>
             </View>
             <View className="flex-row items-center gap-2">
-              {hasPending && (
-                <View className="w-2.5 h-2.5 rounded-full bg-urgent" />
-              )}
+              {hasPending && <View className="w-2.5 h-2.5 rounded-full bg-urgent" />}
               <Text className="text-meta text-base">→</Text>
             </View>
           </View>
@@ -1182,6 +1273,7 @@ git commit -m "feat: add Team row to OrganizationSection with pending invite ind
 ### Task 9: Extract translations and fill locale files
 
 **Files:**
+
 - Modify: `src/locales/en.json`, `es.json`, `fr.json`, `ru.json`
 
 - [ ] **Step 1: Run extraction**
@@ -1220,6 +1312,7 @@ npx expo start --clear
 ```
 
 Verify:
+
 - Settings → Organization shows "Team" row
 - Tapping Team navigates to team list screen
 - Can create a team (requires Supabase connection)

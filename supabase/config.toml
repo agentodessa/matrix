@@ -9,5 +9,5 @@ additional_redirect_urls = [
   "eisenhower-reminder://**",
   "exp://",
   "exp://**",
-  "https://zfhahtqrvzudnnqfwxlx.supabase.co/auth/v1/callback"
+  "https://zfhahtqrvzudnnqfwxlx.supabase.co/auth/v1/callback",
 ]

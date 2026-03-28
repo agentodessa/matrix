@@ -16,7 +16,8 @@ export const TaskItem = ({ task, onToggle, onDelete }: TaskItemProps) => {
   const quadrantT = useQuadrantT();
   const role = useWorkspaceRole();
   const { user } = useAuth();
-  const canDelete = role === "personal" || role === "owner" || role === "admin" || task.created_by === user?.id;
+  const canDelete =
+    role === "personal" || role === "owner" || role === "admin" || task.created_by === user?.id;
   const quadrant = getQuadrant(task);
   const info = QUADRANTS[quadrant];
   const qText = quadrantT(quadrant);
@@ -38,9 +39,7 @@ export const TaskItem = ({ task, onToggle, onDelete }: TaskItemProps) => {
             {qText.priority}
           </Text>
         </View>
-        {task.project ? (
-          <Text className="font-body text-xs text-meta">{task.project}</Text>
-        ) : null}
+        {task.project ? <Text className="font-body text-xs text-meta">{task.project}</Text> : null}
       </View>
 
       {/* Title */}
@@ -75,9 +74,7 @@ export const TaskItem = ({ task, onToggle, onDelete }: TaskItemProps) => {
               onPress={() => onDelete(task.id)}
               className="rounded-full bg-btn-surface px-3 py-1.5"
             >
-              <Text className="font-body text-xs font-semibold text-urgent">
-                {t("Delete")}
-              </Text>
+              <Text className="font-body text-xs font-semibold text-urgent">{t("Delete")}</Text>
             </Pressable>
           )}
           <Pressable

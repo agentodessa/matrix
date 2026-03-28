@@ -1,11 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { View, Text, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
-import {
-  Gesture,
-  GestureDetector,
-  Pressable as GHPressable,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector, Pressable as GHPressable } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,13 +9,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated";
-import {
-  Task,
-  Quadrant,
-  QUADRANTS,
-  getQuadrant,
-  quadrantToProperties,
-} from "@/types/task";
+import { Task, Quadrant, QUADRANTS, getQuadrant, quadrantToProperties } from "@/types/task";
 import { useQuadrantT } from "@/lib/use-quadrant-t";
 
 interface LayoutRect {
@@ -33,10 +23,7 @@ interface DraggableMatrixProps {
   getTasksByQuadrant: (q: Quadrant) => Task[];
   filterByProject: (list: Task[]) => Task[];
   toggleTask: (id: string) => void;
-  updateTask: (
-    id: string,
-    updates: Partial<Pick<Task, "urgency" | "importance">>
-  ) => void;
+  updateTask: (id: string, updates: Partial<Pick<Task, "urgency" | "importance">>) => void;
   onViewQuadrant: (q: Quadrant) => void;
   onDragStateChange: (dragging: boolean) => void;
 }
@@ -77,17 +64,12 @@ export const DraggableMatrix = ({
       setDraggedTaskData(task);
       onDragStateChange(true);
     },
-    [onDragStateChange]
+    [onDragStateChange],
   );
 
   const endDrag = useCallback(
     (targetQuadrant: number | null) => {
-      if (
-        draggedTaskData &&
-        targetQuadrant &&
-        targetQuadrant >= 1 &&
-        targetQuadrant <= 4
-      ) {
+      if (draggedTaskData && targetQuadrant && targetQuadrant >= 1 && targetQuadrant <= 4) {
         const currentQ = getQuadrant(draggedTaskData);
         if (currentQ !== targetQuadrant) {
           const props = quadrantToProperties(targetQuadrant as Quadrant);
@@ -97,48 +79,39 @@ export const DraggableMatrix = ({
       setDraggedTaskData(null);
       onDragStateChange(false);
     },
-    [draggedTaskData, updateTask, onDragStateChange]
+    [draggedTaskData, updateTask, onDragStateChange],
   );
 
-  const findQuadrant = useCallback(
-    (absX: number, absY: number): number | null => {
-      const layouts = quadrantLayouts.current;
-      for (const key of [1, 2, 3, 4]) {
-        const rect = layouts[key];
-        if (!rect) continue;
-        if (
-          absX >= rect.x &&
-          absX <= rect.x + rect.width &&
-          absY >= rect.y &&
-          absY <= rect.y + rect.height
-        ) {
-          return key;
-        }
+  const findQuadrant = useCallback((absX: number, absY: number): number | null => {
+    const layouts = quadrantLayouts.current;
+    for (const key of [1, 2, 3, 4]) {
+      const rect = layouts[key];
+      if (!rect) continue;
+      if (
+        absX >= rect.x &&
+        absX <= rect.x + rect.width &&
+        absY >= rect.y &&
+        absY <= rect.y + rect.height
+      ) {
+        return key;
       }
-      return null;
-    },
-    []
-  );
+    }
+    return null;
+  }, []);
 
   // Store absolute screen coordinates via measureInWindow
   const quadrantRefs = useRef<Record<number, View | null>>({});
-  const measureQuadrant = useCallback(
-    (q: Quadrant) => {
-      const ref = quadrantRefs.current[q];
-      if (ref) {
-        ref.measureInWindow((x, y, width, height) => {
-          quadrantLayouts.current[q] = { x, y, width, height };
-        });
-      }
-    },
-    []
-  );
-  const setQuadrantRef = useCallback(
-    (q: Quadrant, ref: View | null) => {
-      quadrantRefs.current[q] = ref;
-    },
-    []
-  );
+  const measureQuadrant = useCallback((q: Quadrant) => {
+    const ref = quadrantRefs.current[q];
+    if (ref) {
+      ref.measureInWindow((x, y, width, height) => {
+        quadrantLayouts.current[q] = { x, y, width, height };
+      });
+    }
+  }, []);
+  const setQuadrantRef = useCallback((q: Quadrant, ref: View | null) => {
+    quadrantRefs.current[q] = ref;
+  }, []);
 
   const containerRef = useRef<View>(null);
 
@@ -228,10 +201,7 @@ export const DraggableMatrix = ({
               elevation: 12,
             }}
           >
-            <Text
-              className="font-body text-sm font-bold text-heading"
-              numberOfLines={2}
-            >
+            <Text className="font-body text-sm font-bold text-heading" numberOfLines={2}>
               {draggedTaskData.title}
             </Text>
           </View>
@@ -297,9 +267,7 @@ const DroppableQuadrant = ({
   const highlightStyle = useAnimatedStyle(() => ({
     borderWidth: activeDropZone.value === quadrant ? 2 : 1,
     borderColor:
-      activeDropZone.value === quadrant
-        ? "rgba(100,160,255,0.7)"
-        : "rgba(150,150,150,0.2)",
+      activeDropZone.value === quadrant ? "rgba(100,160,255,0.7)" : "rgba(150,150,150,0.2)",
     borderRadius: 16,
   }));
 
@@ -321,17 +289,9 @@ const DroppableQuadrant = ({
         <View style={{ padding: 14, flex: 1 }}>
           {/* Header */}
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="font-display text-sm font-bold text-heading">
-              {qText.title}
-            </Text>
-            <View
-              style={{ backgroundColor: accent + "20" }}
-              className="rounded-full px-2.5 py-1"
-            >
-              <Text
-                style={{ color: accent }}
-                className="font-body text-xs font-bold"
-              >
+            <Text className="font-display text-sm font-bold text-heading">{qText.title}</Text>
+            <View style={{ backgroundColor: accent + "20" }} className="rounded-full px-2.5 py-1">
+              <Text style={{ color: accent }} className="font-body text-xs font-bold">
                 {active.length}
               </Text>
             </View>
@@ -421,7 +381,7 @@ const DraggableTaskRow = ({
       const target = findQuadrant(absX, absY);
       activeDropZone.value = target ?? 0;
     },
-    [findQuadrant, activeDropZone]
+    [findQuadrant, activeDropZone],
   );
 
   const handleEnd = useCallback(
@@ -429,7 +389,7 @@ const DraggableTaskRow = ({
       const target = findQuadrant(absX, absY);
       endDrag(target);
     },
-    [findQuadrant, endDrag]
+    [findQuadrant, endDrag],
   );
 
   const handleToggle = useCallback(() => {
@@ -440,7 +400,7 @@ const DraggableTaskRow = ({
     (t: Task) => {
       startDrag(t);
     },
-    [startDrag]
+    [startDrag],
   );
 
   const tap = Gesture.Tap().onEnd(() => {
@@ -503,10 +463,7 @@ const DraggableTaskRow = ({
           style={{ borderColor: accent + "40" }}
           className="w-4.5 h-4.5 mt-0.5 rounded border items-center justify-center"
         />
-        <Text
-          className="font-body text-[13px] text-body flex-1 leading-[18px]"
-          numberOfLines={2}
-        >
+        <Text className="font-body text-[13px] text-body flex-1 leading-[18px]" numberOfLines={2}>
           {task.title}
         </Text>
       </GHPressable>
@@ -515,20 +472,12 @@ const DraggableTaskRow = ({
 
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View
-        style={[
-          { flexDirection: "row", alignItems: "flex-start", gap: 8 },
-          rowStyle,
-        ]}
-      >
+      <Animated.View style={[{ flexDirection: "row", alignItems: "flex-start", gap: 8 }, rowStyle]}>
         <View
           style={{ borderColor: accent + "50" }}
           className="w-4.5 h-4.5 mt-0.5 rounded border items-center justify-center"
         />
-        <Text
-          className="font-body text-[13px] text-body flex-1 leading-[18px]"
-          numberOfLines={2}
-        >
+        <Text className="font-body text-[13px] text-body flex-1 leading-[18px]" numberOfLines={2}>
           {task.title}
         </Text>
       </Animated.View>

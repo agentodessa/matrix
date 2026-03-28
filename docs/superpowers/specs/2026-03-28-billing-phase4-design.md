@@ -5,6 +5,7 @@
 Add a Pro Team plan tier that replaces individual Pro. Owner pays $4.99/mo base + $2.99 per additional team member. Members get Pro features only within the team workspace, not in their personal workspace. Full billing UI wired to mock payment backend.
 
 **Phased Roadmap:**
+
 1. Phase 1 — Teams & Membership (done)
 2. Phase 2 — Shared Data Layer (done)
 3. Phase 3 — Permissions (done)
@@ -20,14 +21,14 @@ Add a Pro Team plan tier that replaces individual Pro. Owner pays $4.99/mo base 
 
 ## Plan & Pricing
 
-| | Free | Pro | Pro Team |
-|--|------|-----|----------|
-| Price | $0 | $4.99/mo or $39.99/yr | $4.99/mo + $2.99/seat/mo |
-| Personal cloud sync | no | yes | yes |
-| Personal calendar | no | yes | yes |
-| Unlimited personal projects | no | yes | yes |
-| Team workspaces | no | no | yes |
-| Team calendar/sync | no | no | yes |
+|                             | Free | Pro                   | Pro Team                 |
+| --------------------------- | ---- | --------------------- | ------------------------ |
+| Price                       | $0   | $4.99/mo or $39.99/yr | $4.99/mo + $2.99/seat/mo |
+| Personal cloud sync         | no   | yes                   | yes                      |
+| Personal calendar           | no   | yes                   | yes                      |
+| Unlimited personal projects | no   | yes                   | yes                      |
+| Team workspaces             | no   | no                    | yes                      |
+| Team calendar/sync          | no   | no                    | yes                      |
 
 Annual pricing for Pro Team: $39.99/yr base + $2.99/seat/mo (seats always monthly).
 
@@ -36,6 +37,7 @@ Annual pricing for Pro Team: $39.99/yr base + $2.99/seat/mo (seats always monthl
 ### Modify `subscriptions` table
 
 Add columns:
+
 - `seat_count` INTEGER NOT NULL DEFAULT 0 — number of paid seats (members excluding owner)
 - `seat_price` NUMERIC NOT NULL DEFAULT 2.99 — price per seat per month
 
@@ -98,6 +100,7 @@ const PRO_TEAM_FEATURES = {
 ```
 
 `isFeatureAvailable(feature, plan)`:
+
 - `"free"` — only free features
 - `"pro"` — PRO_FEATURES
 - `"pro_team"` — PRO_TEAM_FEATURES
@@ -111,6 +114,7 @@ Team creation (in `app/team.tsx`) requires Pro Team plan. If user is on Free or 
 When a member views a Pro Team workspace, they get Pro features even if their personal plan is Free. This is checked by looking at the team owner's subscription, not the member's own.
 
 Add to workspace context or a new hook: `useWorkspaceProStatus()` that returns whether the active workspace has Pro features:
+
 - Personal workspace: check user's own subscription
 - Team workspace: check the team owner's subscription plan === "pro_team"
 
@@ -127,6 +131,7 @@ Update paywall to show three plan cards:
 ### Seat Pricing Breakdown
 
 When Pro Team is selected, show:
+
 - Base: $4.99/mo
 - Seats: N × $2.99/mo = $X.XX/mo
 - Total: $X.XX/mo
@@ -145,6 +150,7 @@ Seat count shown as current team member count (or 0 if no team yet).
 ### `SubscriptionSection`
 
 Show plan-specific info:
+
 - Free: "Upgrade to Pro" (existing)
 - Pro: "Pro Plan" + "Upgrade to Pro Team" link
 - Pro Team: "Pro Team" + seat count + monthly seat cost
@@ -152,6 +158,7 @@ Show plan-specific info:
 ### Team Detail Screen
 
 For owner: show billing summary at the top:
+
 - "N members × $2.99/mo = $X.XX/mo"
 - Link to paywall for plan management
 

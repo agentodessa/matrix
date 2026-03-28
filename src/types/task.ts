@@ -71,8 +71,7 @@ export const QUADRANTS: Record<Quadrant, QuadrantInfo> = {
     label: "Quadrant 03",
     title: "Delegate",
     priority: "Strategic",
-    description:
-      "Urgent but not important to you personally. Hand these off to the right people.",
+    description: "Urgent but not important to you personally. Hand these off to the right people.",
     classes: {
       border: "border-l-strategic",
       badgeBg: "bg-strategic-soft",
@@ -85,8 +84,7 @@ export const QUADRANTS: Record<Quadrant, QuadrantInfo> = {
     label: "Quadrant 04",
     title: "Eliminate",
     priority: "Low Priority",
-    description:
-      "Neither urgent nor important. Remove these distractions from your workflow.",
+    description: "Neither urgent nor important. Remove these distractions from your workflow.",
     classes: {
       border: "border-l-meta",
       badgeBg: "bg-slate-soft",
@@ -105,9 +103,13 @@ export const getQuadrant = (task: Task): Quadrant => {
 
 export const quadrantToProperties = (q: Quadrant): { urgency: Urgency; importance: Importance } => {
   switch (q) {
-    case 1: return { urgency: "urgent", importance: "high" };
-    case 2: return { urgency: "routine", importance: "high" };
-    case 3: return { urgency: "urgent", importance: "casual" };
-    case 4: return { urgency: "routine", importance: "casual" };
+    case 1:
+      return { urgency: "urgent", importance: "high" };
+    case 2:
+      return { urgency: "routine", importance: "high" };
+    case 3:
+      return { urgency: "urgent", importance: "casual" };
+    case 4:
+      return { urgency: "routine", importance: "casual" };
   }
 };

@@ -104,18 +104,21 @@ export const MetricTile = ({
       {numericMatch ? (
         <AnimatedNumber value={parseInt(numericMatch[1], 10)} suffix={numericMatch[2]} />
       ) : (
-        <Text className="font-display text-2xl font-extrabold tracking-tight text-heading" numberOfLines={1}>
+        <Text
+          className="font-display text-2xl font-extrabold tracking-tight text-heading"
+          numberOfLines={1}
+        >
           {value}
         </Text>
       )}
 
       {description ? (
-        <Text className="font-body text-xs text-meta" numberOfLines={1}>{description}</Text>
+        <Text className="font-body text-xs text-meta" numberOfLines={1}>
+          {description}
+        </Text>
       ) : null}
 
-      {progress !== undefined ? (
-        <AnimatedProgressBar progress={progress} />
-      ) : null}
+      {progress !== undefined ? <AnimatedProgressBar progress={progress} /> : null}
 
       {children}
     </View>

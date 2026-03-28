@@ -33,8 +33,12 @@ const WorkspaceOption = ({
   return (
     <Animated.View entering={FadeIn.delay(index * 50).duration(200)}>
       <Pressable
-        onPressIn={() => { scale.value = withSpring(0.97, SPRING_CONFIG); }}
-        onPressOut={() => { scale.value = withSpring(1, SPRING_CONFIG); }}
+        onPressIn={() => {
+          scale.value = withSpring(0.97, SPRING_CONFIG);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, SPRING_CONFIG);
+        }}
         onPress={onPress}
       >
         <Animated.View
@@ -86,10 +90,13 @@ export const WorkspacePill = () => {
 
   const handleClose = useCallback(() => setOpen(false), []);
 
-  const handleSelect = useCallback((id: string) => {
-    setWorkspace(id);
-    handleClose();
-  }, [setWorkspace, handleClose]);
+  const handleSelect = useCallback(
+    (id: string) => {
+      setWorkspace(id);
+      handleClose();
+    },
+    [setWorkspace, handleClose],
+  );
 
   const dropdownWidth = Math.min(screenWidth - 32, 280);
 

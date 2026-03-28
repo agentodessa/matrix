@@ -29,7 +29,8 @@ export const ProGate = ({ feature, featureLabel, children }: ProGateProps) => {
           {featureLabel}
         </Text>
         <Text className="font-body text-sm text-meta text-center leading-5">
-          {t("This feature is available on the Pro plan.")}{"\n"}
+          {t("This feature is available on the Pro plan.")}
+          {"\n"}
           {t("Upgrade to unlock the full experience.")}
         </Text>
       </View>

@@ -22,9 +22,7 @@ export const AppearanceSection = () => {
       <View className="bg-bg-card rounded-lg overflow-hidden">
         <View className="flex-row items-center justify-between px-5 py-4">
           <View className="flex-1 gap-1">
-            <Text className="font-body text-base font-bold text-heading">
-              {t("Dark Mode")}
-            </Text>
+            <Text className="font-body text-base font-bold text-heading">{t("Dark Mode")}</Text>
             <Text className="font-body text-sm text-body">
               {t("Optimized for low-light environments")}
             </Text>
@@ -38,11 +36,14 @@ export const AppearanceSection = () => {
         </View>
         <View className="flex-row items-center justify-between px-5 py-4">
           <View className="flex-1 gap-1">
-            <Text className="font-body text-base font-bold text-heading">
-              {t("Language")}
-            </Text>
+            <Text className="font-body text-base font-bold text-heading">{t("Language")}</Text>
             <Text className="font-body text-sm text-body">
-              {({ en: "English", es: "Español", fr: "Français", ru: "Русский" } as Record<string, string>)[i18n.language] ?? "English"}
+              {(
+                { en: "English", es: "Español", fr: "Français", ru: "Русский" } as Record<
+                  string,
+                  string
+                >
+              )[i18n.language] ?? "English"}
             </Text>
           </View>
           <View className="flex-row gap-2">

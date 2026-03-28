@@ -9,7 +9,7 @@ import { MetricTile } from "@/components/MetricTile";
 import { useTasks } from "@/lib/store";
 
 const DraggableMatrix = lazy(() =>
-  import("@/components/DraggableMatrix").then((m) => ({ default: m.DraggableMatrix }))
+  import("@/components/DraggableMatrix").then((m) => ({ default: m.DraggableMatrix })),
 );
 import { useProjects } from "@/lib/projects-store";
 import { usePullRefresh } from "@/lib/use-pull-refresh";
@@ -51,7 +51,9 @@ export default function FocusDashboard() {
         contentContainerClassName="pb-32"
         showsVerticalScrollIndicator={false}
         scrollEnabled={scrollEnabled}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />
+        }
       >
         {/* ── View Mode Toggle ── */}
         <View className="px-7 pt-4">
@@ -92,9 +94,7 @@ export default function FocusDashboard() {
                       ? "rounded-full bg-slate px-4 py-1.5"
                       : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
                   }
-                  onPress={() =>
-                    setSelectedProject(selectedProject === p ? null : p)
-                  }
+                  onPress={() => setSelectedProject(selectedProject === p ? null : p)}
                 >
                   <Text
                     className={
@@ -180,17 +180,15 @@ const FocusView = ({
 
         <View className="gap-3">
           {q1Active.length > 0 ? (
-            q1Active.slice(0, 4).map((task) => (
-              <TaskItem key={task.id} task={task} onToggle={toggleTask} />
-            ))
+            q1Active
+              .slice(0, 4)
+              .map((task) => <TaskItem key={task.id} task={task} onToggle={toggleTask} />)
           ) : (
             <View className="bg-bg-card rounded-lg py-10 items-center gap-2">
               <Text className="font-display text-base font-bold text-heading">
                 {t("All clear")}
               </Text>
-              <Text className="font-body text-sm text-meta">
-                {t("No urgent tasks right now.")}
-              </Text>
+              <Text className="font-body text-sm text-meta">{t("No urgent tasks right now.")}</Text>
             </View>
           )}
         </View>
@@ -232,7 +230,7 @@ const FocusView = ({
           {([1, 2, 3, 4] as Quadrant[]).map((q) => {
             const info = QUADRANTS[q];
             const count = filterByProject(getTasksByQuadrant(q)).filter(
-              (t) => t.status === "active"
+              (t) => t.status === "active",
             ).length;
             return (
               <Pressable
@@ -277,4 +275,3 @@ const FocusView = ({
     </>
   );
 };
-

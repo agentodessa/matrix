@@ -218,7 +218,15 @@ export const useTeamMutations = () => {
   });
 
   const updateRole = useMutation({
-    mutationFn: async ({ teamId, userId, role }: { teamId: string; userId: string; role: string }) => {
+    mutationFn: async ({
+      teamId,
+      userId,
+      role,
+    }: {
+      teamId: string;
+      userId: string;
+      role: string;
+    }) => {
       const { error } = await supabase
         .from("team_members")
         .update({ role })
@@ -248,10 +256,7 @@ export const useTeamMutations = () => {
 
   const deleteTeam = useMutation({
     mutationFn: async (teamId: string) => {
-      const { error } = await supabase
-        .from("teams")
-        .delete()
-        .eq("id", teamId);
+      const { error } = await supabase.from("teams").delete().eq("id", teamId);
       if (error) throw error;
     },
     onSuccess: () => {

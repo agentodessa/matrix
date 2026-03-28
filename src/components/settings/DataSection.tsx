@@ -24,15 +24,13 @@ export const DataSection = () => {
         >
           <View className="flex-row items-center justify-between px-5 py-4">
             <View className="flex-1 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Cloud Sync")}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Cloud Sync")}</Text>
               <Text className="font-body text-sm text-body">
                 {isPro && isAuthenticated
                   ? t("Connected")
                   : isPro
-                  ? t("Sign in to enable")
-                  : t("Pro feature")}
+                    ? t("Sign in to enable")
+                    : t("Pro feature")}
               </Text>
             </View>
             {!isPro && (

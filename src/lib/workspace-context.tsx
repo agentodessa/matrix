@@ -39,28 +39,44 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   const teamIds = teams.map((t) => t.id).join(",");
 
   useEffect(() => {
-    if (!userId) { setPersonalWs(null); setTeamWorkspaces([]); return; }
+    if (!userId) {
+      setPersonalWs(null);
+      setTeamWorkspaces([]);
+      return;
+    }
     const load = async () => {
       const { data } = await supabase
-        .from("workspaces").select("*").eq("type", "personal").eq("owner_id", userId).single();
+        .from("workspaces")
+        .select("*")
+        .eq("type", "personal")
+        .eq("owner_id", userId)
+        .single();
       if (data) setPersonalWs(data as Workspace);
     };
     load();
   }, [userId]);
 
   useEffect(() => {
-    if (!teamIds) { setTeamWorkspaces([]); return; }
+    if (!teamIds) {
+      setTeamWorkspaces([]);
+      return;
+    }
     const load = async () => {
       const ids = teamIds.split(",");
       const { data } = await supabase
-        .from("workspaces").select("*").eq("type", "team").in("team_id", ids);
+        .from("workspaces")
+        .select("*")
+        .eq("type", "team")
+        .in("team_id", ids);
       if (data) setTeamWorkspaces(data as Workspace[]);
     };
     load();
   }, [teamIds]);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((saved) => { if (saved) setActiveId(saved); });
+    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
+      if (saved) setActiveId(saved);
+    });
   }, []);
 
   const allWorkspaces = useMemo(() => {

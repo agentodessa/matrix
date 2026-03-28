@@ -14,8 +14,8 @@ export const OrganizationSection = () => {
   const teamSubtitle = !user
     ? t("Sign in to create a team")
     : teams.length > 0
-    ? t("{{count}} team", { count: teams.length })
-    : t("Create or join a team");
+      ? t("{{count}} team", { count: teams.length })
+      : t("Create or join a team");
 
   return (
     <View className="gap-3">
@@ -24,15 +24,10 @@ export const OrganizationSection = () => {
       </Text>
       <View className="bg-bg-card rounded-lg overflow-hidden">
         {/* Projects row */}
-        <Pressable
-          className="active:opacity-70"
-          onPress={() => router.push("/projects")}
-        >
+        <Pressable className="active:opacity-70" onPress={() => router.push("/projects")}>
           <View className="flex-row items-center justify-between px-5 py-4">
             <View className="flex-1 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Projects")}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Projects")}</Text>
               <Text className="font-body text-sm text-body">
                 {t("Create and manage your projects")}
               </Text>
@@ -42,23 +37,14 @@ export const OrganizationSection = () => {
         </Pressable>
 
         {/* Team row */}
-        <Pressable
-          className="active:opacity-70"
-          onPress={() => router.push("/team")}
-        >
+        <Pressable className="active:opacity-70" onPress={() => router.push("/team")}>
           <View className="flex-row items-center justify-between px-5 py-4">
             <View className="flex-1 gap-1">
-              <Text className="font-body text-base font-bold text-heading">
-                {t("Team")}
-              </Text>
-              <Text className="font-body text-sm text-body">
-                {teamSubtitle}
-              </Text>
+              <Text className="font-body text-base font-bold text-heading">{t("Team")}</Text>
+              <Text className="font-body text-sm text-body">{teamSubtitle}</Text>
             </View>
             <View className="flex-row items-center gap-2">
-              {pendingInvites.length > 0 && (
-                <View className="w-2.5 h-2.5 rounded-full bg-urgent" />
-              )}
+              {pendingInvites.length > 0 && <View className="w-2.5 h-2.5 rounded-full bg-urgent" />}
               <Text className="text-meta text-base">→</Text>
             </View>
           </View>

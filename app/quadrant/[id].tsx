@@ -29,18 +29,14 @@ export default function QuadrantScreen() {
   const titleWords = qText.title.split(" ");
   const firstWord = titleWords[0];
   const restWords = titleWords.slice(1).join(" ");
-  const displayedTasks =
-    activeTab === "active" ? activeTasks : completedTasks;
+  const displayedTasks = activeTab === "active" ? activeTasks : completedTasks;
   const completionRate =
     tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={["top"]}>
       <Header showBack />
-      <ScrollView
-        contentContainerClassName="pb-32"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerClassName="pb-32" showsVerticalScrollIndicator={false}>
         {/* ── Editorial Header ── */}
         <View className="px-7 pt-8 pb-10 gap-3">
           <View className="flex-row items-center gap-3">
@@ -53,10 +49,7 @@ export default function QuadrantScreen() {
           <Text className="font-display text-[42px] font-extrabold text-heading tracking-tighter leading-[44px]">
             {firstWord}
             {"\n"}
-            <Text className={cls.badgeText}>
-              {restWords || firstWord}
-            </Text>
-            .
+            <Text className={cls.badgeText}>{restWords || firstWord}</Text>.
           </Text>
 
           <Text className="font-body text-base text-body leading-7 pt-2 max-w-[520px]">
@@ -127,18 +120,14 @@ export default function QuadrantScreen() {
               className="self-start bg-slate-btn rounded-lg px-4 py-2.5 active:opacity-70"
               onPress={() => router.push("/(tabs)/add")}
             >
-              <Text className="font-body text-sm font-bold text-white">
-                {t("+ New Task")}
-              </Text>
+              <Text className="font-body text-sm font-bold text-white">{t("+ New Task")}</Text>
             </Pressable>
           )}
 
           {displayedTasks.length === 0 ? (
             <View className="items-center py-12 gap-2">
               <Text className="font-display text-base font-bold text-heading">
-                {activeTab === "active"
-                  ? t("No active tasks")
-                  : t("Nothing completed yet")}
+                {activeTab === "active" ? t("No active tasks") : t("Nothing completed yet")}
               </Text>
               <Text className="font-body text-sm text-meta">
                 {activeTab === "active"
@@ -161,9 +150,7 @@ export default function QuadrantScreen() {
             </Text>
             <View className="flex-row items-center gap-8">
               <View className="items-center">
-                <Text className="font-display text-3xl font-extrabold text-heading">
-                  42m
-                </Text>
+                <Text className="font-display text-3xl font-extrabold text-heading">42m</Text>
                 <Text className="font-body text-[9px] font-bold text-meta tracking-[1.5px] uppercase">
                   {t("Avg. Resolution")}
                 </Text>

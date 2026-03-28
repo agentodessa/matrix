@@ -141,9 +141,7 @@ export const WebSidebar = ({ urgentCount }: { urgentCount: number }) => {
             }}
           >
             <Text style={{ fontSize: 14 }}>
-              {isAuthenticated
-                ? user?.displayName?.charAt(0)?.toUpperCase() ?? "U"
-                : "👤"}
+              {isAuthenticated ? (user?.displayName?.charAt(0)?.toUpperCase() ?? "U") : "👤"}
             </Text>
           </View>
           <View style={{ flex: 1 }}>
@@ -151,11 +149,7 @@ export const WebSidebar = ({ urgentCount }: { urgentCount: number }) => {
               {isAuthenticated ? user?.displayName : t("Guest")}
             </Text>
             <Text className="font-body text-[10px] text-meta" numberOfLines={1}>
-              {isAuthenticated
-                ? isPro
-                  ? t("Pro Plan")
-                  : t("Free Plan")
-                : t("Tap to sign in")}
+              {isAuthenticated ? (isPro ? t("Pro Plan") : t("Free Plan")) : t("Tap to sign in")}
             </Text>
           </View>
         </Pressable>

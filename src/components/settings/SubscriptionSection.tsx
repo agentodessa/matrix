@@ -25,10 +25,13 @@ export const SubscriptionSection = () => {
             </Text>
             <Text className="font-body text-sm text-body">
               {isProTeam
-                ? t("{{count}} seats × ${{price}}/mo", { count: subscription?.seatCount ?? 0, price: PRICING.seat.toFixed(2) })
+                ? t("{{count}} seats × ${{price}}/mo", {
+                    count: subscription?.seatCount ?? 0,
+                    price: PRICING.seat.toFixed(2),
+                  })
                 : isPro
-                ? t("Upgrade to Pro Team for shared boards")
-                : t("Calendar, cloud sync, and more — $4.99/mo")}
+                  ? t("Upgrade to Pro Team for shared boards")
+                  : t("Calendar, cloud sync, and more — $4.99/mo")}
             </Text>
           </View>
           {!isPro && (

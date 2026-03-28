@@ -35,7 +35,9 @@ export const GoogleSignInButton = ({ onSuccess }: { onSuccess?: () => void }) =>
   // Web: listen for auth state changes after token extraction
   useEffect(() => {
     if (Platform.OS !== "web") return;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") {
         onSuccess?.();
       }
@@ -74,11 +76,9 @@ export const GoogleSignInButton = ({ onSuccess }: { onSuccess?: () => void }) =>
 
       // ── Native (iOS/Android) ──
       // Open the OAuth URL in an in-app browser
-      const result = await WebBrowser.openAuthSessionAsync(
-        data.url,
-        redirectTo,
-        { showInRecents: true }
-      );
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo, {
+        showInRecents: true,
+      });
 
       setLoading(false);
 

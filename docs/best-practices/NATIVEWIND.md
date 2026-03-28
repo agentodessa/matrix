@@ -12,6 +12,7 @@ npx expo install --dev tailwindcss @tailwindcss/postcss postcss
 ```
 
 **Pin lightningcss** in `package.json` to avoid deserialization errors:
+
 ```json
 {
   "overrides": {
@@ -22,18 +23,19 @@ npx expo install --dev tailwindcss @tailwindcss/postcss postcss
 
 ## Required Peer Versions
 
-| Package | Minimum |
-|---------|---------|
-| `tailwindcss` | > 4.1.11 |
-| `react-native-css` | ^3.0.1 |
-| `react` | >= 19 |
-| `react-native` | >= 0.81 |
-| `@expo/metro-config` | >= 54 |
-| `react-native-reanimated` | >= 4 |
+| Package                   | Minimum  |
+| ------------------------- | -------- |
+| `tailwindcss`             | > 4.1.11 |
+| `react-native-css`        | ^3.0.1   |
+| `react`                   | >= 19    |
+| `react-native`            | >= 0.81  |
+| `@expo/metro-config`      | >= 54    |
+| `react-native-reanimated` | >= 4     |
 
 ## Configuration
 
 ### `global.css`
+
 ```css
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
@@ -47,6 +49,7 @@ npx expo install --dev tailwindcss @tailwindcss/postcss postcss
 ```
 
 ### `metro.config.js`
+
 ```javascript
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativewind } = require("nativewind/metro");
@@ -55,9 +58,11 @@ const config = getDefaultConfig(__dirname);
 
 module.exports = withNativewind(config);
 ```
+
 No options needed — v5 auto-detects `global.css`.
 
 ### `postcss.config.mjs` (NEW — required)
+
 ```javascript
 export default {
   plugins: {
@@ -67,6 +72,7 @@ export default {
 ```
 
 ### `babel.config.js` (SIMPLIFIED)
+
 ```javascript
 module.exports = function (api) {
   api.cache(true);
@@ -78,14 +84,17 @@ module.exports = function (api) {
 ```
 
 ### TypeScript — `nativewind-env.d.ts`
+
 ```typescript
 /// <reference types="react-native-css/types" />
 ```
+
 File name must NOT match any folder or `node_modules` directory name.
 
 ## Dark Mode (Verified Working Pattern)
 
 ### Prerequisites
+
 Set `"userInterfaceStyle": "automatic"` in `app.json`.
 
 ### Step 1: Define tokens in `global.css`
@@ -111,6 +120,7 @@ Light values go in `@theme`, dark overrides in `@media (prefers-color-scheme: da
 **Why this works:** `@theme` registers tokens AND sets light defaults. `@media (prefers-color-scheme: dark)` with `:root` overrides them when dark mode is active. NativeWind intercepts the media query and applies the dark values when `Appearance.colorScheme === "dark"`.
 
 **What does NOT work:**
+
 - `@variant dark` inside `@layer theme` — NativeWind v5 doesn't recognize `light` variant, and `dark` variant alone doesn't reliably switch CSS custom properties
 - `@theme inline` with `var()` references — vars are resolved at build time, not runtime
 - Bare CSS custom properties inside `@layer theme` without a selector — syntax error
@@ -172,16 +182,19 @@ This triggers both the CSS `@media` overrides AND React re-render (via `useColor
 ## className Rules
 
 ### Supported Components
+
 All RN core components: `View`, `Text`, `Image`, `ScrollView`, `TextInput`, `Pressable`, `SafeAreaView`, `Modal`, `FlatList`, `SectionList`, `KeyboardAvoidingView`, `ActivityIndicator`, `Switch`.
 
 ### Special Bindings
-| Component | Prop |
-|-----------|------|
-| `ScrollView` | `contentContainerClassName` |
-| `FlatList` | `contentContainerClassName`, `columnWrapperClassName` |
-| `TextInput` | `placeholderClassName` (v5 replaces `placeholderTextColorClassName`) |
+
+| Component    | Prop                                                                 |
+| ------------ | -------------------------------------------------------------------- |
+| `ScrollView` | `contentContainerClassName`                                          |
+| `FlatList`   | `contentContainerClassName`, `columnWrapperClassName`                |
+| `TextInput`  | `placeholderClassName` (v5 replaces `placeholderTextColorClassName`) |
 
 ### Key Rules
+
 1. **Styles do NOT inherit** — apply `text-*` to `<Text>`, not parent `<View>`
 2. **All class names must be static** — use ternary, NOT `bg-${color}-500`
 3. **`style` overrides `className`** for overlapping properties
@@ -192,15 +205,15 @@ All RN core components: `View`, `Text`, `Image`, `ScrollView`, `TextInput`, `Pre
 
 ## Breaking Changes from Uniwind / v4
 
-| Uniwind | NativeWind v5 |
-|---------|---------------|
-| `withUniwindConfig` | `withNativewind` (no args) |
-| `@import 'tailwindcss'` + `@import 'uniwind'` | 4 explicit imports |
-| `jsxImportSource: "nativewind"` in babel | Not needed |
-| `withUniwind(Component)` HOC | Not needed — import rewriting |
-| `useCSSVariable()` | `vars()` from nativewind or CSS variables |
-| `Uniwind.setTheme()` | `Appearance.setColorScheme()` from react-native |
-| `useUniwind()` | `useColorScheme()` from react-native |
+| Uniwind                                       | NativeWind v5                                   |
+| --------------------------------------------- | ----------------------------------------------- |
+| `withUniwindConfig`                           | `withNativewind` (no args)                      |
+| `@import 'tailwindcss'` + `@import 'uniwind'` | 4 explicit imports                              |
+| `jsxImportSource: "nativewind"` in babel      | Not needed                                      |
+| `withUniwind(Component)` HOC                  | Not needed — import rewriting                   |
+| `useCSSVariable()`                            | `vars()` from nativewind or CSS variables       |
+| `Uniwind.setTheme()`                          | `Appearance.setColorScheme()` from react-native |
+| `useUniwind()`                                | `useColorScheme()` from react-native            |
 
 ## Troubleshooting
 

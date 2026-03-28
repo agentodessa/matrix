@@ -11,7 +11,12 @@ const SPRING_CONFIG = { damping: 20, stiffness: 200, mass: 0.8 };
 
 const COLORS = {
   light: { active: "#2a3439", inactive: "#717c82", pillBg: "rgba(0,0,0,0.08)", trackBg: "#e1e9ee" },
-  dark: { active: "#e0e4e6", inactive: "#6b777d", pillBg: "rgba(255,255,255,0.12)", trackBg: "#232b2e" },
+  dark: {
+    active: "#e0e4e6",
+    inactive: "#6b777d",
+    pillBg: "rgba(255,255,255,0.12)",
+    trackBg: "#232b2e",
+  },
 };
 
 interface Props {

@@ -13,11 +13,15 @@ async function loadLocal(): Promise<string[]> {
   try {
     const json = await AsyncStorage.getItem(STORAGE_KEY);
     return json ? JSON.parse(json) : [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 async function saveLocal(projects: string[]) {
-  try { await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch {}
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  } catch {}
 }
 
 /* ── Supabase helpers ── */
@@ -37,7 +41,9 @@ async function fetchRemoteProjects(workspaceId: string): Promise<string[]> {
 let localProjects: string[] = [];
 let localInit = false;
 const localListeners = new Set<() => void>();
-const notifyLocal = () => { localListeners.forEach((l) => l()); };
+const notifyLocal = () => {
+  localListeners.forEach((l) => l());
+};
 
 const useLocalProjects = () => {
   const [, update] = useState(0);
@@ -49,9 +55,14 @@ const useLocalProjects = () => {
     localListeners.add(listener);
     if (!localInit) {
       localInit = true;
-      loadLocal().then((p) => { localProjects = p; notifyLocal(); });
+      loadLocal().then((p) => {
+        localProjects = p;
+        notifyLocal();
+      });
     }
-    return () => { if (ref.current) localListeners.delete(ref.current); };
+    return () => {
+      if (ref.current) localListeners.delete(ref.current);
+    };
   }, []);
 
   return {
@@ -60,13 +71,18 @@ const useLocalProjects = () => {
       const trimmed = name.trim();
       if (!trimmed || localProjects.includes(trimmed)) return;
       localProjects = [...localProjects, trimmed];
-      saveLocal(localProjects); notifyLocal();
+      saveLocal(localProjects);
+      notifyLocal();
     },
     removeProject: (name: string) => {
       localProjects = localProjects.filter((p) => p !== name);
-      saveLocal(localProjects); notifyLocal();
+      saveLocal(localProjects);
+      notifyLocal();
     },
-    reload: async () => { localProjects = await loadLocal(); notifyLocal(); },
+    reload: async () => {
+      localProjects = await loadLocal();
+      notifyLocal();
+    },
   };
 };
 
@@ -84,7 +100,9 @@ const useCloudProjects = (workspaceId: string, userId: string) => {
 
   const addMutation = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from("projects").insert({ workspace_id: workspaceId, created_by: userId, name });
+      const { error } = await supabase
+        .from("projects")
+        .insert({ workspace_id: workspaceId, created_by: userId, name });
       if (error) throw error;
     },
     onMutate: async (name) => {
@@ -93,22 +111,32 @@ const useCloudProjects = (workspaceId: string, userId: string) => {
       qc.setQueryData<string[]>(["projects", workspaceId], (old = []) => [...old, name]);
       return { prev };
     },
-    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev); },
+    onError: (_e, _n, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["projects", workspaceId] }),
   });
 
   const removeMutation = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from("projects").delete().eq("workspace_id", workspaceId).eq("name", name);
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("workspace_id", workspaceId)
+        .eq("name", name);
       if (error) throw error;
     },
     onMutate: async (name) => {
       await qc.cancelQueries({ queryKey: ["projects", workspaceId] });
       const prev = qc.getQueryData<string[]>(["projects", workspaceId]);
-      qc.setQueryData<string[]>(["projects", workspaceId], (old = []) => old.filter((p) => p !== name));
+      qc.setQueryData<string[]>(["projects", workspaceId], (old = []) =>
+        old.filter((p) => p !== name),
+      );
       return { prev };
     },
-    onError: (_e, _n, ctx) => { if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev); },
+    onError: (_e, _n, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["projects", workspaceId], ctx.prev);
+    },
     onSettled: () => qc.invalidateQueries({ queryKey: ["projects", workspaceId] }),
   });
 
@@ -120,7 +148,9 @@ const useCloudProjects = (workspaceId: string, userId: string) => {
       addMutation.mutate(trimmed);
     },
     removeProject: (name: string) => removeMutation.mutate(name),
-    reload: async () => { await qc.invalidateQueries({ queryKey: ["projects", workspaceId] }); },
+    reload: async () => {
+      await qc.invalidateQueries({ queryKey: ["projects", workspaceId] });
+    },
   };
 };
 

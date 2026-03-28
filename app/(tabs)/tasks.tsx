@@ -36,11 +36,8 @@ export default function TasksScreen() {
   const filteredTasks =
     activeFilter === "all"
       ? projectFiltered
-      : projectFiltered.filter(
-          (t) =>
-            getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant).some(
-              (q) => q.id === t.id
-            )
+      : projectFiltered.filter((t) =>
+          getTasksByQuadrant(parseInt(activeFilter, 10) as Quadrant).some((q) => q.id === t.id),
         );
 
   const activeTasks = filteredTasks.filter((t) => t.status === "active");
@@ -101,9 +98,7 @@ export default function TasksScreen() {
                     ? "rounded-full bg-slate px-4 py-1.5"
                     : "rounded-full bg-btn-surface border border-border px-4 py-1.5 active:opacity-70"
                 }
-                onPress={() =>
-                  setSelectedProject(selectedProject === p ? null : p)
-                }
+                onPress={() => setSelectedProject(selectedProject === p ? null : p)}
               >
                 <Text
                   className={
@@ -128,9 +123,10 @@ export default function TasksScreen() {
             const count =
               filter.key === "all"
                 ? projectFiltered.filter((t) => t.status === "active").length
-                : getTasksByQuadrant(
-                    parseInt(filter.key, 10) as Quadrant
-                  ).filter((t) => t.status === "active" && (!selectedProject || t.project === selectedProject)).length;
+                : getTasksByQuadrant(parseInt(filter.key, 10) as Quadrant).filter(
+                    (t) =>
+                      t.status === "active" && (!selectedProject || t.project === selectedProject),
+                  ).length;
 
             return (
               <Pressable
@@ -161,15 +157,17 @@ export default function TasksScreen() {
       <ScrollView
         contentContainerClassName="px-7 pt-2 pb-32 gap-3"
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#737686" />
+        }
       >
         {activeTasks.length === 0 && completedTasks.length === 0 && (
           <View className="items-center py-16 gap-3">
-            <Text className="font-display text-lg font-bold text-heading">
-              {t("All clear")}
-            </Text>
+            <Text className="font-display text-lg font-bold text-heading">{t("All clear")}</Text>
             <Text className="font-body text-sm text-meta text-center leading-5">
-              {t("No tasks in this quadrant.")}{"\n"}{t("That's either impressive or suspicious.")}
+              {t("No tasks in this quadrant.")}
+              {"\n"}
+              {t("That's either impressive or suspicious.")}
             </Text>
           </View>
         )}
