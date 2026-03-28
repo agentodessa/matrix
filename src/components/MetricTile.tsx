@@ -12,7 +12,7 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 const HEADING_COLOR = { light: "#2a3439", dark: "#e0e4e6" };
 
-function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
+const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
   const colorScheme = useColorScheme();
   const color = HEADING_COLOR[colorScheme === "dark" ? "dark" : "light"];
   const animatedValue = useSharedValue(0);
@@ -40,14 +40,14 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
       defaultValue={`0${suffix}`}
     />
   );
-}
+};
 
-function getProgressColor(v: number) {
+const getProgressColor = (v: number) => {
   "worklet";
   return v < 30 ? "#dc2626" : v < 70 ? "#d97706" : "#16a34a";
-}
+};
 
-function AnimatedProgressBar({ progress }: { progress: number }) {
+const AnimatedProgressBar = ({ progress }: { progress: number }) => {
   const animatedProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -67,7 +67,7 @@ function AnimatedProgressBar({ progress }: { progress: number }) {
       <Animated.View className="h-1.5 rounded-full" style={barStyle} />
     </View>
   );
-}
+};
 
 interface MetricTileProps {
   label: string;
@@ -78,14 +78,14 @@ interface MetricTileProps {
   children?: React.ReactNode;
 }
 
-export function MetricTile({
+export const MetricTile = ({
   label,
   labelColor,
   value,
   description,
   progress,
   children,
-}: MetricTileProps) {
+}: MetricTileProps) => {
   const numericMatch = value.match(/^(\d+)(.*)$/);
 
   return (
@@ -120,4 +120,4 @@ export function MetricTile({
       {children}
     </View>
   );
-}
+};

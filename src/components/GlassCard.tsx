@@ -5,13 +5,13 @@ interface GlassCardProps extends ViewProps {
   fallbackClassName?: string;
 }
 
-export function GlassCard({
+export const GlassCard = ({
   children,
   className,
   fallbackClassName = "bg-bg-card rounded-lg",
   style,
   ...props
-}: GlassCardProps) {
+}: GlassCardProps) => {
   if (isGlassAvailable()) {
     const { GlassView } = require("expo-glass-effect");
     return (
@@ -35,4 +35,4 @@ export function GlassCard({
       {children}
     </View>
   );
-}
+};

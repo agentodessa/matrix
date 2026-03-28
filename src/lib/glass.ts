@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 
 let _glassAvailable: boolean | null = null;
 
-export function isGlassAvailable(): boolean {
+export const isGlassAvailable = (): boolean => {
   if (_glassAvailable !== null) return _glassAvailable;
   if (Platform.OS !== "ios") {
     _glassAvailable = false;
@@ -15,4 +15,4 @@ export function isGlassAvailable(): boolean {
     _glassAvailable = false;
   }
   return _glassAvailable;
-}
+};

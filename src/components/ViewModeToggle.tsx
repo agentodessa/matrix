@@ -7,7 +7,7 @@ interface ViewModeToggleProps {
   onChange: (mode: "focus" | "matrix") => void;
 }
 
-function NativeToggle({ value, onChange }: ViewModeToggleProps) {
+const NativeToggle = ({ value, onChange }: ViewModeToggleProps) => {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -36,7 +36,7 @@ function NativeToggle({ value, onChange }: ViewModeToggleProps) {
       }}
     />
   );
-}
+};
 
 // Lazy-load web implementation only on web
 let WebToggle: React.ComponentType<ViewModeToggleProps>;
@@ -46,9 +46,9 @@ if (Platform.OS === "web") {
   WebToggle = require("./ViewModeToggle.web").WebViewModeToggle;
 }
 
-export function ViewModeToggle(props: ViewModeToggleProps) {
+export const ViewModeToggle = (props: ViewModeToggleProps) => {
   if (Platform.OS === "web") {
     return <WebToggle {...props} />;
   }
   return <NativeToggle {...props} />;
-}
+};

@@ -10,7 +10,7 @@ interface ProGateProps {
   children: React.ReactNode;
 }
 
-export function ProGate({ feature, featureLabel, children }: ProGateProps) {
+export const ProGate = ({ feature, featureLabel, children }: ProGateProps) => {
   const { t } = useTranslation();
   const { plan } = useSubscription();
   const router = useRouter();
@@ -50,4 +50,4 @@ export function ProGate({ feature, featureLabel, children }: ProGateProps) {
       </View>
     </View>
   );
-}
+};

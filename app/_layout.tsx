@@ -8,7 +8,7 @@ import { lightTheme, darkTheme } from "../src/lib/theme";
 import { QueryProvider } from "../src/lib/query-client";
 import { useRealtimeSync } from "../src/lib/realtime-sync";
 
-function AppContent() {
+const AppContent = () => {
   const themeLoaded = useThemePersistence();
   const colorScheme = useColorScheme();
   useRealtimeSync();
@@ -36,7 +36,7 @@ function AppContent() {
       </View>
     </GestureHandlerRootView>
   );
-}
+};
 
 export default function RootLayout() {
   return (

@@ -12,16 +12,26 @@ import { Task, getQuadrant } from "../../src/types/task";
 
 type CalendarView = "month" | "year";
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-const MONTH_SHORT = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const WEEKDAYS_SHORT = ["M", "T", "W", "T", "F", "S", "S"];
+const getMonthNames = (locale: string) => {
+  return Array.from({ length: 12 }, (_, i) =>
+    new Date(2024, i, 1).toLocaleString(locale, { month: "long" })
+  );
+};
+const getMonthShort = (locale: string) => {
+  return Array.from({ length: 12 }, (_, i) =>
+    new Date(2024, i, 1).toLocaleString(locale, { month: "short" })
+  );
+};
+const getWeekdays = (locale: string) => {
+  return Array.from({ length: 7 }, (_, i) =>
+    new Date(2024, 0, i + 1).toLocaleString(locale, { weekday: "short" })
+  );
+};
+const getWeekdaysShort = (locale: string) => {
+  return Array.from({ length: 7 }, (_, i) =>
+    new Date(2024, 0, i + 1).toLocaleString(locale, { weekday: "narrow" })
+  );
+};
 
 const QUADRANT_COLORS: Record<number, string> = {
   1: "#ac0b18",
@@ -32,35 +42,40 @@ const QUADRANT_COLORS: Record<number, string> = {
 
 /* ── Helpers ── */
 
-function getToday() {
+const getToday = () => {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth(), date: d.getDate() };
-}
-function getDaysInMonth(y: number, m: number) {
+};
+const getDaysInMonth = (y: number, m: number) => {
   return new Date(y, m + 1, 0).getDate();
-}
-function getFirstDayOfWeek(y: number, m: number) {
+};
+const getFirstDayOfWeek = (y: number, m: number) => {
   const d = new Date(y, m, 1).getDay();
   return d === 0 ? 6 : d - 1;
-}
-function isSameDay(a: Date, b: Date) {
+};
+const isSameDay = (a: Date, b: Date) => {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-function parseTaskDate(t: Task): Date | null {
+};
+const parseTaskDate = (t: Task): Date | null => {
   if (t.created_at) { const d = new Date(t.created_at); if (!isNaN(d.getTime())) return d; }
   return null;
-}
-function getTasksForDate(tasks: Task[], date: Date) {
+};
+const getTasksForDate = (tasks: Task[], date: Date) => {
   return tasks.filter((t) => { const d = parseTaskDate(t); return d && isSameDay(d, date); });
-}
-function hasTasksOnDate(tasks: Task[], date: Date) {
+};
+const hasTasksOnDate = (tasks: Task[], date: Date) => {
   return tasks.some((t) => { const d = parseTaskDate(t); return d && isSameDay(d, date); });
-}
+};
 
 /* ── Main ── */
 
 export default function CalendarScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
+  const monthNames = useMemo(() => getMonthNames(locale), [locale]);
+  const monthShort = useMemo(() => getMonthShort(locale), [locale]);
+  const weekdays = useMemo(() => getWeekdays(locale), [locale]);
+  const weekdaysShort = useMemo(() => getWeekdaysShort(locale), [locale]);
   const { tasks, toggleTask } = useTasks();
   const { projects } = useProjects();
   const today = getToday();
@@ -110,7 +125,7 @@ export default function CalendarScreen() {
           </Pressable>
           <Pressable onPress={() => setView(view === "month" ? "year" : "month")} className="active:opacity-70">
             <Text className="font-display text-base font-bold text-heading" style={{ minWidth: 150, textAlign: "center" }}>
-              {view === "month" ? `${t(MONTH_NAMES[currentMonth])} ${currentYear}` : `${currentYear}`}
+              {view === "month" ? `${monthNames[currentMonth]} ${currentYear}` : `${currentYear}`}
             </Text>
           </Pressable>
           <Pressable onPress={next} style={{ width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" }} className="bg-btn-surface active:opacity-70">
@@ -175,10 +190,12 @@ export default function CalendarScreen() {
           selectedDate={selectedDate} onSelectDate={setSelectedDate}
           tasks={filteredTasks} selectedTasks={selectedTasks} toggleTask={toggleTask}
           refreshing={refreshing} onRefresh={onRefresh}
+          weekdays={weekdays} weekdaysShort={weekdaysShort}
         />
       ) : (
         <YearView year={currentYear} today={today} tasks={filteredTasks}
           onSelectMonth={(m) => { setCurrentMonth(m); setView("month"); }}
+          monthShort={monthShort} weekdaysShort={weekdaysShort}
         />
       )}
 
@@ -189,15 +206,16 @@ export default function CalendarScreen() {
 
 /* ── Month View with event bars ── */
 
-function MonthView({
-  year, month, today, selectedDate, onSelectDate, tasks, selectedTasks, toggleTask, refreshing, onRefresh,
+const MonthView = ({
+  year, month, today, selectedDate, onSelectDate, tasks, selectedTasks, toggleTask, refreshing, onRefresh, weekdays, weekdaysShort,
 }: {
   year: number; month: number;
   today: { year: number; month: number; date: number };
   selectedDate: Date; onSelectDate: (d: Date) => void;
   tasks: Task[]; selectedTasks: Task[]; toggleTask: (id: string) => void;
   refreshing: boolean; onRefresh: () => void;
-}) {
+  weekdays: string[]; weekdaysShort: string[];
+}) => {
   const { t } = useTranslation();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
@@ -242,7 +260,7 @@ function MonthView({
       >
         {/* Weekday headers */}
         <View style={{ flexDirection: "row", paddingHorizontal: 4 }}>
-          {(isWeb ? WEEKDAYS : WEEKDAYS_SHORT).map((d, i) => (
+          {(isWeb ? weekdays : weekdaysShort).map((d, i) => (
             <View key={i} style={{ flex: 1, alignItems: "center", paddingVertical: 4 }}>
               <Text className={i >= 5 ? "font-body text-[11px] font-bold text-meta/40" : "font-body text-[11px] font-bold text-meta"}>{d}</Text>
             </View>
@@ -370,11 +388,11 @@ function MonthView({
       </ScrollView>
     </View>
   );
-}
+};
 
 /* ── Compact task row for calendar detail ── */
 
-function CalendarTaskRow({ task, onToggle }: { task: Task; onToggle: (id: string) => void }) {
+const CalendarTaskRow = ({ task, onToggle }: { task: Task; onToggle: (id: string) => void }) => {
   const q = getQuadrant(task);
   const color = QUADRANT_COLORS[q];
   const done = task.status === "completed";
@@ -420,35 +438,36 @@ function CalendarTaskRow({ task, onToggle }: { task: Task; onToggle: (id: string
       )}
     </Pressable>
   );
-}
+};
 
 /* ── Year View ── */
 
-function YearView({
-  year, today, tasks, onSelectMonth,
+const YearView = ({
+  year, today, tasks, onSelectMonth, monthShort, weekdaysShort,
 }: {
   year: number; today: { year: number; month: number; date: number };
   tasks: Task[]; onSelectMonth: (m: number) => void;
-}) {
+  monthShort: string[]; weekdaysShort: string[];
+}) => {
   return (
     <ScrollView contentContainerClassName="px-4 pb-32 pt-2" showsVerticalScrollIndicator={false}>
       <View className="flex-row flex-wrap">
         {Array.from({ length: 12 }, (_, m) => (
-          <MiniMonth key={m} year={year} month={m} today={today} tasks={tasks} onPress={() => onSelectMonth(m)} />
+          <MiniMonth key={m} year={year} month={m} today={today} tasks={tasks} onPress={() => onSelectMonth(m)} monthShort={monthShort} weekdaysShort={weekdaysShort} />
         ))}
       </View>
     </ScrollView>
   );
-}
+};
 
-function MiniMonth({
-  year, month, today, tasks, onPress,
+const MiniMonth = ({
+  year, month, today, tasks, onPress, monthShort, weekdaysShort,
 }: {
   year: number; month: number;
   today: { year: number; month: number; date: number };
   tasks: Task[]; onPress: () => void;
-}) {
-  const { t } = useTranslation();
+  monthShort: string[]; weekdaysShort: string[];
+}) => {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
   const isCurrent = year === today.year && month === today.month;
@@ -464,10 +483,10 @@ function MiniMonth({
     <Pressable style={{ width: "33.33%" }} className="p-2 active:opacity-70" onPress={onPress}>
       <View className="bg-bg-card rounded-xl p-3">
         <Text className={isCurrent ? "font-display text-sm font-bold text-heading pb-2" : "font-display text-sm font-bold text-meta pb-2"}>
-          {t(MONTH_SHORT[month])}
+          {monthShort[month]}
         </Text>
         <View className="flex-row">
-          {WEEKDAYS_SHORT.map((d, i) => (
+          {weekdaysShort.map((d, i) => (
             <View key={i} style={{ flex: 1, alignItems: "center" }}>
               <Text className="font-body text-[7px] text-meta">{d}</Text>
             </View>
@@ -497,4 +516,4 @@ function MiniMonth({
       </View>
     </Pressable>
   );
-}
+};

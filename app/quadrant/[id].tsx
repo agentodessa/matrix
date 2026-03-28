@@ -7,11 +7,13 @@ import { TaskItem } from "../../src/components/TaskItem";
 import { useTasks } from "../../src/lib/store";
 import { QUADRANTS, Quadrant } from "../../src/types/task";
 import { useTranslation } from "react-i18next";
+import { useQuadrantT } from "../../src/lib/use-quadrant-t";
 
 export default function QuadrantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
+  const quadrantT = useQuadrantT();
   const quadrantId = parseInt(id, 10) as Quadrant;
   const quadrant = QUADRANTS[quadrantId];
   const { getTasksByQuadrant, toggleTask } = useTasks();
@@ -22,8 +24,9 @@ export default function QuadrantScreen() {
 
   if (!quadrant) return null;
 
+  const qText = quadrantT(quadrantId);
   const cls = quadrant.classes;
-  const titleWords = quadrant.title.split(" ");
+  const titleWords = qText.title.split(" ");
   const firstWord = titleWords[0];
   const restWords = titleWords.slice(1).join(" ");
   const displayedTasks =
@@ -57,7 +60,7 @@ export default function QuadrantScreen() {
           </Text>
 
           <Text className="font-body text-base text-body leading-7 pt-2 max-w-[520px]">
-            {t(quadrant.description)}
+            {qText.description}
           </Text>
 
           {/* Stat Row */}

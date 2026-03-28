@@ -94,18 +94,18 @@ export const QUADRANTS: Record<Quadrant, QuadrantInfo> = {
   },
 };
 
-export function getQuadrant(task: Task): Quadrant {
+export const getQuadrant = (task: Task): Quadrant => {
   if (task.urgency === "urgent" && task.importance === "high") return 1;
   if (task.urgency === "routine" && task.importance === "high") return 2;
   if (task.urgency === "urgent" && task.importance === "casual") return 3;
   return 4;
-}
+};
 
-export function quadrantToProperties(q: Quadrant): { urgency: Urgency; importance: Importance } {
+export const quadrantToProperties = (q: Quadrant): { urgency: Urgency; importance: Importance } => {
   switch (q) {
     case 1: return { urgency: "urgent", importance: "high" };
     case 2: return { urgency: "routine", importance: "high" };
     case 3: return { urgency: "urgent", importance: "casual" };
     case 4: return { urgency: "routine", importance: "casual" };
   }
-}
+};

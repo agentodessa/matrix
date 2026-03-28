@@ -12,6 +12,7 @@ import { useProjects } from "../../src/lib/projects-store";
 import { usePullRefresh } from "../../src/lib/use-pull-refresh";
 import { ViewModeToggle } from "../../src/components/ViewModeToggle";
 import { QUADRANTS, Quadrant, Task } from "../../src/types/task";
+import { useQuadrantT } from "../../src/lib/use-quadrant-t";
 
 type ViewMode = "focus" | "matrix";
 
@@ -136,7 +137,7 @@ export default function FocusDashboard() {
 
 /* ── Focus View (existing dashboard) ── */
 
-function FocusView({
+const FocusView = ({
   q1Active,
   totalActive,
   totalCompleted,
@@ -156,8 +157,9 @@ function FocusView({
   getTasksByQuadrant: (q: Quadrant) => Task[];
   toggleTask: (id: string) => void;
   router: ReturnType<typeof useRouter>;
-}) {
+}) => {
   const { t } = useTranslation();
+  const quadrantT = useQuadrantT();
   return (
     <>
       {/* ── Urgent Tasks First ── */}
@@ -235,7 +237,7 @@ function FocusView({
               >
                 <View className={`w-2 h-2 rounded-full ${info.classes.dot}`} />
                 <Text className="font-display text-base font-bold text-heading">
-                  {info.title}
+                  {quadrantT(q).title}
                 </Text>
                 <Text className="font-body text-xs text-meta">
                   {count} {t("active")}
@@ -269,5 +271,5 @@ function FocusView({
       </View>
     </>
   );
-}
+};
 

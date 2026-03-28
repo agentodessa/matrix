@@ -15,7 +15,7 @@ let resolved = false;
 let resolvePromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
-function notify() { listeners.forEach((l) => l()); }
+const notify = () => { listeners.forEach((l) => l()); };
 
 async function persistProStatus() {
   try {
@@ -84,7 +84,7 @@ supabase.auth.onAuthStateChange(() => {
   resolvePromise = refresh();
 });
 
-export function useProStatus(): { userId: string | null; isPro: boolean } {
+export const useProStatus = (): { userId: string | null; isPro: boolean } => {
   const [, update] = useState(0);
 
   useEffect(() => {
@@ -100,9 +100,9 @@ export function useProStatus(): { userId: string | null; isPro: boolean } {
     userId: cachedUserId,
     isPro: cachedIsPro,
   };
-}
+};
 
 /** Get pro user ID — for use outside React components */
-export function getProUserIdSync(): string | null {
+export const getProUserIdSync = (): string | null => {
   return cachedIsPro ? cachedUserId : null;
-}
+};

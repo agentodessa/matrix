@@ -7,15 +7,15 @@ let channel: RealtimeChannel | null = null;
 let subscribedUserId: string | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-function invalidateAll(userId: string) {
+const invalidateAll = (userId: string) => {
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     queryClient.invalidateQueries({ queryKey: ["tasks", userId] });
     queryClient.invalidateQueries({ queryKey: ["projects", userId] });
   }, 500);
-}
+};
 
-export function useRealtimeSync() {
+export const useRealtimeSync = () => {
   const didSetup = useRef(false);
 
   useEffect(() => {
@@ -81,4 +81,4 @@ export function useRealtimeSync() {
       if (debounceTimer) clearTimeout(debounceTimer);
     };
   }, []);
-}
+};

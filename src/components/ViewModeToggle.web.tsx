@@ -19,7 +19,7 @@ interface Props {
   onChange: (mode: "focus" | "matrix") => void;
 }
 
-export function WebViewModeToggle({ value, onChange }: Props) {
+export const WebViewModeToggle = ({ value, onChange }: Props) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
@@ -83,4 +83,4 @@ export function WebViewModeToggle({ value, onChange }: Props) {
       </Pressable>
     </View>
   );
-}
+};

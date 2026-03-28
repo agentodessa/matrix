@@ -203,3 +203,21 @@ Variants: `"primary"`, `"secondary"`, `"tertiary"`, `"outline"`, `"ghost"`, `"da
 8. All HeroUI components accept `className` for Uniwind styling
 9. `feedbackVariant` controls press animation: `"scale-highlight"`, `"scale-ripple"`, `"scale"`, `"none"`
 10. Slot-based styling via `styles` prop for multi-part components
+
+---
+
+## Code Conventions
+
+### Arrow Functions Over Function Declarations
+Use `const` with arrow functions for all exports — components, hooks, utilities:
+```tsx
+// ✅ Correct
+export const useAuth = () => { ... };
+export const ProfileScreen = () => { ... };
+export const formatDate = (date: Date) => { ... };
+
+// ❌ Wrong
+export function useAuth() { ... }
+export default function ProfileScreen() { ... }
+```
+Exception: `export default` requires a declaration in Expo Router files (`app/` directory) — use `export default function` there since `export default const` is not valid syntax.

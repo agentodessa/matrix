@@ -14,15 +14,16 @@ import {
   getQuadrant,
   QUADRANTS,
 } from "../../src/types/task";
+import { useQuadrantT } from "../../src/lib/use-quadrant-t";
 
-function getTomorrow() {
+const getTomorrow = () => {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(17, 0, 0, 0);
   return d;
-}
+};
 
-function formatDate(date: Date) {
+const formatDate = (date: Date) => {
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(now.getDate() + 1);
@@ -35,7 +36,7 @@ function formatDate(date: Date) {
   if (isToday) return `Today, ${time}`;
   if (isTomorrow) return `Tomorrow, ${time}`;
   return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${time}`;
-}
+};
 
 interface FormData {
   title: string;
@@ -48,6 +49,7 @@ interface FormData {
 
 export default function AddTaskScreen() {
   const { t } = useTranslation();
+  const quadrantT = useQuadrantT();
   const router = useRouter();
   const { addTask } = useTasks();
   const { projects } = useProjects();
@@ -348,7 +350,7 @@ export default function AddTaskScreen() {
         <View className="flex-row items-center gap-3 px-1">
           <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
           <Text className="font-body text-sm text-meta">
-            → {t(quadrantInfo.title)}
+            → {quadrantT(quadrant).title}
           </Text>
         </View>
 

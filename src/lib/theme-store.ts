@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const THEME_KEY = "@executive_theme";
 
-export async function loadSavedTheme() {
+export const loadSavedTheme = async () => {
   try {
     const saved = await AsyncStorage.getItem(THEME_KEY);
     if (saved === "dark" || saved === "light") {
@@ -13,16 +13,14 @@ export async function loadSavedTheme() {
     }
   } catch {}
   return "light";
-}
+};
 
-export async function saveTheme(theme: "light" | "dark") {
-  try {
-    await AsyncStorage.setItem(THEME_KEY, theme);
-    Appearance.setColorScheme(theme);
-  } catch {}
-}
+export const saveTheme = (theme: "light" | "dark") => {
+  Appearance.setColorScheme(theme);
+  AsyncStorage.setItem(THEME_KEY, theme);
+};
 
-export function useThemePersistence() {
+export const useThemePersistence = () => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,4 +28,4 @@ export function useThemePersistence() {
   }, []);
 
   return loaded;
-}
+};

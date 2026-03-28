@@ -36,9 +36,9 @@ async function fetchRemoteProjects(userId: string): Promise<string[]> {
 let localProjects: string[] = [];
 let localInit = false;
 const localListeners = new Set<() => void>();
-function notifyLocal() { localListeners.forEach((l) => l()); }
+const notifyLocal = () => { localListeners.forEach((l) => l()); };
 
-function useLocalProjects() {
+const useLocalProjects = () => {
   const [, update] = useState(0);
   const ref = useRef<(() => void) | null>(null);
 
@@ -67,11 +67,11 @@ function useLocalProjects() {
     },
     reload: async () => { localProjects = await loadLocal(); notifyLocal(); },
   };
-}
+};
 
 /* ── Cloud store ── */
 
-function useCloudProjects(userId: string) {
+const useCloudProjects = (userId: string) => {
   const qc = useQueryClient();
 
   const { data: projects = [] } = useQuery<string[]>({
@@ -121,13 +121,13 @@ function useCloudProjects(userId: string) {
     removeProject: (name: string) => removeMutation.mutate(name),
     reload: async () => { await qc.invalidateQueries({ queryKey: ["projects", userId] }); },
   };
-}
+};
 
 /* ── Unified hook ── */
 
-export function useProjects() {
+export const useProjects = () => {
   const { userId, isPro } = useProStatus();
   const local = useLocalProjects();
   const cloud = useCloudProjects(isPro && userId ? userId : "__none__");
   return isPro && userId ? cloud : local;
-}
+};

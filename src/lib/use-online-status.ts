@@ -4,7 +4,7 @@ import NetInfo from "@react-native-community/netinfo";
 
 export type SyncStatus = "synced" | "syncing" | "offline";
 
-export function useIsOnline(): boolean {
+export const useIsOnline = (): boolean => {
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
@@ -14,9 +14,9 @@ export function useIsOnline(): boolean {
   }, []);
 
   return isOnline;
-}
+};
 
-export function useSyncStatus(): SyncStatus {
+export const useSyncStatus = (): SyncStatus => {
   const isOnline = useIsOnline();
   const mutating = useIsMutating();
   const fetching = useIsFetching();
@@ -64,4 +64,4 @@ export function useSyncStatus(): SyncStatus {
   }, []);
 
   return display;
-}
+};

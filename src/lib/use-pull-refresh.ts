@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
  * Pull-to-refresh hook.
  * Invalidates all React Query caches, triggering refetch.
  */
-export function usePullRefresh() {
+export const usePullRefresh = () => {
   const [refreshing, setRefreshing] = useState(false);
   const qc = useQueryClient();
 
@@ -23,4 +23,4 @@ export function usePullRefresh() {
   }, [qc]);
 
   return { refreshing, onRefresh };
-}
+};

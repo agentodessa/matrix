@@ -11,24 +11,24 @@ import ru from "../locales/ru.json";
 const SUPPORTED_LANGS = ["en", "es", "fr", "ru"] as const;
 const LANG_STORAGE_KEY = "@executive_lang";
 
-function getDeviceLanguage(): string {
+const getDeviceLanguage = (): string => {
   const locales = getLocales();
   const deviceLang = locales[0]?.languageCode ?? "en";
   return SUPPORTED_LANGS.includes(deviceLang as any) ? deviceLang : "en";
-}
+};
 
-async function getStoredLanguage(): Promise<string | null> {
+const getStoredLanguage = async (): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem(LANG_STORAGE_KEY);
   } catch {
     return null;
   }
-}
+};
 
-export async function setLanguage(lng: string) {
-  await AsyncStorage.setItem(LANG_STORAGE_KEY, lng);
-  await i18n.changeLanguage(lng);
-}
+export const setLanguage = (lng: string) => {
+  i18n.changeLanguage(lng);
+  AsyncStorage.setItem(LANG_STORAGE_KEY, lng);
+};
 
 // Initialize
 getStoredLanguage().then((stored) => {

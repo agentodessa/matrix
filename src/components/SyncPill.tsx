@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SyncStatus } from "../lib/use-online-status";
 
-function SpinningIcon() {
+const SpinningIcon = () => {
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -40,9 +40,9 @@ function SpinningIcon() {
       />
     </Animated.View>
   );
-}
+};
 
-export function SyncPill({ status }: { status: SyncStatus }) {
+export const SyncPill = ({ status }: { status: SyncStatus }) => {
   if (status === "offline") {
     return <View className="w-3 h-3 rounded-full bg-urgent" />;
   }
@@ -53,4 +53,4 @@ export function SyncPill({ status }: { status: SyncStatus }) {
 
   // synced
   return <View className="w-3 h-3 rounded-full bg-success" />;
-}
+};

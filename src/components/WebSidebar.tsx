@@ -11,7 +11,7 @@ interface NavItem {
   match: string;
 }
 
-export function WebSidebar({ urgentCount }: { urgentCount: number }) {
+export const WebSidebar = ({ urgentCount }: { urgentCount: number }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -167,4 +167,4 @@ export function WebSidebar({ urgentCount }: { urgentCount: number }) {
       </View>
     </View>
   );
-}
+};

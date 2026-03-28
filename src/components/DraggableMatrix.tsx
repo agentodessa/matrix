@@ -20,6 +20,7 @@ import {
   getQuadrant,
   quadrantToProperties,
 } from "../types/task";
+import { useQuadrantT } from "../lib/use-quadrant-t";
 
 interface LayoutRect {
   x: number;
@@ -40,14 +41,14 @@ interface DraggableMatrixProps {
   onDragStateChange: (dragging: boolean) => void;
 }
 
-export function DraggableMatrix({
+export const DraggableMatrix = ({
   getTasksByQuadrant,
   filterByProject,
   toggleTask,
   updateTask,
   onViewQuadrant,
   onDragStateChange,
-}: DraggableMatrixProps) {
+}: DraggableMatrixProps) => {
   const { t } = useTranslation();
   const quadrantLayouts = useRef<Record<number, LayoutRect>>({});
   const containerOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -238,7 +239,7 @@ export function DraggableMatrix({
       )}
     </View>
   );
-}
+};
 
 /* ── Droppable Quadrant Cell ── */
 
@@ -267,7 +268,7 @@ interface DroppableQuadrantProps {
   findQuadrant: (absX: number, absY: number) => number | null;
 }
 
-function DroppableQuadrant({
+const DroppableQuadrant = ({
   quadrant,
   tasks,
   toggleTask,
@@ -283,9 +284,11 @@ function DroppableQuadrant({
   startDrag,
   endDrag,
   findQuadrant,
-}: DroppableQuadrantProps) {
+}: DroppableQuadrantProps) => {
   const { t } = useTranslation();
+  const quadrantT = useQuadrantT();
   const info = QUADRANTS[quadrant];
+  const qText = quadrantT(quadrant);
   const active = tasks.filter((t) => t.status === "active");
   const completed = tasks.filter((t) => t.status === "completed");
   const MAX_VISIBLE = 4;
@@ -319,7 +322,7 @@ function DroppableQuadrant({
           {/* Header */}
           <View className="flex-row items-center justify-between mb-3">
             <Text className="font-display text-sm font-bold text-heading">
-              {info.title}
+              {qText.title}
             </Text>
             <View
               style={{ backgroundColor: accent + "20" }}
@@ -378,7 +381,7 @@ function DroppableQuadrant({
       </GHPressable>
     </Animated.View>
   );
-}
+};
 
 /* ── Draggable Task Row ── */
 
@@ -397,7 +400,7 @@ interface DraggableTaskRowProps {
   accent: string;
 }
 
-function DraggableTaskRow({
+const DraggableTaskRow = ({
   task,
   isDraggedAway,
   toggleTask,
@@ -410,7 +413,7 @@ function DraggableTaskRow({
   endDrag,
   findQuadrant,
   accent,
-}: DraggableTaskRowProps) {
+}: DraggableTaskRowProps) => {
   const isActive = useSharedValue(false);
 
   const updateDropZone = useCallback(
@@ -531,4 +534,4 @@ function DraggableTaskRow({
       </Animated.View>
     </GestureDetector>
   );
-}
+};

@@ -9,9 +9,9 @@ let globalUser: User | null = null;
 let initialized = false;
 const listeners = new Set<() => void>();
 
-function notify() {
+const notify = () => {
   listeners.forEach((l) => l());
-}
+};
 
 async function persistUser(user: User | null) {
   try {
@@ -32,7 +32,7 @@ async function restoreCachedUser(): Promise<User | null> {
   }
 }
 
-function mapSupabaseUser(supaUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }): User {
+const mapSupabaseUser = (supaUser: { id: string; email?: string; user_metadata?: Record<string, unknown> }): User => {
   return {
     id: supaUser.id,
     email: supaUser.email ?? "",
@@ -47,9 +47,9 @@ function mapSupabaseUser(supaUser: { id: string; email?: string; user_metadata?:
       undefined,
     createdAt: new Date().toISOString(),
   };
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const [, forceUpdate] = useState(0);
   const listenerRef = useRef<(() => void) | null>(null);
 
@@ -160,4 +160,4 @@ export function useAuth() {
       }
     },
   };
-}
+};

@@ -18,7 +18,7 @@ const AVATAR_COLORS = [
 
 const AVATAR_EMOJIS = ["🦊", "🐼", "🦉", "🐸", "🦋", "🐙", "🦄", "🐯"];
 
-function useGuestAvatar() {
+const useGuestAvatar = () => {
   return useMemo(() => {
     const idx = Math.floor(Math.random() * AVATAR_COLORS.length);
     return {
@@ -26,9 +26,9 @@ function useGuestAvatar() {
       emoji: AVATAR_EMOJIS[idx],
     };
   }, []);
-}
+};
 
-export function Header({ title, showBack = false }: HeaderProps) {
+export const Header = ({ title, showBack = false }: HeaderProps) => {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
@@ -101,4 +101,4 @@ export function Header({ title, showBack = false }: HeaderProps) {
       </View>
     </View>
   );
-}
+};

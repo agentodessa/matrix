@@ -1,16 +1,19 @@
 import { View, Text, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Task, getQuadrant, QUADRANTS } from "../types/task";
+import { useQuadrantT } from "../lib/use-quadrant-t";
 
 interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
 }
 
-export function TaskItem({ task, onToggle }: TaskItemProps) {
+export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
   const { t } = useTranslation();
+  const quadrantT = useQuadrantT();
   const quadrant = getQuadrant(task);
   const info = QUADRANTS[quadrant];
+  const qText = quadrantT(quadrant);
   const classes = info.classes;
   const isCompleted = task.status === "completed";
 
@@ -26,7 +29,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
       <View className="flex-row items-center gap-2">
         <View className={`rounded-full px-2 py-0.5 ${classes.badgeBg}`}>
           <Text className={`font-body text-xs font-semibold ${classes.badgeText}`}>
-            {info.priority}
+            {qText.priority}
           </Text>
         </View>
         {task.project ? (
@@ -71,4 +74,4 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
       </View>
     </View>
   );
-}
+};

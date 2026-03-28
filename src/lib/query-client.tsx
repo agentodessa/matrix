@@ -28,7 +28,7 @@ export const queryClient = new QueryClient({
 // Persist cache on changes (debounced)
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
-function persistCache() {
+const persistCache = () => {
   if (persistTimer) clearTimeout(persistTimer);
   persistTimer = setTimeout(async () => {
     try {
@@ -43,7 +43,7 @@ function persistCache() {
       await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(serializable));
     } catch {}
   }, 1000);
-}
+};
 
 // Restore cache on startup
 async function restoreCache() {
@@ -66,7 +66,7 @@ async function restoreCache() {
 // Subscribe to cache changes for persistence
 queryClient.getQueryCache().subscribe(persistCache);
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
+export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   // Restore cache on mount
   useEffect(() => {
     restoreCache();
@@ -88,4 +88,4 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       {children}
     </QueryClientProvider>
   );
-}
+};

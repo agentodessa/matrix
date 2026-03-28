@@ -32,7 +32,7 @@ async function fetchRemoteTasks(userId: string): Promise<Task[]> {
   return (data ?? []).map(mapRemoteTask);
 }
 
-function mapRemoteTask(r: Record<string, unknown>): Task {
+const mapRemoteTask = (r: Record<string, unknown>): Task => {
   return {
     id: r.id as string,
     title: r.title as string,
@@ -47,9 +47,9 @@ function mapRemoteTask(r: Record<string, unknown>): Task {
     created_at: r.created_at as string,
     completed_at: (r.completed_at as string) ?? undefined,
   };
-}
+};
 
-function toRemoteRow(task: Task, userId: string) {
+const toRemoteRow = (task: Task, userId: string) => {
   return {
     id: task.id,
     user_id: userId,
@@ -65,16 +65,16 @@ function toRemoteRow(task: Task, userId: string) {
     created_at: task.created_at,
     completed_at: task.completed_at ?? null,
   };
-}
+};
 
 /* ── Local-only store (free/guest) ── */
 
 let localTasks: Task[] = [];
 let localInit = false;
 const localListeners = new Set<() => void>();
-function notifyLocal() { localListeners.forEach((l) => l()); }
+const notifyLocal = () => { localListeners.forEach((l) => l()); };
 
-function useLocalTasks() {
+const useLocalTasks = () => {
   const [, update] = useState(0);
   const ref = useRef<(() => void) | null>(null);
 
@@ -114,11 +114,11 @@ function useLocalTasks() {
     },
     reload: async () => { localTasks = await loadLocal(); notifyLocal(); },
   };
-}
+};
 
 /* ── Cloud store (Pro users) ── */
 
-function useCloudTasks(userId: string) {
+const useCloudTasks = (userId: string) => {
   const qc = useQueryClient();
 
   const { data: tasks = [] } = useQuery<Task[]>({
@@ -208,11 +208,11 @@ function useCloudTasks(userId: string) {
     deleteTask: (id: string) => deleteMutation.mutate(id),
     reload: async () => { await qc.invalidateQueries({ queryKey: ["tasks", userId] }); },
   };
-}
+};
 
 /* ── Unified hook ── */
 
-export function useTasks() {
+export const useTasks = () => {
   const { userId, isPro } = useProStatus();
   const local = useLocalTasks();
   const cloud = useCloudTasks(isPro && userId ? userId : "__none__");
@@ -222,4 +222,4 @@ export function useTasks() {
     ...store,
     getTasksByQuadrant: (q: Quadrant) => store.tasks.filter((t) => getQuadrant(t) === q),
   };
-}
+};

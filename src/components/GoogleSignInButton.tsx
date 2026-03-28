@@ -28,7 +28,7 @@ if (Platform.OS === "web" && typeof window !== "undefined") {
 // The redirect URL for native — must use the app scheme
 const nativeRedirectUrl = Linking.createURL("auth/callback");
 
-export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
+export const GoogleSignInButton = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -126,9 +126,9 @@ export function GoogleSignInButton({ onSuccess }: { onSuccess?: () => void }) {
       </Text>
     </Pressable>
   );
-}
+};
 
-function extractHashParams(url: string): Record<string, string> {
+const extractHashParams = (url: string): Record<string, string> => {
   const hash = url.split("#")[1];
   if (!hash) return {};
   const params: Record<string, string> = {};
@@ -137,4 +137,4 @@ function extractHashParams(url: string): Record<string, string> {
     if (key && value) params[key] = decodeURIComponent(value);
   });
   return params;
-}
+};

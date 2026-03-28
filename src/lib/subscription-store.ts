@@ -6,15 +6,15 @@ import { useAuth } from "./auth-store";
 
 /* ── Helpers ── */
 
-function getPlan(sub: Subscription | null): Plan {
+const getPlan = (sub: Subscription | null): Plan => {
   if (sub && sub.plan === "pro" && sub.status === "active") {
     if (sub.expiresAt && new Date(sub.expiresAt) < new Date()) return "free";
     return "pro";
   }
   return "free";
-}
+};
 
-function mapRow(row: Record<string, unknown>): Subscription {
+const mapRow = (row: Record<string, unknown>): Subscription => {
   return {
     plan: (row.plan as string) === "pro" ? "pro" : "free",
     billingCycle: (row.billing_cycle as BillingCycle) ?? "monthly",
@@ -22,7 +22,7 @@ function mapRow(row: Record<string, unknown>): Subscription {
     expiresAt: (row.expires_at as string) ?? "",
     status: (row.status as Subscription["status"]) ?? "active",
   };
-}
+};
 
 async function fetchSubscription(userId: string): Promise<Subscription | null> {
   const { data, error } = await supabase
@@ -36,7 +36,7 @@ async function fetchSubscription(userId: string): Promise<Subscription | null> {
 
 /* ── Hook ── */
 
-export function useSubscription() {
+export const useSubscription = () => {
   const qc = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -139,4 +139,4 @@ export function useSubscription() {
       return { success: false };
     },
   };
-}
+};
