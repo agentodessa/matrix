@@ -4,6 +4,8 @@
   "\"{{name}}\" has {{count}} active task. Tasks won't be deleted, but they'll lose their project label._other": "\"{{name}}\" has {{count}} active tasks. Tasks won't be deleted, but they'll lose their project label.",
   "{{count}} active task_one": "{{count}} active task",
   "{{count}} active task_other": "{{count}} active tasks",
+  "{{count}} team_one": "{{count}} team",
+  "{{count}} team_other": "{{count}} teams",
   "+ New Task": "+ New Task",
   "A project named \"{{name}}\" already exists": "A project named \"{{name}}\" already exists",
   "About": "About",
