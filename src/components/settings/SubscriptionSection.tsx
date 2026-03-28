@@ -2,11 +2,12 @@ import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useSubscription } from "@/lib/subscription-store";
+import { PRICING } from "@/types/user";
 
 export const SubscriptionSection = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isPro } = useSubscription();
+  const { isPro, isProTeam, subscription } = useSubscription();
 
   return (
     <View className="gap-3">
@@ -20,11 +21,13 @@ export const SubscriptionSection = () => {
         <View className="flex-row items-center justify-between px-5 py-4">
           <View className="flex-1 gap-1">
             <Text className="font-body text-base font-bold text-heading">
-              {isPro ? t("Pro Plan") : t("Upgrade to Pro")}
+              {isProTeam ? t("Pro Team") : isPro ? t("Pro Plan") : t("Upgrade to Pro")}
             </Text>
             <Text className="font-body text-sm text-body">
-              {isPro
-                ? t("All features unlocked")
+              {isProTeam
+                ? t("{{count}} seats × ${{price}}/mo", { count: subscription?.seatCount ?? 0, price: PRICING.seat.toFixed(2) })
+                : isPro
+                ? t("Upgrade to Pro Team for shared boards")
                 : t("Calendar, cloud sync, and more — $4.99/mo")}
             </Text>
           </View>
