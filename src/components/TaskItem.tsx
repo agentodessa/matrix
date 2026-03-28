@@ -2,15 +2,21 @@ import { View, Text, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Task, getQuadrant, QUADRANTS } from "@/types/task";
 import { useQuadrantT } from "@/lib/use-quadrant-t";
+import { useWorkspaceRole } from "@/lib/workspace-context";
+import { useAuth } from "@/lib/auth-store";
 
 interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
+export const TaskItem = ({ task, onToggle, onDelete }: TaskItemProps) => {
   const { t } = useTranslation();
   const quadrantT = useQuadrantT();
+  const role = useWorkspaceRole();
+  const { user } = useAuth();
+  const canDelete = role === "personal" || role === "owner" || role === "admin" || task.created_by === user?.id;
   const quadrant = getQuadrant(task);
   const info = QUADRANTS[quadrant];
   const qText = quadrantT(quadrant);
@@ -63,14 +69,26 @@ export const TaskItem = ({ task, onToggle }: TaskItemProps) => {
             <Text className="font-body text-xs text-meta">{task.deadline}</Text>
           ) : null}
         </View>
-        <Pressable
-          onPress={() => onToggle(task.id)}
-          className="rounded-full bg-btn-surface px-3 py-1.5"
-        >
-          <Text className="font-body text-xs font-semibold text-heading">
-            {isCompleted ? t("Undo") : t("Done")}
-          </Text>
-        </Pressable>
+        <View className="flex-row items-center gap-2">
+          {canDelete && onDelete && (
+            <Pressable
+              onPress={() => onDelete(task.id)}
+              className="rounded-full bg-btn-surface px-3 py-1.5"
+            >
+              <Text className="font-body text-xs font-semibold text-urgent">
+                {t("Delete")}
+              </Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => onToggle(task.id)}
+            className="rounded-full bg-btn-surface px-3 py-1.5"
+          >
+            <Text className="font-body text-xs font-semibold text-heading">
+              {isCompleted ? t("Undo") : t("Done")}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
