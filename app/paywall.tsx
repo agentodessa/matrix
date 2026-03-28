@@ -178,7 +178,7 @@ export default function PaywallScreen() {
             <View className="flex-row items-center gap-2">
               <Text className="font-display text-sm font-bold text-heading">{t("Pro")}</Text>
               <View className="bg-success/15 rounded-full px-2 py-0.5">
-                <Text className="font-body text-[10px] font-bold text-success">{t("BEST")}</Text>
+                <Text className="font-body text-[10px] font-bold text-success uppercase">{t("Best")}</Text>
               </View>
             </View>
             {FEATURES_PRO.map((f) => (

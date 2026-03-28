@@ -43,7 +43,7 @@ export default function QuadrantScreen() {
           <View className="flex-row items-center gap-3">
             <View className={`w-2.5 h-2.5 rounded-full ${cls.dot}`} />
             <Text className="font-body text-[10px] font-bold text-label tracking-[3px] uppercase">
-              {t(quadrant.label)}
+              {t("Quadrant {{number}}", { number: String(quadrantId).padStart(2, "0") })}
             </Text>
           </View>
 

@@ -10,7 +10,7 @@
     "tauri": "cargo tauri",
     "tauri:dev": "cargo tauri dev",
     "tauri:build": "cargo tauri build",
-    "i18n:extract": "i18next 'app/**/*.{ts,tsx}' 'src/**/*.{ts,tsx}'"
+    "i18n:extract": "i18next-cli extract"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
