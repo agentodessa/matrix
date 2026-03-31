@@ -15,7 +15,8 @@
     "lint": "oxlint --type-aware",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prebuild:ios": "npx expo prebuild --platform ios --clean"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
