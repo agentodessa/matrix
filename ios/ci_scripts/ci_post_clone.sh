@@ -8,6 +8,9 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 22
 nvm use 22
 
+echo ">>> Installing cmake (required by Hermes)"
+brew install cmake
+
 echo ">>> Installing npm dependencies"
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 npm install
