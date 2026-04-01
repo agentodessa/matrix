@@ -4,13 +4,4 @@ const { wrapWithReanimatedMetroConfig } = require("react-native-reanimated/metro
 
 const config = getDefaultConfig(__dirname);
 
-config.resolver.blockList = [
-  /ios\/EisenhowerMatrixProductivity\.xcodeproj\/.*/,
-  /ios\/EisenhowerMatrixProductivity\.xcworkspace\/.*/,
-  /ios\/EisenhowerMatrixProductivity\/.*/,
-  /ios\/ci_scripts\/.*/,
-  /ios\/build\/.*/,
-  /ios\/Pods\/.*/,
-];
-
 module.exports = withNativewind(wrapWithReanimatedMetroConfig(config));
